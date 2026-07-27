@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#FFF8E7">
+<title>Diversión con Banderas</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<section class="screen on" id="s-start">
+  <div class="cover">
+    <div class="bunting" aria-hidden="true"></div>
+    <p class="eyebrow">El gran juego de banderas</p>
+    <h1 class="cover-name">Diversión con<br>Banderas</h1>
+    <div class="cover-flags" id="coverFlags" aria-hidden="true"></div>
+    <p class="who">¿Quién juega?</p>
+    <div class="players" id="players">
+      <button class="player" data-player="Miguel Ángel">
+        <span class="pIcon">🧒</span>
+        <span class="pName">Miguel Ángel</span>
+      </button>
+      <button class="player" data-player="Mami">
+        <span class="pIcon">👩</span>
+        <span class="pName">Mami</span>
+      </button>
+      <button class="player" data-player="Papi">
+        <span class="pIcon">👨</span>
+        <span class="pName">Papi</span>
+      </button>
+      <button class="player" id="btnOtherPlayer">
+        <span class="pIcon">✨</span>
+        <span class="pName">Otro jugador</span>
+      </button>
+    </div>
+    <div class="name-box" id="nameBox" style="display:none">
+      <input id="nameInput" class="name-input" maxlength="24" placeholder="Escribe tu nombre" autocomplete="off">
+      <button class="big" id="btnNameGo">Jugar</button>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="s-level">
+  <h1 class="lvl-title">¡Hola, <span id="lvlWho">!</span></h1>
+  <p class="who">Elige tu nivel</p>
+  <div class="levels" id="levels"></div>
+  <button class="daily" id="btnDaily">🔥 Reto diario</button>
+  <button id="btnRanking" style="font-size:15px;padding:9px 20px">🏆 Ranking familiar</button>
+  <button id="btnBackStart" style="font-size:14px;padding:8px 18px;box-shadow:none;border-width:0">↩ Cambiar de jugador</button>
+</section>
+
+<section class="screen" id="s-game">
+  <div class="hud">
+    <div class="chip" id="whoChip">🧒</div>
+    <div class="chip">🏳️ <b id="round">1</b>/<b id="rounds">20</b></div>
+    <div class="chip" id="streakChip" style="display:none">🔥 <b id="streakMult">x1</b></div>
+    <div class="chip">⭐ <b id="score">0</b></div>
+    <div class="chip" id="timeChip">⏱️ <b id="time">20</b></div>
+    <button class="menuBtn" id="btnMenu" aria-label="Menú">☰</button>
+  </div>
+  <div class="bar"><i id="barFill"></i></div>
+  <div class="flag-box" id="flagBox"></div>
+  <div class="feedback" id="feedback">Elige una</div>
+  <div class="fact" id="fact"></div>
+  <div class="options" id="options"></div>
+  <button class="hintBtn" id="btnHint" style="display:none">💡 Pista (<span id="hintCount">0</span>)</button>
+</section>
+
+<section class="screen" id="s-end">
+  <h1 id="endTitle">¡Fin!</h1>
+  <p class="end-score" id="endScore">0</p>
+  <p class="end-sub" id="endSub"></p>
+  <div class="end-list" id="endList"></div>
+  <button class="big" id="btnAgain">Jugar otra vez</button>
+  <button id="btnChangeLevel" style="font-size:16px;padding:10px 22px">Cambiar de nivel</button>
+  <button id="btnHome" style="font-size:14px;padding:8px 18px;box-shadow:none;border-width:0">↩ Cambiar de jugador</button>
+</section>
+
+<section class="screen" id="s-ranking">
+  <h1 style="font-size:clamp(24px,5.5vw,34px)">🏆 Ranking familiar</h1>
+  <div class="end-list" id="rankFamily" style="max-height:26dvh"></div>
+  <h1 style="font-size:clamp(20px,4.6vw,26px);margin-top:6px">🔥 Reto diario de hoy</h1>
+  <div class="end-list" id="rankDaily" style="max-height:22dvh"></div>
+  <button id="btnRankBack" style="font-size:16px;padding:10px 22px">↩ Volver</button>
+</section>
+
+<div class="menuOverlay" id="menuOverlay">
+  <div class="menuPanel">
+    <p class="who" style="margin:0 0 8px">Menú</p>
+    <button class="big" id="btnRestart">🔄 Reiniciar partida</button>
+    <button id="btnQuit" style="font-size:16px;padding:10px 22px;background:var(--coral);color:#fff">🚪 Terminar partida</button>
+    <button id="btnMenuClose" style="font-size:14px;padding:8px 18px;box-shadow:none;border-width:0">Seguir jugando</button>
+  </div>
+</div>
+
+<div id="fx" aria-hidden="true"></div>
+<script type="module" src="js/game.js"></script>
+</body>
+</html>
