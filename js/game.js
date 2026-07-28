@@ -118,15 +118,6 @@ function buildDailyDeck() {
   $('coverFlags').innerHTML = picks.map(c => `<span><img src="${flagSrc(c.code)}" alt="" loading="lazy"></span>`).join('');
 })();
 
-document.querySelectorAll('#players .player[data-player]').forEach(b => {
-  onTap(b, () => selectPlayer(b.dataset.player));
-});
-onTap($('btnOtherPlayer'), () => {
-  $('nameBox').style.display = 'flex';
-  const saved = localStorage.getItem(PLAYER_KEY);
-  if (saved) $('nameInput').value = saved;
-  $('nameInput').focus();
-});
 onTap($('btnNameGo'), () => {
   const name = $('nameInput').value.trim().slice(0, 24);
   if (name) selectPlayer(name);
@@ -141,6 +132,15 @@ function selectPlayer(name) {
   $('lvlWho').textContent = name;
   renderLevels();
   show('s-level');
+}
+
+/* Si ya hay un nombre guardado, se entra directo sin volver a preguntar. */
+const savedPlayer = localStorage.getItem(PLAYER_KEY);
+if (savedPlayer) {
+  $('nameInput').value = savedPlayer;
+  selectPlayer(savedPlayer);
+} else {
+  $('nameInput').focus();
 }
 
 /* ---------- Pantalla de nivel ---------- */
@@ -177,7 +177,7 @@ function startDaily() {
 function beginGame() {
   idx = 0; score = 0; streak = 0; hintsLeft = level.hints; wrongList.length = 0;
   $('rounds').textContent = deck.length;
-  $('whoChip').textContent = isDaily ? '🔥' : (player === 'Miguel Ángel' ? '🧒' : player === 'Mami' ? '👩' : player === 'Papi' ? '👨' : '✨');
+  $('whoChip').textContent = isDaily ? '🔥' : '✨';
   document.body.classList.toggle('big', !!level.big);
   $('score').textContent = 0;
   show('s-game');

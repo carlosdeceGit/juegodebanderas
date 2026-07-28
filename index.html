@@ -17,26 +17,8 @@
     <p class="eyebrow">El gran juego de banderas</p>
     <h1 class="cover-name">Diversión con<br>Banderas</h1>
     <div class="cover-flags" id="coverFlags" aria-hidden="true"></div>
-    <p class="who">¿Quién juega?</p>
-    <div class="players" id="players">
-      <button class="player" data-player="Miguel Ángel">
-        <span class="pIcon">🧒</span>
-        <span class="pName">Miguel Ángel</span>
-      </button>
-      <button class="player" data-player="Mami">
-        <span class="pIcon">👩</span>
-        <span class="pName">Mami</span>
-      </button>
-      <button class="player" data-player="Papi">
-        <span class="pIcon">👨</span>
-        <span class="pName">Papi</span>
-      </button>
-      <button class="player" id="btnOtherPlayer">
-        <span class="pIcon">✨</span>
-        <span class="pName">Otro jugador</span>
-      </button>
-    </div>
-    <div class="name-box" id="nameBox" style="display:none">
+    <p class="who">¿Cómo te llamas?</p>
+    <div class="name-box" id="nameBox">
       <input id="nameInput" class="name-input" maxlength="24" placeholder="Escribe tu nombre" autocomplete="off">
       <button class="big" id="btnNameGo">Jugar</button>
     </div>
@@ -49,7 +31,7 @@
   <div class="levels" id="levels"></div>
   <button class="daily" id="btnDaily">🔥 Reto diario</button>
   <button id="btnRanking" style="font-size:15px;padding:9px 20px">🏆 Ranking familiar</button>
-  <button id="btnBackStart" style="font-size:14px;padding:8px 18px;box-shadow:none;border-width:0">↩ Cambiar de jugador</button>
+  <button id="btnBackStart" style="font-size:14px;padding:8px 18px;box-shadow:none;border-width:0">↩ Cambiar de nombre</button>
 </section>
 
 <section class="screen" id="s-game">
@@ -76,7 +58,7 @@
   <div class="end-list" id="endList"></div>
   <button class="big" id="btnAgain">Jugar otra vez</button>
   <button id="btnChangeLevel" style="font-size:16px;padding:10px 22px">Cambiar de nivel</button>
-  <button id="btnHome" style="font-size:14px;padding:8px 18px;box-shadow:none;border-width:0">↩ Cambiar de jugador</button>
+  <button id="btnHome" style="font-size:14px;padding:8px 18px;box-shadow:none;border-width:0">↩ Cambiar de nombre</button>
 </section>
 
 <section class="screen" id="s-ranking">

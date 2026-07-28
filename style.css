@@ -92,14 +92,9 @@ button:disabled{cursor:default;opacity:.85}
 @keyframes wave{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-9px) rotate(2deg)}}
 
 .who{margin:2px 0 0;font-size:clamp(17px,4.4vw,21px);font-weight:700}
-.players{display:grid;gap:10px;width:var(--w)}
-.player{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:12px;
-        padding:12px 16px;text-align:left;background:#fff;min-height:60px}
-.player .pIcon{font-size:28px;line-height:1}
-.player .pName{font-size:clamp(17px,4.4vw,21px)}
 
 .name-box{display:flex;gap:8px;width:var(--w)}
-.name-input{flex:1;font-family:inherit;font-size:17px;font-weight:700;border:4px solid var(--ink);
+.name-input{flex:1;min-width:0;font-family:inherit;font-size:17px;font-weight:700;border:4px solid var(--ink);
   border-radius:14px;padding:10px 14px;background:#fff;color:var(--ink)}
 .name-input:focus{outline:4px solid var(--sun);outline-offset:2px}
 
