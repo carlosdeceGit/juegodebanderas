@@ -6,7 +6,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#FFF8E7">
-<title>Diversión con Banderas</title>
+<title data-i18n="app.title">Diversión con Banderas</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -14,25 +14,25 @@
 <section class="screen on" id="s-start">
   <div class="cover">
     <div class="bunting" aria-hidden="true"></div>
-    <p class="eyebrow">El gran juego de banderas</p>
-    <h1 class="cover-name">Diversión con<br>Banderas</h1>
+    <p class="eyebrow" data-i18n="start.eyebrow">El gran juego de banderas</p>
+    <h1 class="cover-name" data-i18n-html="start.titleHtml">Diversión con<br>Banderas</h1>
     <div class="cover-flags" id="coverFlags" aria-hidden="true"></div>
-    <p class="who">¿Cómo te llamas?</p>
+    <p class="who" data-i18n="start.who">¿Cómo te llamas?</p>
     <div class="name-box" id="nameBox">
-      <input id="nameInput" class="name-input" maxlength="24" placeholder="Escribe tu nombre" autocomplete="off">
-      <button class="big" id="btnNameGo">Jugar</button>
+      <input id="nameInput" class="name-input" maxlength="24" data-i18n-placeholder="start.namePlaceholder" placeholder="Escribe tu nombre" autocomplete="off">
+      <button class="big" id="btnNameGo" data-i18n="start.play">Jugar</button>
     </div>
   </div>
 </section>
 
 <section class="screen" id="s-level">
-  <h1 class="lvl-title">¡Hola, <span id="lvlWho">!</span></h1>
-  <p class="who">Elige tu nivel</p>
+  <h1 class="lvl-title" id="lvlTitle">¡Hola, <span id="lvlWho">!</span></h1>
+  <p class="who" data-i18n="level.choose">Elige tu nivel</p>
   <p class="progress" id="seenProgress"></p>
   <div class="continentRow">
-    <label for="continentSelect">🌍 Continente</label>
+    <label for="continentSelect" data-i18n="level.continent">🌍 Continente</label>
     <select id="continentSelect">
-      <option value="">Todos</option>
+      <option value="" data-i18n="level.continentAll">Todos</option>
       <option value="África">África</option>
       <option value="América">América</option>
       <option value="Asia">Asia</option>
@@ -40,21 +40,21 @@
       <option value="Oceanía">Oceanía</option>
     </select>
   </div>
-  <p class="hint">No afecta al reto diario ni a "Repasa tus fallos"</p>
-  <label class="bigToggle"><input type="checkbox" id="bigToggle"> 🔠 Texto grande</label>
+  <p class="hint" data-i18n="level.continentHint">No afecta al reto diario ni a "Repasa tus fallos"</p>
+  <label class="bigToggle"><input type="checkbox" id="bigToggle"> <span data-i18n="level.bigText">🔠 Texto grande</span></label>
   <div class="levels" id="levels"></div>
-  <button class="daily" id="btnDaily">🔥 Reto diario</button>
-  <p class="who" style="margin:2px 0 -2px;font-size:15px">Más modos</p>
+  <button class="daily" id="btnDaily" data-i18n="nav.daily">🔥 Reto diario</button>
+  <p class="who" style="margin:2px 0 -2px;font-size:15px" data-i18n="level.moreModes">Más modos</p>
   <div class="modesGrid">
-    <button id="btnLearn">📖 Aprender</button>
-    <button id="btnReview" style="display:none">🔁 Repasa fallos</button>
-    <button id="btnInvert">🔄 Elige la bandera</button>
-    <button id="btnClassify">🗺️ Por continente</button>
-    <button id="btnPairing">🏛️ Bandera y capital</button>
-    <button id="btnSurvival">💀 Supervivencia</button>
+    <button id="btnLearn" data-i18n="nav.learn">📖 Aprender</button>
+    <button id="btnReview" style="display:none" data-i18n="nav.review">🔁 Repasa fallos</button>
+    <button id="btnInvert" data-i18n="nav.invert">🔄 Elige la bandera</button>
+    <button id="btnClassify" data-i18n="nav.classify">🗺️ Por continente</button>
+    <button id="btnPairing" data-i18n="nav.pairing">🏛️ Bandera y capital</button>
+    <button id="btnSurvival" data-i18n="nav.survival">💀 Supervivencia</button>
   </div>
-  <button id="btnRanking" style="font-size:15px;padding:9px 20px">🏆 Ranking familiar</button>
-  <button id="btnBackStart" style="font-size:14px;padding:8px 18px;box-shadow:none;border-width:0">↩ Cambiar de nombre</button>
+  <button id="btnRanking" style="font-size:15px;padding:9px 20px" data-i18n="nav.ranking">🏆 Ranking familiar</button>
+  <button id="btnBackStart" style="font-size:14px;padding:8px 18px;box-shadow:none;border-width:0" data-i18n="nav.changeName">↩ Cambiar de nombre</button>
 </section>
 
 <section class="screen" id="s-game">
@@ -64,14 +64,14 @@
     <div class="chip" id="streakChip" style="display:none">🔥 <b id="streakMult">x1</b></div>
     <div class="chip" aria-live="polite">⭐ <b id="score">0</b></div>
     <div class="chip" id="timeChip">⏱️ <b id="time">20</b></div>
-    <button class="menuBtn" id="btnMenu" aria-label="Menú">☰</button>
+    <button class="menuBtn" id="btnMenu" data-i18n-aria-label="nav.menu" aria-label="Menú">☰</button>
   </div>
   <div class="bar"><i id="barFill"></i></div>
   <div class="flag-box" id="flagBox"></div>
-  <div class="feedback" id="feedback" aria-live="polite">Elige una</div>
+  <div class="feedback" id="feedback" aria-live="polite" data-i18n="game.chooseOne">Elige una</div>
   <div class="fact" id="fact" aria-live="polite"></div>
   <div class="options" id="options"></div>
-  <button class="hintBtn" id="btnHint" style="display:none">💡 Pista (<span id="hintCount">0</span>)</button>
+  <button class="hintBtn" id="btnHint" style="display:none"><span data-i18n="game.hint">💡 Pista</span> (<span id="hintCount">0</span>)</button>
 </section>
 
 <section class="screen" id="s-end">
@@ -79,37 +79,37 @@
   <p class="end-score" id="endScore">0</p>
   <p class="end-sub" id="endSub"></p>
   <div class="end-list" id="endList"></div>
-  <button class="big" id="btnAgain">Jugar otra vez</button>
-  <button id="btnChangeLevel" style="font-size:16px;padding:10px 22px">Cambiar de nivel</button>
-  <button id="btnHome" style="font-size:14px;padding:8px 18px;box-shadow:none;border-width:0">↩ Cambiar de nombre</button>
+  <button class="big" id="btnAgain" data-i18n="end.playAgain">Jugar otra vez</button>
+  <button id="btnChangeLevel" style="font-size:16px;padding:10px 22px" data-i18n="end.changeLevel">Cambiar de nivel</button>
+  <button id="btnHome" style="font-size:14px;padding:8px 18px;box-shadow:none;border-width:0" data-i18n="nav.changeName">↩ Cambiar de nombre</button>
 </section>
 
 <section class="screen" id="s-learn">
-  <h1 style="font-size:clamp(24px,5.5vw,34px)">📖 Aprender banderas</h1>
-  <p class="who" style="margin:0">Sin cronómetro ni puntuación</p>
+  <h1 style="font-size:clamp(24px,5.5vw,34px)" data-i18n="learn.title">📖 Aprender banderas</h1>
+  <p class="who" style="margin:0" data-i18n="learn.sub">Sin cronómetro ni puntuación</p>
   <div class="learnList" id="learnList"></div>
-  <button id="btnLearnBack" style="font-size:16px;padding:10px 22px">↩ Volver</button>
+  <button id="btnLearnBack" style="font-size:16px;padding:10px 22px" data-i18n="nav.back">↩ Volver</button>
 </section>
 
 <section class="screen" id="s-ranking">
-  <h1 style="font-size:clamp(24px,5.5vw,34px)">🏆 Ranking familiar</h1>
+  <h1 style="font-size:clamp(24px,5.5vw,34px)" data-i18n="nav.ranking">🏆 Ranking familiar</h1>
   <div class="end-list" id="rankFamily" style="max-height:26dvh"></div>
-  <h1 style="font-size:clamp(20px,4.6vw,26px);margin-top:6px">🔥 Reto diario de hoy</h1>
+  <h1 style="font-size:clamp(20px,4.6vw,26px);margin-top:6px" data-i18n="ranking.dailyTitle">🔥 Reto diario de hoy</h1>
   <div class="end-list" id="rankDaily" style="max-height:22dvh"></div>
   <div class="duelRow">
-    <input id="duelName" placeholder="Nombre del rival" maxlength="24" autocomplete="off">
-    <button id="btnDuel">⚔️ Duelo</button>
+    <input id="duelName" data-i18n-placeholder="duel.rivalPlaceholder" placeholder="Nombre del rival" maxlength="24" autocomplete="off">
+    <button id="btnDuel" data-i18n="duel.button">⚔️ Duelo</button>
   </div>
   <p class="duelResult" id="duelResult" aria-live="polite"></p>
-  <button id="btnRankBack" style="font-size:16px;padding:10px 22px">↩ Volver</button>
+  <button id="btnRankBack" style="font-size:16px;padding:10px 22px" data-i18n="nav.back">↩ Volver</button>
 </section>
 
 <div class="menuOverlay" id="menuOverlay">
   <div class="menuPanel">
-    <p class="who" style="margin:0 0 8px">Menú</p>
-    <button class="big" id="btnRestart">🔄 Reiniciar partida</button>
-    <button id="btnQuit" style="font-size:16px;padding:10px 22px;background:var(--coral);color:#fff">🚪 Terminar partida</button>
-    <button id="btnMenuClose" style="font-size:14px;padding:8px 18px;box-shadow:none;border-width:0">Seguir jugando</button>
+    <p class="who" style="margin:0 0 8px" data-i18n="game.menuTitle">Menú</p>
+    <button class="big" id="btnRestart" data-i18n="game.restart">🔄 Reiniciar partida</button>
+    <button id="btnQuit" style="font-size:16px;padding:10px 22px;background:var(--coral);color:#fff" data-i18n="game.quit">🚪 Terminar partida</button>
+    <button id="btnMenuClose" style="font-size:14px;padding:8px 18px;box-shadow:none;border-width:0" data-i18n="game.resume">Seguir jugando</button>
   </div>
 </div>
 
