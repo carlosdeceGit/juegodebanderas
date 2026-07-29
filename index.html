@@ -29,9 +29,23 @@
   <h1 class="lvl-title">¡Hola, <span id="lvlWho">!</span></h1>
   <p class="who">Elige tu nivel</p>
   <p class="progress" id="seenProgress"></p>
+  <div class="continentRow">
+    <label for="continentSelect">🌍 Continente</label>
+    <select id="continentSelect">
+      <option value="">Todos</option>
+      <option value="África">África</option>
+      <option value="América">América</option>
+      <option value="Asia">Asia</option>
+      <option value="Europa">Europa</option>
+      <option value="Oceanía">Oceanía</option>
+    </select>
+  </div>
+  <p class="hint">No afecta al reto diario ni a "Repasa tus fallos"</p>
   <label class="bigToggle"><input type="checkbox" id="bigToggle"> 🔠 Texto grande</label>
   <div class="levels" id="levels"></div>
   <button class="daily" id="btnDaily">🔥 Reto diario</button>
+  <button id="btnLearn" style="font-size:15px;padding:9px 20px">📖 Aprender sin prisa</button>
+  <button id="btnReview" style="font-size:15px;padding:9px 20px;display:none">🔁 Repasa tus fallos</button>
   <button id="btnRanking" style="font-size:15px;padding:9px 20px">🏆 Ranking familiar</button>
   <button id="btnBackStart" style="font-size:14px;padding:8px 18px;box-shadow:none;border-width:0">↩ Cambiar de nombre</button>
 </section>
@@ -61,6 +75,13 @@
   <button class="big" id="btnAgain">Jugar otra vez</button>
   <button id="btnChangeLevel" style="font-size:16px;padding:10px 22px">Cambiar de nivel</button>
   <button id="btnHome" style="font-size:14px;padding:8px 18px;box-shadow:none;border-width:0">↩ Cambiar de nombre</button>
+</section>
+
+<section class="screen" id="s-learn">
+  <h1 style="font-size:clamp(24px,5.5vw,34px)">📖 Aprender banderas</h1>
+  <p class="who" style="margin:0">Sin cronómetro ni puntuación</p>
+  <div class="learnList" id="learnList"></div>
+  <button id="btnLearnBack" style="font-size:16px;padding:10px 22px">↩ Volver</button>
 </section>
 
 <section class="screen" id="s-ranking">
