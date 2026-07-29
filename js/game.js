@@ -610,6 +610,10 @@ function end() {
     saveScore({
       player, level: levelKey, score, rounds: mode === 'survival' ? idx : deck.length,
       errors: wrongList.length, daily: mode === 'daily', dailyDate: dailyDateStr,
+    }).then(result => {
+      if (mode === 'daily' && result.reason === 'duplicate') {
+        $('endSub').textContent += ' · Ya jugaste hoy: este intento no cuenta para el ranking';
+      }
     });
   }
 }
@@ -618,20 +622,39 @@ onTap($('btnAgain'), replay);
 onTap($('btnChangeLevel'), () => show('s-level'));
 onTap($('btnHome'), () => show('s-start'));
 
-/* ---------- Ranking familiar ---------- */
+/* ---------- Ranking familiar + duelo asíncrono sobre el mazo diario ---------- */
+let lastDailyRanking = [];
+const normName = s => String(s).trim().toLowerCase();
+
 async function renderRanking() {
   $('rankFamily').innerHTML = '<div>Cargando…</div>';
   $('rankDaily').innerHTML = '<div>Cargando…</div>';
+  $('duelResult').textContent = '';
   const [fam, daily] = await Promise.all([getFamilyRanking(), getDailyRanking()]);
+  lastDailyRanking = daily || [];
 
   $('rankFamily').innerHTML = (fam && fam.length)
     ? fam.map(r => `<div><span>${LEVELS[r.level]?.icon || MODE_LABELS[r.level]?.icon || ''} ${escapeHtml(r.player)} · ${LEVELS[r.level]?.label || MODE_LABELS[r.level]?.label || r.level}</span><b>${r.best_score} ⭐</b></div>`).join('')
     : '<div>Aún no hay partidas guardadas.</div>';
 
-  $('rankDaily').innerHTML = (daily && daily.length)
-    ? daily.map(r => `<div><span>${escapeHtml(r.player)}</span><b>${r.score} ⭐</b></div>`).join('')
+  $('rankDaily').innerHTML = (lastDailyRanking.length)
+    ? lastDailyRanking.map(r => `<div><span>${escapeHtml(r.player)}</span><b>${r.score} ⭐</b></div>`).join('')
     : '<div>Nadie ha jugado el reto de hoy todavía.</div>';
 }
+
+onTap($('btnDuel'), () => {
+  const rivalName = $('duelName').value.trim();
+  const resultEl = $('duelResult');
+  if (!rivalName) { resultEl.textContent = 'Escribe el nombre de tu rival.'; return; }
+  const mine = lastDailyRanking.find(r => normName(r.player) === normName(player || ''));
+  const rival = lastDailyRanking.find(r => normName(r.player) === normName(rivalName));
+  if (!mine) { resultEl.textContent = 'Aún no has jugado el reto de hoy.'; return; }
+  if (!rival) { resultEl.textContent = `${rivalName} no ha jugado el reto de hoy todavía.`; return; }
+  if (mine.score > rival.score) resultEl.textContent = `¡Le ganas! ${mine.score} ⭐ vs ${rival.score} ⭐`;
+  else if (mine.score < rival.score) resultEl.textContent = `Te gana. ${mine.score} ⭐ vs ${rival.score} ⭐`;
+  else resultEl.textContent = `¡Empate! ${mine.score} ⭐ los dos`;
+});
+
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
