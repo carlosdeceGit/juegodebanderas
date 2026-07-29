@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#FFF8E7">
@@ -28,6 +28,8 @@
 <section class="screen" id="s-level">
   <h1 class="lvl-title">¡Hola, <span id="lvlWho">!</span></h1>
   <p class="who">Elige tu nivel</p>
+  <p class="progress" id="seenProgress"></p>
+  <label class="bigToggle"><input type="checkbox" id="bigToggle"> 🔠 Texto grande</label>
   <div class="levels" id="levels"></div>
   <button class="daily" id="btnDaily">🔥 Reto diario</button>
   <button id="btnRanking" style="font-size:15px;padding:9px 20px">🏆 Ranking familiar</button>
@@ -39,14 +41,14 @@
     <div class="chip" id="whoChip">🧒</div>
     <div class="chip">🏳️ <b id="round">1</b>/<b id="rounds">20</b></div>
     <div class="chip" id="streakChip" style="display:none">🔥 <b id="streakMult">x1</b></div>
-    <div class="chip">⭐ <b id="score">0</b></div>
+    <div class="chip" aria-live="polite">⭐ <b id="score">0</b></div>
     <div class="chip" id="timeChip">⏱️ <b id="time">20</b></div>
     <button class="menuBtn" id="btnMenu" aria-label="Menú">☰</button>
   </div>
   <div class="bar"><i id="barFill"></i></div>
   <div class="flag-box" id="flagBox"></div>
-  <div class="feedback" id="feedback">Elige una</div>
-  <div class="fact" id="fact"></div>
+  <div class="feedback" id="feedback" aria-live="polite">Elige una</div>
+  <div class="fact" id="fact" aria-live="polite"></div>
   <div class="options" id="options"></div>
   <button class="hintBtn" id="btnHint" style="display:none">💡 Pista (<span id="hintCount">0</span>)</button>
 </section>

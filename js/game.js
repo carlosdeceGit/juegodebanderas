@@ -4,14 +4,20 @@ import { pickDistractors } from "./distractors.js";
 import { saveScore, getFamilyRanking, getDailyRanking } from "./db.js";
 
 window.onerror = function (m, src, l, c) {
+  console.error(m, src, l, c);
+  if (document.getElementById('dcb-error-banner')) return;
   const d = document.createElement('div');
-  d.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:99999;background:#E76F51;color:#fff;font:13px monospace;padding:10px;white-space:pre-wrap';
-  d.textContent = '⚠ ' + m + '  (línea ' + l + ')';
+  d.id = 'dcb-error-banner';
+  d.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:99999;background:#E76F51;color:#fff;font:14px system-ui,sans-serif;padding:10px;text-align:center';
+  d.textContent = 'Algo ha ido mal. Intenta recargar la página.';
   document.body.appendChild(d);
 };
 
 const $ = id => document.getElementById(id);
-const show = id => document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === id));
+const show = id => {
+  document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === id));
+  if (id === 's-level') updateSeenProgress();
+};
 const flagSrc = code => `assets/flags/${code}.svg`;
 
 function shuffle(a) {
@@ -73,7 +79,23 @@ function saveSeenMap() {
 const seen = loadSeen();
 for (const c of COUNTRIES) if (!seen.has(c.code)) seen.set(c.code, 0);
 
+function updateSeenProgress() {
+  const learned = [...seen.values()].filter(v => v > 0).length;
+  $('seenProgress').textContent = `${learned}/${COUNTRIES.length} banderas vistas`;
+}
+
 const PLAYER_KEY = 'dcb_player';
+
+/* ---------- Texto grande: ajuste de accesibilidad, independiente del nivel ---------- */
+const BIGTEXT_KEY = 'dcb_bigtext';
+function isBigTextEnabled() { return localStorage.getItem(BIGTEXT_KEY) === '1'; }
+$('bigToggle').checked = isBigTextEnabled();
+document.body.classList.toggle('big', isBigTextEnabled());
+$('bigToggle').addEventListener('change', () => {
+  const on = $('bigToggle').checked;
+  try { localStorage.setItem(BIGTEXT_KEY, on ? '1' : '0'); } catch { /* ignore */ }
+  document.body.classList.toggle('big', on);
+});
 
 /* ---------- Estado de juego ---------- */
 let player = null;
@@ -178,7 +200,6 @@ function beginGame() {
   idx = 0; score = 0; streak = 0; hintsLeft = level.hints; wrongList.length = 0;
   $('rounds').textContent = deck.length;
   $('whoChip').textContent = isDaily ? '🔥' : '✨';
-  document.body.classList.toggle('big', !!level.big);
   $('score').textContent = 0;
   show('s-game');
   nextRound();
@@ -407,11 +428,20 @@ function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
-/* ---------- Si se bloquea el móvil o se cambia de app, el reloj se detiene ---------- */
+/* ---------- Si se bloquea el móvil o se cambia de app, se descuenta el tiempo real transcurrido ---------- */
+let hiddenAt = null;
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) { clearInterval(timer); }
-  else if (!locked && $('s-game').classList.contains('on') && tLeft > 0) {
+  if (document.hidden) {
+    hiddenAt = Date.now();
     clearInterval(timer);
+  } else if (!locked && $('s-game').classList.contains('on') && tLeft > 0) {
+    if (hiddenAt !== null) {
+      tLeft = Math.max(0, +(tLeft - (Date.now() - hiddenAt) / 1000).toFixed(1));
+      hiddenAt = null;
+    }
+    clearInterval(timer);
+    if (tLeft <= 0) { timeout(); return; }
+    paintTimer();
     timer = setInterval(() => {
       tLeft = Math.max(0, +(tLeft - 0.1).toFixed(1));
       paintTimer();
