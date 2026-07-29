@@ -2,6 +2,15 @@ import { COUNTRIES } from "./countries.js";
 import { LEVELS, DAILY_LEVEL_KEY, DAILY_ROUNDS } from "./levels.js";
 import { pickDistractors } from "./distractors.js";
 import { saveScore, getFamilyRanking, getDailyRanking } from "./db.js";
+import { describeFlag } from "./flagDescription.js";
+
+/* Modo "repasa tus fallos": no es un nivel fijo, se arma con las banderas
+   que más ha fallado el jugador. No cuenta para el ranking. */
+const REVIEW_LEVEL = {
+  key: "repaso", label: "Repasa tus fallos", icon: "🔁",
+  secs: 15, opts: 3, distractorMode: "mixed", retry: true, hints: 2, mult: 1,
+};
+const REVIEW_MIN_FAILS = 3;
 
 window.onerror = function (m, src, l, c) {
   console.error(m, src, l, c);
@@ -16,7 +25,7 @@ window.onerror = function (m, src, l, c) {
 const $ = id => document.getElementById(id);
 const show = id => {
   document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === id));
-  if (id === 's-level') updateSeenProgress();
+  if (id === 's-level') { updateSeenProgress(); updateReviewAvailability(); }
 };
 const flagSrc = code => `assets/flags/${code}.svg`;
 
@@ -84,6 +93,44 @@ function updateSeenProgress() {
   $('seenProgress').textContent = `${learned}/${COUNTRIES.length} banderas vistas`;
 }
 
+/* ---------- Historial de fallos (persiste entre partidas, para "Repasa tus fallos") ---------- */
+const WRONG_KEY = 'dcb_wrong_v1';
+function loadWrongMap() {
+  try { return new Map(JSON.parse(localStorage.getItem(WRONG_KEY)) || []); }
+  catch { return new Map(); }
+}
+function saveWrongMap() {
+  try { localStorage.setItem(WRONG_KEY, JSON.stringify([...wrongMap])); } catch { /* ignore */ }
+}
+const wrongMap = loadWrongMap();
+function recordWrong(code) {
+  wrongMap.set(code, (wrongMap.get(code) || 0) + 1);
+  saveWrongMap();
+}
+function clearWrong(code) {
+  if (!wrongMap.has(code)) return;
+  wrongMap.delete(code);
+  saveWrongMap();
+}
+function updateReviewAvailability() {
+  const count = [...wrongMap.values()].filter(v => v > 0).length;
+  $('btnReview').style.display = count >= REVIEW_MIN_FAILS ? '' : 'none';
+}
+
+/* ---------- Filtro de continente (solo afecta a los niveles clásicos) ---------- */
+const CONTINENT_KEY = 'dcb_continent';
+let continentFilter = '';
+try { continentFilter = localStorage.getItem(CONTINENT_KEY) || ''; } catch { /* ignore */ }
+function poolForContinent() {
+  return continentFilter ? COUNTRIES.filter(c => c.continent === continentFilter) : COUNTRIES;
+}
+$('continentSelect').value = continentFilter;
+$('continentSelect').addEventListener('change', () => {
+  continentFilter = $('continentSelect').value;
+  try { localStorage.setItem(CONTINENT_KEY, continentFilter); } catch { /* ignore */ }
+  renderLevels();
+});
+
 const PLAYER_KEY = 'dcb_player';
 
 /* ---------- Texto grande: ajuste de accesibilidad, independiente del nivel ---------- */
@@ -100,7 +147,8 @@ $('bigToggle').addEventListener('change', () => {
 /* ---------- Estado de juego ---------- */
 let player = null;
 let levelKey = null, level = null;
-let isDaily = false, dailyDateStr = null;
+let isDaily = false, dailyDateStr = null, isReview = false;
+let distractorPool = COUNTRIES;
 let deck = [], idx = 0, score = 0, streak = 0, hintsLeft = 0;
 let answer = null, locked = false, wrongCount = 0, hintUsedThisRound = false;
 let tLeft = 0, timer = null;
@@ -121,8 +169,9 @@ function computePoints(tLeftVal, wrongC, streakBefore, hintUsed) {
 
 /* ---------- Construcción de mazos ---------- */
 function buildDeck(lvl) {
-  const pool = shuffle(COUNTRIES).sort((a, b) => (seen.get(a.code) || 0) - (seen.get(b.code) || 0));
-  const chosen = shuffle(pool.slice(0, Math.min(lvl.rounds, COUNTRIES.length)));
+  const source = poolForContinent();
+  const pool = shuffle(source).sort((a, b) => (seen.get(a.code) || 0) - (seen.get(b.code) || 0));
+  const chosen = shuffle(pool.slice(0, Math.min(lvl.rounds, source.length)));
   chosen.forEach(c => seen.set(c.code, (seen.get(c.code) || 0) + 1));
   saveSeenMap();
   return chosen;
@@ -168,38 +217,67 @@ if (savedPlayer) {
 /* ---------- Pantalla de nivel ---------- */
 function renderLevels() {
   const cont = $('levels');
+  const poolSize = poolForContinent().length;
   cont.innerHTML = '';
   Object.values(LEVELS).forEach(lvl => {
+    const rounds = Math.min(lvl.rounds, poolSize);
     const b = document.createElement('button');
     b.className = 'level';
     b.innerHTML = `<span class="lIcon">${lvl.icon}</span>
       <span><span class="lLabel">${lvl.label}</span>
-      <span class="lTag">${lvl.tagline} · ${lvl.rounds} rondas · ${lvl.secs}s</span></span>`;
+      <span class="lTag">${lvl.tagline} · ${rounds} rondas · ${lvl.secs}s</span></span>`;
     onTap(b, () => startLevel(lvl.key));
     cont.appendChild(b);
   });
 }
 onTap($('btnDaily'), startDaily);
 onTap($('btnRanking'), () => { renderRanking(); show('s-ranking'); });
+onTap($('btnLearn'), () => { renderLearnList(); show('s-learn'); });
+onTap($('btnLearnBack'), () => show('s-level'));
+onTap($('btnReview'), startReview);
 onTap($('btnBackStart'), () => show('s-start'));
 onTap($('btnRankBack'), () => show('s-level'));
 
 function startLevel(key) {
-  levelKey = key; level = LEVELS[key]; isDaily = false; dailyDateStr = null;
+  levelKey = key; level = LEVELS[key]; isDaily = false; isReview = false; dailyDateStr = null;
+  distractorPool = poolForContinent();
   deck = buildDeck(level);
   beginGame();
 }
 function startDaily() {
-  levelKey = DAILY_LEVEL_KEY; level = LEVELS[DAILY_LEVEL_KEY]; isDaily = true;
+  levelKey = DAILY_LEVEL_KEY; level = LEVELS[DAILY_LEVEL_KEY]; isDaily = true; isReview = false;
+  distractorPool = COUNTRIES;
   const d = buildDailyDeck();
   deck = d.deck; dailyDateStr = d.dateStr;
   beginGame();
+}
+function startReview() {
+  const codes = [...wrongMap.entries()].filter(([, n]) => n > 0).sort((a, b) => b[1] - a[1]).map(([code]) => code);
+  if (codes.length < REVIEW_MIN_FAILS) { show('s-level'); return; }
+  const bySpeed = codes.map(code => COUNTRIES.find(c => c.code === code)).filter(Boolean);
+  levelKey = null; level = REVIEW_LEVEL; isDaily = false; isReview = true; dailyDateStr = null;
+  distractorPool = COUNTRIES;
+  deck = bySpeed.slice(0, Math.min(bySpeed.length, 20));
+  beginGame();
+}
+
+/* ---------- Pantalla "Aprender sin prisa" (sin cronómetro ni puntuación) ---------- */
+function renderLearnList() {
+  const pool = poolForContinent().slice().sort((a, b) => a.name.localeCompare(b.name, 'es'));
+  $('learnList').innerHTML = pool.map(c => `
+    <div class="learnRow">
+      <img src="${flagSrc(c.code)}" alt="Bandera de ${escapeHtml(c.name)}" loading="lazy">
+      <div class="learnInfo">
+        <b>${escapeHtml(c.name)}</b>
+        <span>${escapeHtml(c.continent)} · 🏛️ ${escapeHtml(c.capital)}</span>
+      </div>
+    </div>`).join('');
 }
 
 function beginGame() {
   idx = 0; score = 0; streak = 0; hintsLeft = level.hints; wrongList.length = 0;
   $('rounds').textContent = deck.length;
-  $('whoChip').textContent = isDaily ? '🔥' : '✨';
+  $('whoChip').textContent = isDaily ? '🔥' : isReview ? '🔁' : '✨';
   $('score').textContent = 0;
   show('s-game');
   nextRound();
@@ -217,11 +295,11 @@ function nextRound() {
   updateStreakChip();
   updateHintButton();
 
-  const distractors = pickDistractors(COUNTRIES, answer, level.opts - 1, level.distractorMode);
+  const distractors = pickDistractors(distractorPool, answer, level.opts - 1, level.distractorMode);
   const choices = shuffle([answer, ...distractors]);
 
   const box = $('flagBox');
-  box.innerHTML = `<img src="${flagSrc(answer.code)}" alt="" loading="eager">`;
+  box.innerHTML = `<img src="${flagSrc(answer.code)}" alt="${escapeHtml(describeFlag(answer))}" loading="eager">`;
   box.classList.remove('pop'); void box.offsetWidth; box.classList.add('pop');
 
   const optsEl = $('options');
@@ -333,7 +411,8 @@ function pick(btn, choice) {
     [...$('options').children].forEach(b => b.disabled = true);
     $('feedback').textContent = wrongCount === 0 ? `¡Muy bien! +${pts} ⭐` : `¡Esa es! +${pts} ⭐`;
     $('fact').textContent = `🏛️ Capital: ${answer.capital}`;
-    if (wrongCount > 0) wrongList.push(answer.name);
+    if (wrongCount > 0) { wrongList.push(answer.name); recordWrong(answer.code); }
+    if (isReview) clearWrong(answer.code);
     idx++;
     setTimeout(nextRound, 1000);
   } else {
@@ -346,6 +425,7 @@ function pick(btn, choice) {
       locked = true; clearInterval(timer);
       streak = 0; updateStreakChip();
       wrongList.push(answer.name);
+      recordWrong(answer.code);
       [...$('options').children].forEach(b => {
         b.disabled = true;
         if (b.textContent === answer.name) b.classList.add('good');
@@ -368,6 +448,7 @@ function timeout() {
   buzz(140); burst('lose');
   streak = 0; updateStreakChip();
   wrongList.push(answer.name);
+  recordWrong(answer.code);
   [...$('options').children].forEach(b => {
     b.disabled = true;
     if (b.textContent === answer.name) b.classList.add('good');
@@ -383,7 +464,7 @@ onTap($('btnMenu'), () => $('menuOverlay').classList.add('on'));
 onTap($('btnMenuClose'), () => $('menuOverlay').classList.remove('on'));
 onTap($('btnRestart'), () => {
   $('menuOverlay').classList.remove('on');
-  if (isDaily) startDaily(); else startLevel(levelKey);
+  if (isDaily) startDaily(); else if (isReview) startReview(); else startLevel(levelKey);
 });
 onTap($('btnQuit'), () => {
   $('menuOverlay').classList.remove('on');
@@ -403,10 +484,12 @@ function end() {
     ? '<div>Ni un solo fallo. Impresionante. 🌟</div>'
     : '<div><b>Para repasar:</b></div>' + [...new Set(wrongList)].map(n => `<div>• ${n}</div>`).join('');
   show('s-end');
-  saveScore({ player, level: levelKey, score, rounds: deck.length, errors: wrongList.length, daily: isDaily, dailyDate: dailyDateStr });
+  if (!isReview) {
+    saveScore({ player, level: levelKey, score, rounds: deck.length, errors: wrongList.length, daily: isDaily, dailyDate: dailyDateStr });
+  }
 }
 
-onTap($('btnAgain'), () => { if (isDaily) startDaily(); else startLevel(levelKey); });
+onTap($('btnAgain'), () => { if (isDaily) startDaily(); else if (isReview) startReview(); else startLevel(levelKey); });
 onTap($('btnChangeLevel'), () => show('s-level'));
 onTap($('btnHome'), () => show('s-start'));
 
