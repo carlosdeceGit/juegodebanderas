@@ -1,0 +1,122 @@
+/* Diccionario de cadenas de la interfaz (Fase 4 de la auditoría).
+   Hoy solo existe "es": el juego sigue siendo 100% español, esto es la
+   infraestructura para que añadir un idioma nuevo sea solo rellenar un
+   objeto más aquí, sin tocar la lógica del juego. No se traduce el
+   contenido (nombres de país, capitales, continentes en countries.js),
+   solo la interfaz: eso necesitaría datos traducidos aparte, algo fuera
+   del alcance de esta fase. */
+
+const STRINGS = {
+  es: {
+    "app.title": "Diversión con Banderas",
+
+    "start.eyebrow": "El gran juego de banderas",
+    "start.titleHtml": "Diversión con<br>Banderas",
+    "start.who": "¿Cómo te llamas?",
+    "start.namePlaceholder": "Escribe tu nombre",
+    "start.play": "Jugar",
+
+    "level.greeting": "¡Hola, {name}!",
+    "level.choose": "Elige tu nivel",
+    "level.continent": "🌍 Continente",
+    "level.continentAll": "Todos",
+    "level.continentHint": 'No afecta al reto diario ni a "Repasa tus fallos"',
+    "level.bigText": "🔠 Texto grande",
+    "level.moreModes": "Más modos",
+    "level.tag": "{tagline} · {rounds} rondas · {secs}s",
+
+    "level.nene.label": "Nivel Nene",
+    "level.nene.tagline": "Para empezar, con calma",
+    "level.principiante.label": "Nivel Principiante",
+    "level.principiante.tagline": "Ya conoces unas cuantas",
+    "level.experto.label": "Nivel Experto",
+    "level.experto.tagline": "Un fallo y se acaba la ronda",
+    "level.dios.label": "Nivel Dios",
+    "level.dios.tagline": "Banderas casi gemelas, tiempo mínimo",
+    "level.review.label": "Repasa tus fallos",
+    "level.invert.label": "Elige la bandera",
+    "level.classify.label": "Clasifica por continente",
+    "level.pairing.label": "Bandera y capital",
+    "level.survival.label": "Supervivencia",
+
+    "nav.daily": "🔥 Reto diario",
+    "nav.learn": "📖 Aprender",
+    "nav.review": "🔁 Repasa fallos",
+    "nav.invert": "🔄 Elige la bandera",
+    "nav.classify": "🗺️ Por continente",
+    "nav.pairing": "🏛️ Bandera y capital",
+    "nav.survival": "💀 Supervivencia",
+    "nav.ranking": "🏆 Ranking familiar",
+    "nav.changeName": "↩ Cambiar de nombre",
+    "nav.back": "↩ Volver",
+    "nav.menu": "Menú",
+
+    "game.chooseOne": "Elige una",
+    "game.correctFirstTry": "¡Muy bien! +{pts} ⭐",
+    "game.correctAfterRetry": "¡Esa es! +{pts} ⭐",
+    "game.wasAnswer": "Era {name}",
+    "game.tryAgain": "Casi… prueba otra 🤔",
+    "game.timeUp": "Se acabó el tiempo: {name}",
+    "game.factCapital": "🏛️ Capital: {capital}",
+    "game.factCountry": "🏳️ País: {name}",
+    "game.hint": "💡 Pista",
+    "game.menuTitle": "Menú",
+    "game.restart": "🔄 Reiniciar partida",
+    "game.quit": "🚪 Terminar partida",
+    "game.resume": "Seguir jugando",
+
+    "end.excellent": "¡Increíble! 🏆",
+    "end.great": "¡Muy bien! 🎉",
+    "end.goodTry": "¡Buen intento! 💪",
+    "end.approxMax": "aprox. de {max} puntos posibles",
+    "end.dailyTag": "· Reto diario 🔥",
+    "end.survivalFinished": "¡Las viste todas! 🌍🏆",
+    "end.survivalOver": "💥 ¡Racha terminada!",
+    "end.survivalSubOne": "{icon} Supervivencia · sobreviviste 1 ronda",
+    "end.survivalSubMany": "{icon} Supervivencia · sobreviviste {count} rondas",
+    "end.noMistakes": "Ni un solo fallo. Impresionante. 🌟",
+    "end.forReview": "<b>Para repasar:</b>",
+    "end.alreadyPlayedToday": " · Ya jugaste hoy: este intento no cuenta para el ranking",
+    "end.playAgain": "Jugar otra vez",
+    "end.changeLevel": "Cambiar de nivel",
+
+    "learn.title": "📖 Aprender banderas",
+    "learn.sub": "Sin cronómetro ni puntuación",
+    "learn.flagAlt": "Bandera de {name}",
+
+    "ranking.dailyTitle": "🔥 Reto diario de hoy",
+    "ranking.noFamilyScores": "Aún no hay partidas guardadas.",
+    "ranking.noDailyScores": "Nadie ha jugado el reto de hoy todavía.",
+    "duel.rivalPlaceholder": "Nombre del rival",
+    "duel.button": "⚔️ Duelo",
+    "duel.needName": "Escribe el nombre de tu rival.",
+    "duel.needOwnScore": "Aún no has jugado el reto de hoy.",
+    "duel.rivalNoScore": "{rivalName} no ha jugado el reto de hoy todavía.",
+    "duel.win": "¡Le ganas! {mine} ⭐ vs {rival} ⭐",
+    "duel.lose": "Te gana. {mine} ⭐ vs {rival} ⭐",
+    "duel.tie": "¡Empate! {score} ⭐ los dos",
+
+    "common.loading": "Cargando…",
+    "progress.seenFlags": "{learned}/{total} banderas vistas",
+    "error.generic": "Algo ha ido mal. Intenta recargar la página.",
+  },
+};
+
+const LOCALE = "es"; // único idioma disponible hoy; ver docs/decisiones-producto.md
+
+export function t(key, vars) {
+  let str = STRINGS[LOCALE]?.[key];
+  if (str === undefined) return key;
+  if (vars) for (const k in vars) str = str.replaceAll(`{${k}}`, vars[k]);
+  return str;
+}
+
+/* Aplica las cadenas estáticas del HTML (data-i18n / data-i18n-html /
+   data-i18n-placeholder / data-i18n-aria-label) una vez al cargar. */
+export function applyStaticI18n(root = document) {
+  root.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = t(el.dataset.i18n); });
+  root.querySelectorAll("[data-i18n-html]").forEach(el => { el.innerHTML = t(el.dataset.i18nHtml); });
+  root.querySelectorAll("[data-i18n-placeholder]").forEach(el => { el.placeholder = t(el.dataset.i18nPlaceholder); });
+  root.querySelectorAll("[data-i18n-aria-label]").forEach(el => { el.setAttribute("aria-label", t(el.dataset.i18nAriaLabel)); });
+  document.title = t("app.title");
+}

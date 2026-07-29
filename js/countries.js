@@ -1,4 +1,6 @@
-/* 195 países soberanos (ONU) + Ciudad del Vaticano. Generado a partir de flag-icons (MIT). */
+/* 195 países soberanos (ONU) + Ciudad del Vaticano. Generado a partir de flag-icons (MIT).
+   Criterio de inclusión documentado como política editorial explícita en
+   docs/decisiones-producto.md — no ampliar sin que el producto lo pida. */
 export const COUNTRIES = [
 {"code":"dz","name":"Argelia","capital":"Argel","continent":"África","pattern":"crescent-star","palette":"green-white-red"},
 {"code":"ao","name":"Angola","capital":"Luanda","continent":"África","pattern":"horizontal-bicolor-emblem","palette":"red-black-yellow"},
