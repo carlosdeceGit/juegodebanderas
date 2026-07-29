@@ -22,6 +22,11 @@ export const CONFUSABLES = [
   ["fm", "so"],             // Micronesia / Somalia
   ["om", "ae"],             // Omán / Emiratos (verde-blanco-negro-rojo)
   ["kw", "jo"],             // Kuwait / Jordania (rojo-blanco-negro-verde)
+  ["kg", "mk"],             // Kirguistán / Macedonia del Norte (sol/rayos, rojo-amarillo)
+  ["az", "uz"],             // Azerbaiyán / Uzbekistán (tricolor horizontal con media luna)
+  ["mz", "zw", "er"],       // Mozambique / Zimbabue / Eritrea (triángulo con emblema al asta)
+  ["dj", "ss"],             // Yibuti / Sudán del Sur (estrella en triángulo al asta)
+  ["sd", "ps"],             // Sudán / Palestina (triángulo al asta, colores panárabes)
 ];
 
 /* Devuelve los códigos "confundibles" con el país dado, uniendo todos los
