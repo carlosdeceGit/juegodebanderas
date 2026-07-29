@@ -12,6 +12,41 @@ const REVIEW_LEVEL = {
 };
 const REVIEW_MIN_FAILS = 3;
 
+/* Modos adicionales (Fase 2): reutilizan el mismo bucle y los mismos datos,
+   con una única dificultad fija cada uno (nada de tutorial, un botón y a jugar). */
+const INVERT_LEVEL = {
+  key: "invert", label: "Elige la bandera", icon: "🔄",
+  rounds: 16, secs: 12, opts: 3, distractorMode: "mixed", retry: true, hints: 2, mult: 1,
+};
+const CLASSIFY_LEVEL = {
+  key: "classify", label: "Clasifica por continente", icon: "🗺️",
+  rounds: 20, secs: 8, opts: 5, distractorMode: null, retry: true, hints: 0, mult: 1,
+};
+const PAIRING_LEVEL = {
+  key: "pairing", label: "Bandera y capital", icon: "🏛️",
+  rounds: 16, secs: 14, opts: 3, distractorMode: "mixed", retry: true, hints: 2, mult: 1,
+};
+const CONTINENTS = ["África", "América", "Asia", "Europa", "Oceanía"];
+
+/* Supervivencia: una sola vida, la dificultad sube con cada acierto.
+   Se genera un objeto nuevo por partida porque sus campos se mutan ronda a ronda. */
+function makeSurvivalLevel() {
+  return {
+    key: "survival", label: "Supervivencia", icon: "💀",
+    retry: false, hints: 0, secs: 12, opts: 3, distractorMode: "easy", mult: 1,
+  };
+}
+function survivalParamsForRound(n) {
+  return {
+    secs: Math.max(3, 12 - n * 0.4),
+    opts: n < 5 ? 3 : n < 12 ? 4 : 5,
+    distractorMode: n < 4 ? "easy" : n < 10 ? "mixed" : n < 18 ? "hard" : "confusables",
+    mult: Math.min(2.5, 1 + n * 0.05),
+  };
+}
+const MODE_LABELS = { survival: { icon: "💀", label: "Supervivencia" } };
+const WHOCHIP_ICON = { daily: "🔥", review: "🔁", survival: "💀", invert: "🔄", classify: "🗺️", pairing: "🏛️" };
+
 window.onerror = function (m, src, l, c) {
   console.error(m, src, l, c);
   if (document.getElementById('dcb-error-banner')) return;
@@ -145,9 +180,10 @@ $('bigToggle').addEventListener('change', () => {
 });
 
 /* ---------- Estado de juego ---------- */
+/* mode: 'classic' | 'daily' | 'review' | 'survival' | 'invert' | 'classify' | 'pairing' */
 let player = null;
 let levelKey = null, level = null;
-let isDaily = false, dailyDateStr = null, isReview = false;
+let mode = 'classic', dailyDateStr = null;
 let distractorPool = COUNTRIES;
 let deck = [], idx = 0, score = 0, streak = 0, hintsLeft = 0;
 let answer = null, locked = false, wrongCount = 0, hintUsedThisRound = false;
@@ -235,17 +271,21 @@ onTap($('btnRanking'), () => { renderRanking(); show('s-ranking'); });
 onTap($('btnLearn'), () => { renderLearnList(); show('s-learn'); });
 onTap($('btnLearnBack'), () => show('s-level'));
 onTap($('btnReview'), startReview);
+onTap($('btnInvert'), startInvert);
+onTap($('btnClassify'), startClassify);
+onTap($('btnPairing'), startPairing);
+onTap($('btnSurvival'), startSurvival);
 onTap($('btnBackStart'), () => show('s-start'));
 onTap($('btnRankBack'), () => show('s-level'));
 
 function startLevel(key) {
-  levelKey = key; level = LEVELS[key]; isDaily = false; isReview = false; dailyDateStr = null;
+  levelKey = key; level = LEVELS[key]; mode = 'classic'; dailyDateStr = null;
   distractorPool = poolForContinent();
   deck = buildDeck(level);
   beginGame();
 }
 function startDaily() {
-  levelKey = DAILY_LEVEL_KEY; level = LEVELS[DAILY_LEVEL_KEY]; isDaily = true; isReview = false;
+  levelKey = DAILY_LEVEL_KEY; level = LEVELS[DAILY_LEVEL_KEY]; mode = 'daily'; dailyDateStr = null;
   distractorPool = COUNTRIES;
   const d = buildDailyDeck();
   deck = d.deck; dailyDateStr = d.dateStr;
@@ -255,9 +295,33 @@ function startReview() {
   const codes = [...wrongMap.entries()].filter(([, n]) => n > 0).sort((a, b) => b[1] - a[1]).map(([code]) => code);
   if (codes.length < REVIEW_MIN_FAILS) { show('s-level'); return; }
   const bySpeed = codes.map(code => COUNTRIES.find(c => c.code === code)).filter(Boolean);
-  levelKey = null; level = REVIEW_LEVEL; isDaily = false; isReview = true; dailyDateStr = null;
+  levelKey = null; level = REVIEW_LEVEL; mode = 'review'; dailyDateStr = null;
   distractorPool = COUNTRIES;
   deck = bySpeed.slice(0, Math.min(bySpeed.length, 20));
+  beginGame();
+}
+function startInvert() {
+  levelKey = null; level = INVERT_LEVEL; mode = 'invert'; dailyDateStr = null;
+  distractorPool = COUNTRIES;
+  deck = shuffle(COUNTRIES).slice(0, level.rounds);
+  beginGame();
+}
+function startClassify() {
+  levelKey = null; level = CLASSIFY_LEVEL; mode = 'classify'; dailyDateStr = null;
+  distractorPool = COUNTRIES;
+  deck = shuffle(COUNTRIES).slice(0, level.rounds);
+  beginGame();
+}
+function startPairing() {
+  levelKey = null; level = PAIRING_LEVEL; mode = 'pairing'; dailyDateStr = null;
+  distractorPool = COUNTRIES;
+  deck = shuffle(COUNTRIES).slice(0, level.rounds);
+  beginGame();
+}
+function startSurvival() {
+  levelKey = 'survival'; level = makeSurvivalLevel(); mode = 'survival'; dailyDateStr = null;
+  distractorPool = COUNTRIES;
+  deck = shuffle(COUNTRIES);
   beginGame();
 }
 
@@ -277,7 +341,7 @@ function renderLearnList() {
 function beginGame() {
   idx = 0; score = 0; streak = 0; hintsLeft = level.hints; wrongList.length = 0;
   $('rounds').textContent = deck.length;
-  $('whoChip').textContent = isDaily ? '🔥' : isReview ? '🔁' : '✨';
+  $('whoChip').textContent = WHOCHIP_ICON[mode] || '✨';
   $('score').textContent = 0;
   show('s-game');
   nextRound();
@@ -289,27 +353,50 @@ function nextRound() {
   clearInterval(timer);
   locked = false; wrongCount = 0; hintUsedThisRound = false;
   answer = deck[idx];
+  if (mode === 'survival') Object.assign(level, survivalParamsForRound(idx));
   $('round').textContent = idx + 1;
   $('feedback').textContent = 'Elige una';
   $('fact').textContent = '';
   updateStreakChip();
   updateHintButton();
 
-  const distractors = pickDistractors(distractorPool, answer, level.opts - 1, level.distractorMode);
-  const choices = shuffle([answer, ...distractors]);
-
   const box = $('flagBox');
-  box.innerHTML = `<img src="${flagSrc(answer.code)}" alt="${escapeHtml(describeFlag(answer))}" loading="eager">`;
-  box.classList.remove('pop'); void box.offsetWidth; box.classList.add('pop');
-
   const optsEl = $('options');
   optsEl.innerHTML = '';
-  choices.forEach(c => {
-    const b = document.createElement('button');
-    b.className = 'opt'; b.textContent = c.name;
-    onTap(b, () => pick(b, c));
-    optsEl.appendChild(b);
-  });
+  optsEl.classList.toggle('flagOptions', mode === 'invert');
+
+  if (mode === 'invert') {
+    box.innerHTML = `<div class="promptName">${escapeHtml(answer.name)}</div>`;
+    const distractors = pickDistractors(distractorPool, answer, level.opts - 1, level.distractorMode);
+    const choices = shuffle([answer, ...distractors]);
+    choices.forEach(c => {
+      const b = document.createElement('button');
+      b.className = 'opt optFlag'; b.dataset.code = c.code;
+      b.innerHTML = `<img src="${flagSrc(c.code)}" alt="${escapeHtml(describeFlag(c))}">`;
+      onTap(b, () => pick(b, c));
+      optsEl.appendChild(b);
+    });
+  } else if (mode === 'classify') {
+    box.innerHTML = `<img src="${flagSrc(answer.code)}" alt="${escapeHtml(describeFlag(answer))}" loading="eager">`;
+    shuffle(CONTINENTS).forEach(name => {
+      const b = document.createElement('button');
+      b.className = 'opt'; b.textContent = name; b.dataset.continent = name;
+      onTap(b, () => pickClassify(b, name));
+      optsEl.appendChild(b);
+    });
+  } else {
+    box.innerHTML = `<img src="${flagSrc(answer.code)}" alt="${escapeHtml(describeFlag(answer))}" loading="eager">`;
+    const distractors = pickDistractors(distractorPool, answer, level.opts - 1, level.distractorMode);
+    const choices = shuffle([answer, ...distractors]);
+    choices.forEach(c => {
+      const b = document.createElement('button');
+      b.className = 'opt'; b.dataset.code = c.code;
+      b.textContent = mode === 'pairing' ? c.capital : c.name;
+      onTap(b, () => pick(b, c));
+      optsEl.appendChild(b);
+    });
+  }
+  box.classList.remove('pop'); void box.offsetWidth; box.classList.add('pop');
 
   tLeft = level.secs; paintTimer();
   timer = setInterval(() => {
@@ -347,7 +434,7 @@ function updateHintButton() {
 
 onTap($('btnHint'), () => {
   if (hintsLeft <= 0 || hintUsedThisRound || locked) return;
-  const wrongBtns = [...$('options').children].filter(b => b.textContent !== answer.name && !b.disabled);
+  const wrongBtns = [...$('options').children].filter(b => b.dataset.code !== answer.code && !b.disabled);
   if (!wrongBtns.length) return;
   const target = wrongBtns[Math.floor(Math.random() * wrongBtns.length)];
   target.disabled = true; target.classList.add('removed');
@@ -397,9 +484,20 @@ function burst(kind) {
 const buzz = p => { try { navigator.vibrate && navigator.vibrate(p); } catch { /* ignore */ } };
 
 /* ---------- Resolución de ronda ---------- */
-function pick(btn, choice) {
+function factText() {
+  return mode === 'pairing' ? `🏳️ País: ${answer.name}` : `🏛️ Capital: ${answer.capital}`;
+}
+function markCorrectOption() {
+  const opts = [...$('options').children];
+  const target = mode === 'classify'
+    ? opts.find(b => b.dataset.continent === answer.continent)
+    : opts.find(b => b.dataset.code === answer.code);
+  if (target) target.classList.add('good');
+}
+
+function resolveRound(btn, isCorrect) {
   if (locked) return;
-  if (choice.code === answer.code) {
+  if (isCorrect) {
     buzz([28, 50, 28]);
     burst('win');
     locked = true; clearInterval(timer);
@@ -410,9 +508,9 @@ function pick(btn, choice) {
     btn.classList.add('good');
     [...$('options').children].forEach(b => b.disabled = true);
     $('feedback').textContent = wrongCount === 0 ? `¡Muy bien! +${pts} ⭐` : `¡Esa es! +${pts} ⭐`;
-    $('fact').textContent = `🏛️ Capital: ${answer.capital}`;
+    $('fact').textContent = factText();
     if (wrongCount > 0) { wrongList.push(answer.name); recordWrong(answer.code); }
-    if (isReview) clearWrong(answer.code);
+    if (mode === 'review') clearWrong(answer.code);
     idx++;
     setTimeout(nextRound, 1000);
   } else {
@@ -426,14 +524,16 @@ function pick(btn, choice) {
       streak = 0; updateStreakChip();
       wrongList.push(answer.name);
       recordWrong(answer.code);
-      [...$('options').children].forEach(b => {
-        b.disabled = true;
-        if (b.textContent === answer.name) b.classList.add('good');
-      });
+      [...$('options').children].forEach(b => b.disabled = true);
+      markCorrectOption();
       $('feedback').textContent = `Era ${answer.name}`;
-      $('fact').textContent = `🏛️ Capital: ${answer.capital}`;
-      idx++;
-      setTimeout(nextRound, 1500);
+      $('fact').textContent = factText();
+      if (mode === 'survival') {
+        setTimeout(end, 1500);
+      } else {
+        idx++;
+        setTimeout(nextRound, 1500);
+      }
       return;
     }
 
@@ -443,20 +543,36 @@ function pick(btn, choice) {
   }
 }
 
+function pick(btn, choice) { resolveRound(btn, choice.code === answer.code); }
+function pickClassify(btn, continentName) { resolveRound(btn, continentName === answer.continent); }
+
 function timeout() {
   clearInterval(timer); locked = true;
   buzz(140); burst('lose');
   streak = 0; updateStreakChip();
   wrongList.push(answer.name);
   recordWrong(answer.code);
-  [...$('options').children].forEach(b => {
-    b.disabled = true;
-    if (b.textContent === answer.name) b.classList.add('good');
-  });
+  [...$('options').children].forEach(b => b.disabled = true);
+  markCorrectOption();
   $('feedback').textContent = `Se acabó el tiempo: ${answer.name}`;
-  $('fact').textContent = `🏛️ Capital: ${answer.capital}`;
-  idx++;
-  setTimeout(nextRound, 1600);
+  $('fact').textContent = factText();
+  if (mode === 'survival') {
+    setTimeout(end, 1600);
+  } else {
+    idx++;
+    setTimeout(nextRound, 1600);
+  }
+}
+
+/* Reproduce el modo actual (usado por "reiniciar" y "jugar otra vez"). */
+function replay() {
+  if (mode === 'daily') startDaily();
+  else if (mode === 'review') startReview();
+  else if (mode === 'survival') startSurvival();
+  else if (mode === 'invert') startInvert();
+  else if (mode === 'classify') startClassify();
+  else if (mode === 'pairing') startPairing();
+  else startLevel(levelKey);
 }
 
 /* ---------- Menú en partida (reiniciar / terminar, sin pausa) ---------- */
@@ -464,7 +580,7 @@ onTap($('btnMenu'), () => $('menuOverlay').classList.add('on'));
 onTap($('btnMenuClose'), () => $('menuOverlay').classList.remove('on'));
 onTap($('btnRestart'), () => {
   $('menuOverlay').classList.remove('on');
-  if (isDaily) startDaily(); else if (isReview) startReview(); else startLevel(levelKey);
+  replay();
 });
 onTap($('btnQuit'), () => {
   $('menuOverlay').classList.remove('on');
@@ -475,21 +591,30 @@ onTap($('btnQuit'), () => {
 /* ---------- Fin de partida ---------- */
 function end() {
   clearInterval(timer);
-  const max = Math.round(deck.length * 100 * level.mult);
   $('endScore').textContent = score;
-  $('endTitle').textContent = score > max * .8 ? '¡Increíble! 🏆' : score > max * .5 ? '¡Muy bien! 🎉' : '¡Buen intento! 💪';
-  $('endSub').textContent = `${level.icon} ${level.label}${isDaily ? ' · Reto diario 🔥' : ''} · aprox. de ${max} puntos posibles`;
+  if (mode === 'survival') {
+    const finished = idx >= deck.length;
+    $('endTitle').textContent = finished ? '¡Las viste todas! 🌍🏆' : '💥 ¡Racha terminada!';
+    $('endSub').textContent = `${level.icon} Supervivencia · sobreviviste ${idx} ${idx === 1 ? 'ronda' : 'rondas'}`;
+  } else {
+    const max = Math.round(deck.length * 100 * level.mult);
+    $('endTitle').textContent = score > max * .8 ? '¡Increíble! 🏆' : score > max * .5 ? '¡Muy bien! 🎉' : '¡Buen intento! 💪';
+    $('endSub').textContent = `${level.icon} ${level.label}${mode === 'daily' ? ' · Reto diario 🔥' : ''} · aprox. de ${max} puntos posibles`;
+  }
   const list = $('endList');
   list.innerHTML = wrongList.length === 0
     ? '<div>Ni un solo fallo. Impresionante. 🌟</div>'
     : '<div><b>Para repasar:</b></div>' + [...new Set(wrongList)].map(n => `<div>• ${n}</div>`).join('');
   show('s-end');
-  if (!isReview) {
-    saveScore({ player, level: levelKey, score, rounds: deck.length, errors: wrongList.length, daily: isDaily, dailyDate: dailyDateStr });
+  if (mode === 'classic' || mode === 'daily' || mode === 'survival') {
+    saveScore({
+      player, level: levelKey, score, rounds: mode === 'survival' ? idx : deck.length,
+      errors: wrongList.length, daily: mode === 'daily', dailyDate: dailyDateStr,
+    });
   }
 }
 
-onTap($('btnAgain'), () => { if (isDaily) startDaily(); else if (isReview) startReview(); else startLevel(levelKey); });
+onTap($('btnAgain'), replay);
 onTap($('btnChangeLevel'), () => show('s-level'));
 onTap($('btnHome'), () => show('s-start'));
 
@@ -500,7 +625,7 @@ async function renderRanking() {
   const [fam, daily] = await Promise.all([getFamilyRanking(), getDailyRanking()]);
 
   $('rankFamily').innerHTML = (fam && fam.length)
-    ? fam.map(r => `<div><span>${LEVELS[r.level]?.icon || ''} ${escapeHtml(r.player)} · ${LEVELS[r.level]?.label || r.level}</span><b>${r.best_score} ⭐</b></div>`).join('')
+    ? fam.map(r => `<div><span>${LEVELS[r.level]?.icon || MODE_LABELS[r.level]?.icon || ''} ${escapeHtml(r.player)} · ${LEVELS[r.level]?.label || MODE_LABELS[r.level]?.label || r.level}</span><b>${r.best_score} ⭐</b></div>`).join('')
     : '<div>Aún no hay partidas guardadas.</div>';
 
   $('rankDaily').innerHTML = (daily && daily.length)
