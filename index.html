@@ -11,105 +11,208 @@
 </head>
 <body>
 
-<section class="screen on" id="s-start">
-  <div class="cover">
+<!-- ══════════ PASO 1 · ¿A qué jugamos? ══════════ -->
+<section class="screen on" id="s-mode">
+  <header class="topbar">
+    <button class="btn btn--sm btn--icon" id="btnRanking" data-i18n-aria-label="nav.ranking" aria-label="Ranking familiar">🏆</button>
+    <div class="topbar__mid"><div class="pills" data-pills aria-label="Progreso"></div></div>
+    <button class="btn btn--sm btn--icon" data-settings="open" data-i18n-aria-label="settings.title" aria-label="Ajustes">⚙</button>
+  </header>
+
+  <div class="screen__body screen__body--wide">
     <div class="bunting" aria-hidden="true"></div>
     <p class="eyebrow" data-i18n="start.eyebrow">El gran juego de banderas</p>
-    <h1 class="cover-name" data-i18n-html="start.titleHtml">Diversión con<br>Banderas</h1>
-    <div class="cover-flags" id="coverFlags" aria-hidden="true"></div>
-    <p class="who" data-i18n="start.who">¿Cómo te llamas?</p>
-    <div class="name-box" id="nameBox">
-      <input id="nameInput" class="name-input" maxlength="24" data-i18n-placeholder="start.namePlaceholder" placeholder="Escribe tu nombre" autocomplete="off">
-      <button class="big" id="btnNameGo" data-i18n="start.play">Jugar</button>
+    <h1 class="h1 cover-name" data-i18n-html="start.titleHtml">Diversión con<br>Banderas</h1>
+    <p class="note" id="seenProgress"></p>
+
+    <button class="card card--continue" id="btnContinue" hidden>
+      <span class="card__icon">▶</span>
+      <span class="card__text">
+        <span class="card__title" data-i18n="wizard.continue">Seguir jugando</span>
+        <span class="card__sub" id="continueSub"></span>
+      </span>
+      <span class="card__badge" data-i18n="wizard.continueBadge">1 toque</span>
+    </button>
+
+    <button class="card card--hero" id="btnDaily">
+      <span class="card__icon">🔥</span>
+      <span class="card__text">
+        <span class="card__title" data-i18n="modes.daily.label">El reto de hoy</span>
+        <span class="card__sub" data-i18n="modes.daily.tagline">Las mismas banderas para toda la familia</span>
+      </span>
+      <span class="card__badge" data-i18n-aria-label="modes.scoresHint" role="img" aria-label="Cuenta para el ranking">🏆</span>
+    </button>
+
+    <p class="divider" data-i18n="wizard.pickGame">Elige un juego</p>
+    <div class="grid" id="modeGrid"></div>
+
+    <p class="divider" data-i18n="wizard.noPressure">Sin prisa y sin puntos</p>
+    <div class="grid">
+      <button class="card" id="btnLearn">
+        <span class="card__icon">📖</span>
+        <span class="card__text">
+          <span class="card__title" data-i18n="modes.learn.label">Aprender banderas</span>
+          <span class="card__sub" data-i18n="modes.learn.tagline">Míralas todas, tranquilamente</span>
+        </span>
+      </button>
+      <button class="card" id="btnReview" hidden>
+        <span class="card__icon">🔁</span>
+        <span class="card__text">
+          <span class="card__title" data-i18n="modes.review.label">Repasa tus fallos</span>
+          <span class="card__sub" id="reviewSub"></span>
+        </span>
+      </button>
     </div>
   </div>
 </section>
 
+<!-- ══════════ PASO 2 · ¿Cómo de difícil? ══════════ -->
 <section class="screen" id="s-level">
-  <h1 class="lvl-title" id="lvlTitle">¡Hola, <span id="lvlWho">!</span></h1>
-  <p class="who" data-i18n="level.choose">Elige tu nivel</p>
-  <p class="progress" id="seenProgress"></p>
-  <div class="continentRow">
-    <label for="continentSelect" data-i18n="level.continent">🌍 Continente</label>
-    <select id="continentSelect">
-      <option value="" data-i18n="level.continentAll">Todos</option>
-      <option value="África">África</option>
-      <option value="América">América</option>
-      <option value="Asia">Asia</option>
-      <option value="Europa">Europa</option>
-      <option value="Oceanía">Oceanía</option>
-    </select>
+  <header class="topbar">
+    <button class="btn btn--sm btn--ghost" data-nav="s-mode" data-i18n="wizard.backToModes">← Otro juego</button>
+    <div class="topbar__mid"><div class="pills" data-pills aria-label="Progreso"></div></div>
+    <button class="btn btn--sm btn--icon" data-settings="open" data-i18n-aria-label="settings.title" aria-label="Ajustes">⚙</button>
+  </header>
+
+  <div class="screen__body screen__body--wide">
+    <p class="eyebrow" id="levelModeEcho"></p>
+    <h1 class="h1" data-i18n="wizard.pickLevel">Elige tu nivel</h1>
+    <div class="grid" id="levels"></div>
+
+    <p class="divider" data-i18n="wizard.pickScope">¿Con qué banderas?</p>
+    <div class="seg" id="continentSeg" role="radiogroup" data-i18n-aria-label="level.continent" aria-label="Continente"></div>
+    <p class="note" id="scopeNote"></p>
   </div>
-  <p class="hint" data-i18n="level.continentHint">No afecta al reto diario ni a "Repasa tus fallos"</p>
-  <label class="bigToggle"><input type="checkbox" id="bigToggle"> <span data-i18n="level.bigText">🔠 Texto grande</span></label>
-  <div class="levels" id="levels"></div>
-  <button class="daily" id="btnDaily" data-i18n="nav.daily">🔥 Reto diario</button>
-  <p class="who" style="margin:2px 0 -2px;font-size:15px" data-i18n="level.moreModes">Más modos</p>
-  <div class="modesGrid">
-    <button id="btnLearn" data-i18n="nav.learn">📖 Aprender</button>
-    <button id="btnReview" style="display:none" data-i18n="nav.review">🔁 Repasa fallos</button>
-    <button id="btnInvert" data-i18n="nav.invert">🔄 Elige la bandera</button>
-    <button id="btnClassify" data-i18n="nav.classify">🗺️ Por continente</button>
-    <button id="btnPairing" data-i18n="nav.pairing">🏛️ Bandera y capital</button>
-    <button id="btnSurvival" data-i18n="nav.survival">💀 Supervivencia</button>
-  </div>
-  <button id="btnRanking" style="font-size:15px;padding:9px 20px" data-i18n="nav.ranking">🏆 Ranking familiar</button>
-  <button id="btnBackStart" style="font-size:14px;padding:8px 18px;box-shadow:none;border-width:0" data-i18n="nav.changeName">↩ Cambiar de nombre</button>
 </section>
 
-<section class="screen" id="s-game">
-  <div class="hud">
-    <div class="chip" id="whoChip">🧒</div>
-    <div class="chip">🏳️ <b id="round">1</b>/<b id="rounds">20</b></div>
-    <div class="chip" id="streakChip" style="display:none">🔥 <b id="streakMult">x1</b></div>
-    <div class="chip" aria-live="polite">⭐ <b id="score">0</b></div>
-    <div class="chip" id="timeChip">⏱️ <b id="time">20</b></div>
-    <button class="menuBtn" id="btnMenu" data-i18n-aria-label="nav.menu" aria-label="Menú">☰</button>
+<!-- ══════════ PASO 3 · ¿Quién juega? ══════════ -->
+<section class="screen" id="s-who">
+  <header class="topbar">
+    <button class="btn btn--sm btn--ghost" id="btnWhoBack" data-i18n="wizard.backToLevels">← Nivel</button>
+    <div class="topbar__mid"><div class="pills" data-pills aria-label="Progreso"></div></div>
+    <button class="btn btn--sm btn--icon" data-settings="open" data-i18n-aria-label="settings.title" aria-label="Ajustes">⚙</button>
+  </header>
+
+  <div class="screen__body screen__body--wide">
+    <h1 class="h1" id="whoTitle" data-i18n="wizard.whoPlays">¿Quién juega?</h1>
+    <p class="note" id="whoSummary"></p>
+
+    <div class="people" id="peopleGrid"></div>
+
+    <div class="field" id="newPlayerRow" hidden>
+      <input id="nameInput" class="input" maxlength="24" data-i18n-placeholder="start.namePlaceholder" placeholder="Escribe tu nombre" autocomplete="off">
+      <button class="btn btn--primary" id="btnNameGo" data-i18n="wizard.letsGo">¡Vamos!</button>
+    </div>
+    <p class="note" id="whoError" role="alert"></p>
+    <p class="note" data-i18n="wizard.namesArePrivate">Estos nombres se guardan solo en este dispositivo.</p>
   </div>
-  <div class="bar"><i id="barFill"></i></div>
-  <div class="flag-box" id="flagBox"></div>
-  <div class="feedback" id="feedback" aria-live="polite" data-i18n="game.chooseOne">Elige una</div>
-  <div class="fact" id="fact" aria-live="polite"></div>
-  <div class="options" id="options"></div>
-  <button class="hintBtn" id="btnHint" style="display:none"><span data-i18n="game.hint">💡 Pista</span> (<span id="hintCount">0</span>)</button>
 </section>
 
+<!-- ══════════ PARTIDA ══════════ -->
+<section class="screen screen--game" id="s-game">
+  <div class="screen__body">
+    <div class="hud">
+      <span class="chip" id="whoChip">🧒</span>
+      <span class="chip">🏳️ <b id="round">1</b>/<b id="rounds">20</b></span>
+      <span class="chip" id="streakChip" hidden>🔥 <b id="streakMult">x1</b></span>
+      <span class="chip" data-i18n-aria-label="game.scoreLabel" aria-label="Puntos">⭐ <b id="score" aria-live="polite" aria-atomic="true">0</b></span>
+      <span class="chip" id="timeChip" role="timer">⏱️ <b id="time">20</b></span>
+      <button class="btn btn--sm btn--icon" id="btnMenu" data-i18n-aria-label="nav.menu" aria-label="Menú">☰</button>
+    </div>
+    <div class="meter"><i id="barFill"></i></div>
+    <div class="flag-box" id="flagBox"></div>
+    <div class="fbwrap">
+      <p class="feedback" id="feedback" aria-live="polite" data-i18n="game.chooseOne">Elige una</p>
+      <p class="fact" id="fact" aria-live="polite"></p>
+    </div>
+    <div class="options" id="options"></div>
+    <button class="btn btn--sm" id="btnHint" hidden><span><span data-i18n="game.hint">💡 Pista</span> (<span id="hintCount">0</span>)</span></button>
+  </div>
+</section>
+
+<!-- ══════════ FIN DE PARTIDA ══════════ -->
 <section class="screen" id="s-end">
-  <h1 id="endTitle">¡Fin!</h1>
-  <p class="end-score" id="endScore">0</p>
-  <p class="end-sub" id="endSub"></p>
-  <div class="end-list" id="endList"></div>
-  <button class="big" id="btnAgain" data-i18n="end.playAgain">Jugar otra vez</button>
-  <button id="btnChangeLevel" style="font-size:16px;padding:10px 22px" data-i18n="end.changeLevel">Cambiar de nivel</button>
-  <button id="btnHome" style="font-size:14px;padding:8px 18px;box-shadow:none;border-width:0" data-i18n="nav.changeName">↩ Cambiar de nombre</button>
-</section>
-
-<section class="screen" id="s-learn">
-  <h1 style="font-size:clamp(24px,5.5vw,34px)" data-i18n="learn.title">📖 Aprender banderas</h1>
-  <p class="who" style="margin:0" data-i18n="learn.sub">Sin cronómetro ni puntuación</p>
-  <div class="learnList" id="learnList"></div>
-  <button id="btnLearnBack" style="font-size:16px;padding:10px 22px" data-i18n="nav.back">↩ Volver</button>
-</section>
-
-<section class="screen" id="s-ranking">
-  <h1 style="font-size:clamp(24px,5.5vw,34px)" data-i18n="nav.ranking">🏆 Ranking familiar</h1>
-  <div class="end-list" id="rankFamily" style="max-height:26dvh"></div>
-  <h1 style="font-size:clamp(20px,4.6vw,26px);margin-top:6px" data-i18n="ranking.dailyTitle">🔥 Reto diario de hoy</h1>
-  <div class="end-list" id="rankDaily" style="max-height:22dvh"></div>
-  <div class="duelRow">
-    <input id="duelName" data-i18n-placeholder="duel.rivalPlaceholder" placeholder="Nombre del rival" maxlength="24" autocomplete="off">
-    <button id="btnDuel" data-i18n="duel.button">⚔️ Duelo</button>
+  <div class="screen__body screen__body--wide">
+    <h1 class="h1" id="endTitle">¡Fin!</h1>
+    <p class="end-score" id="endScore">0</p>
+    <p class="note" id="endSub"></p>
+    <div class="list" id="endList"></div>
+    <button class="btn btn--primary btn--lg btn--block" id="btnAgain" data-i18n="end.playAgain">Jugar otra vez</button>
+    <div class="grid">
+      <button class="btn btn--sm" id="btnChangeLevel" data-i18n="end.changeLevel">Cambiar de nivel</button>
+      <button class="btn btn--sm" id="btnChangeMode" data-i18n="end.changeMode">Otro juego</button>
+      <button class="btn btn--sm" id="btnEndReview" hidden data-i18n="end.reviewThese">Repasar estas</button>
+      <button class="btn btn--sm" id="btnEndRanking" data-i18n="nav.ranking">🏆 Ranking familiar</button>
+    </div>
+    <button class="btn btn--sm btn--ghost" id="btnHome" data-i18n="end.changePlayer">¿No eres tú? Cambiar de jugador</button>
   </div>
-  <p class="duelResult" id="duelResult" aria-live="polite"></p>
-  <button id="btnRankBack" style="font-size:16px;padding:10px 22px" data-i18n="nav.back">↩ Volver</button>
 </section>
 
-<div class="menuOverlay" id="menuOverlay">
-  <div class="menuPanel">
-    <p class="who" style="margin:0 0 8px" data-i18n="game.menuTitle">Menú</p>
-    <button class="big" id="btnRestart" data-i18n="game.restart">🔄 Reiniciar partida</button>
-    <button id="btnQuit" style="font-size:16px;padding:10px 22px;background:var(--coral);color:#fff" data-i18n="game.quit">🚪 Terminar partida</button>
-    <button id="btnMenuClose" style="font-size:14px;padding:8px 18px;box-shadow:none;border-width:0" data-i18n="game.resume">Seguir jugando</button>
+<!-- ══════════ APRENDER ══════════ -->
+<section class="screen" id="s-learn">
+  <header class="topbar">
+    <button class="btn btn--sm btn--ghost" id="btnLearnBack" data-i18n="nav.back">↩ Volver</button>
+    <div class="topbar__mid"></div>
+    <button class="btn btn--sm btn--icon" data-settings="open" data-i18n-aria-label="settings.title" aria-label="Ajustes">⚙</button>
+  </header>
+  <div class="screen__body screen__body--widest">
+    <h1 class="h1" data-i18n="learn.title">📖 Aprender banderas</h1>
+    <p class="note" data-i18n="learn.sub">Sin cronómetro ni puntuación</p>
+    <div class="seg" id="learnSeg" role="radiogroup" data-i18n-aria-label="level.continent" aria-label="Continente"></div>
+    <div class="learnGrid" id="learnList"></div>
+  </div>
+</section>
+
+<!-- ══════════ RANKING ══════════ -->
+<section class="screen" id="s-ranking">
+  <header class="topbar">
+    <button class="btn btn--sm btn--ghost" id="btnRankBack" data-i18n="nav.back">↩ Volver</button>
+    <div class="topbar__mid"></div>
+    <button class="btn btn--sm btn--icon" data-settings="open" data-i18n-aria-label="settings.title" aria-label="Ajustes">⚙</button>
+  </header>
+  <div class="screen__body screen__body--wide">
+    <h1 class="h1" data-i18n="nav.ranking">🏆 Ranking familiar</h1>
+    <div class="list" id="rankFamily"></div>
+
+    <h2 class="h2" data-i18n="ranking.dailyTitle">🔥 Reto diario de hoy</h2>
+    <div class="list" id="rankDaily"></div>
+
+    <p class="divider" data-i18n="duel.title">⚔️ Duelo</p>
+    <p class="note" data-i18n="duel.sub">Compara tu reto de hoy con alguien a quien conoces.</p>
+    <div class="field">
+      <input id="duelName" class="input" data-i18n-placeholder="duel.rivalPlaceholder" placeholder="Nombre del rival" maxlength="24" autocomplete="off">
+      <button class="btn btn--primary" id="btnDuel" data-i18n="duel.button">⚔️ Duelo</button>
+    </div>
+    <p class="note" id="duelResult" aria-live="polite"></p>
+  </div>
+</section>
+
+<!-- ══════════ MENÚ EN PARTIDA ══════════ -->
+<div class="sheet" id="menuOverlay">
+  <div class="sheet__panel" role="dialog" aria-modal="true" data-i18n-aria-label="game.menuTitle" aria-label="Menú">
+    <h2 class="h2" data-i18n="game.menuTitle">Menú</h2>
+    <button class="btn btn--primary btn--block" id="btnMenuClose" data-i18n="game.resume">Seguir jugando</button>
+    <button class="btn btn--sm btn--block" id="btnRestart" data-i18n="game.restart">🔄 Reiniciar partida</button>
+    <button class="btn btn--sm btn--block btn--danger" id="btnQuit" data-i18n="game.quit">🚪 Terminar partida</button>
+  </div>
+</div>
+
+<!-- ══════════ AJUSTES ══════════ -->
+<div class="sheet" id="settingsSheet">
+  <div class="sheet__panel" role="dialog" aria-modal="true" data-i18n-aria-label="settings.title" aria-label="Ajustes">
+    <h2 class="h2" data-i18n="settings.title">Ajustes</h2>
+
+    <p class="field__label" data-i18n="settings.textSize">🔠 Tamaño del texto</p>
+    <div class="seg seg--3" id="textSizeSeg" role="radiogroup" data-i18n-aria-label="settings.textSize" aria-label="Tamaño del texto">
+      <button type="button" role="radio" data-size="md" aria-checked="true">Aa</button>
+      <button type="button" role="radio" data-size="lg" aria-checked="false" class="sizePreview sizePreview--lg">Aa</button>
+      <button type="button" role="radio" data-size="xl" aria-checked="false" class="sizePreview sizePreview--xl">Aa</button>
+    </div>
+
+    <p class="field__label" data-i18n="settings.players">👤 Jugadores</p>
+    <div class="list" id="settingsPlayers"></div>
+
+    <button class="btn btn--ghost btn--block" data-settings="close" data-i18n="settings.close">Cerrar</button>
   </div>
 </div>
 

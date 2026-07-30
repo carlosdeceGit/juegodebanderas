@@ -30,8 +30,8 @@ servidor local evita ese problema.
 ## Estructura del repositorio
 
 ```
-index.html                  Las 6 pantallas del juego (marcado, sin lógica)
-style.css                   Todo el CSS (sin preprocesador)
+index.html                  Las 7 pantallas del juego (marcado, sin lógica)
+style.css                   Sistema de diseño y todo el CSS (sin preprocesador)
 js/
   game.js                   Estado del juego, bucle de ronda, todos los modos
   countries.js              Datos de los 195 países (nombre, capital, continente,
@@ -54,14 +54,65 @@ hasta ahora.
 
 ## Cómo está montada la interfaz
 
-`index.html` define 6 `<section class="screen">` (una por pantalla:
-inicio, nivel, partida, fin, aprender, ranking) más el overlay del
-menú de partida. Solo una tiene la clase `.on` a la vez; `game.js`
-las alterna con la función `show(id)`. No hay routing ni historial:
-todo vive en una sola página.
+`index.html` define 7 `<section class="screen">` (tipo de juego, nivel,
+jugador, partida, fin, aprender, ranking) más dos hojas inferiores: el
+menú de partida y los ajustes. Solo una pantalla tiene la clase `.on` a
+la vez; `game.js` las alterna con la función `show(id)`. No hay routing
+ni historial: todo vive en una sola página.
 
 Todo el texto de la interfaz está en `js/i18n.js`, no hardcodeado en
 el HTML ni en el JS — ver la sección "Internacionalización" más abajo.
+
+### El asistente de tres pasos
+
+Para empezar una partida se recorre siempre el mismo camino:
+
+```
+1. ¿A qué jugamos?   (s-mode)   → tipo de juego
+2. ¿Cómo de difícil? (s-level)  → nivel + continente   ← solo el modo clásico
+3. ¿Quién juega?     (s-who)    → ficha de jugador
+```
+
+Dos reglas que conviene respetar al tocarlo:
+
+- **Ningún paso tiene botón de "siguiente".** Tocar una tarjeta elige y
+  avanza. Así el recorrido cuesta tres toques, los mismos que costaba
+  antes entrar por nombre → nivel → jugar.
+- **El paso 2 solo existe si el modo tiene niveles elegibles.** Eso lo
+  declara `needsLevel` en el catálogo `MODES` de `game.js`; los modos
+  con dificultad fija saltan del paso 1 al 3 y el indicador de progreso
+  se pinta con dos píldoras en vez de tres, sin ninguna rama especial.
+
+**Para añadir un modo al asistente** basta con una entrada en `MODES`
+(icono, claves de i18n, `needsLevel`, `usesScope`, `scoreable` y la
+función `start`). La pantalla del paso 1 se genera a partir de ese
+objeto; no hay que tocar el marcado.
+
+El reto diario y "Repasa tus fallos" están en `MODES` marcados como
+`hidden`: son partidas de pleno derecho (y por tanto pasan por el
+asistente), pero no se pintan en la rejilla porque tienen su propio
+sitio en la pantalla — tarjeta destacada arriba y bloque de "sin
+puntos" abajo. "Aprender" no está en `MODES` porque no es una partida:
+no tiene nivel, ni jugador, ni puntuación.
+
+### Sistema de diseño
+
+`style.css` está organizado en tokens → componentes → layout, y la
+cabecera del fichero lista las tres reglas que no conviene romper. Las
+dos que más se incumplen por descuido:
+
+- **Nada de `style="..."` en `index.html`.** Si hace falta una variante,
+  se añade como clase (`.btn--danger`, `.card--hero`, `.btn--sm`…).
+- **`opacity` nunca para atenuar texto**: usar `--ink-muted`, que tiene
+  un contraste medido. Con opacidad el contraste depende del fondo que
+  toque debajo y deja de ser verificable.
+
+El diseño es responsive de verdad, no una columna de móvil estirada: a
+partir de 640px las rejillas pasan a dos columnas, y a partir de 1024px
+(o en móvil apaisado) la partida se reorganiza en dos columnas con la
+bandera a la izquierda y las respuestas a la derecha. El bloqueo de
+scroll (`html.is-playing`) se aplica **solo durante la partida**, donde
+hay cuenta atrás; el resto de pantallas son documento normal.
 
 ## El bucle de juego
 
@@ -86,13 +137,13 @@ necesita comportarse distinto; el resto del bucle es compartido.
 | Modo | Cómo se juega | Mazo | ¿Cuenta para el ranking? |
 |---|---|---|---|
 | **Clásico** (4 niveles: Nene, Principiante, Experto, Dios) | Bandera → elegir el nombre del país | `buildDeck()`, prioriza banderas menos vistas, respeta el filtro de continente | Sí (`best_scores`) |
-| **Reto diario** (`btnDaily`) | Igual que Experto, pero con semilla determinista por fecha (mismo mazo para todo el mundo el mismo día) | `buildDailyDeck()`, ignora el filtro de continente | Sí, máx. 1 intento/jugador/día (`daily_ranking`) |
-| **Aprender** (`btnLearn`) | Lista navegable de banderas con nombre/capital/continente | Todas (o filtradas por continente), sin cronómetro ni puntuación | No |
+| **Reto diario** (tarjeta destacada del paso 1) | Igual que Experto, pero con semilla determinista por fecha (mismo mazo para todo el mundo el mismo día) | `buildDailyDeck()`, ignora el filtro de continente | Sí, máx. 1 intento/jugador/día (`daily_ranking`) |
+| **Aprender** (`btnLearn`, fuera del asistente) | Lista navegable de banderas con nombre/capital/continente | Todas (o filtradas por continente), sin cronómetro ni puntuación | No |
 | **Repasa tus fallos** (`btnReview`, solo visible con ≥3 fallos históricos) | Igual que Clásico, pero el mazo son las banderas más falladas | Ordenado por nº de fallos; acertar una la quita del historial | No |
-| **Elige la bandera** (`btnInvert`) | Se invierte el sentido: se muestra el nombre y hay que tocar la bandera | Reutiliza `pickDistractors` | No |
-| **Clasifica por continente** (`btnClassify`) | Bandera → elegir el continente entre 5 opciones fijas | — | No |
-| **Bandera y capital** (`btnPairing`) | Igual que Clásico, pero las opciones son capitales | — | No |
-| **Supervivencia** (`btnSurvival`) | Una sola vida; el tiempo baja, las opciones suben y los distractores se endurecen con cada acierto (`survivalParamsForRound`) | Las 195 banderas, mezcladas | Sí, como nivel `survival` |
+| **Elige la bandera** | Se invierte el sentido: se muestra el nombre y hay que tocar la bandera | Reutiliza `pickDistractors` | No |
+| **Clasifica por continente** | Bandera → elegir el continente entre 5 opciones fijas | — | No |
+| **Bandera y capital** | Igual que Clásico, pero las opciones son capitales | — | No |
+| **Supervivencia** | Una sola vida; el tiempo baja, las opciones suben y los distractores se endurecen con cada acierto (`survivalParamsForRound`) | Las 195 banderas, mezcladas | Sí, como nivel `survival` |
 
 Los 4 niveles clásicos están definidos declarativamente en
 `js/levels.js` (rondas, segundos, nº de opciones, modo de distractor,
@@ -106,7 +157,9 @@ niveles.
 patrón de "Elige la bandera"/"Bandera y capital" (mismo bucle, cambia
 solo qué se muestra como pregunta y opciones) sin tocar el temporizador,
 la puntuación ni el HUD. Mirar `nextRound()` y `resolveRound()` en
-`js/game.js` para dónde engancha cada pieza.
+`js/game.js` para dónde engancha cada pieza, y añadir su entrada en
+`MODES` para que aparezca en el asistente (ver "El asistente de tres
+pasos" más arriba).
 
 ### Puntuación
 
@@ -143,20 +196,45 @@ del SVG — ver la auditoría para más detalle.
   nombre del país.
 - `aria-live="polite"` en el feedback, el dato de la capital y la
   puntuación.
-- Ajuste de "texto grande" (`bigToggle`) independiente del nivel,
-  persistido en `localStorage`.
+- Ajuste de tamaño de texto (3 pasos) en la hoja de ajustes, accesible
+  desde cualquier pantalla y persistido en `localStorage`. Funciona con
+  una única variable `--scale` en `:root` que multiplica toda la escala
+  tipográfica y los tamaños de toque, así que **escala la aplicación
+  entera**. Cualquier tamaño nuevo que se añada al CSS debe multiplicarse
+  por `--scale` para no quedarse fuera del ajuste.
+- Zonas de toque de 44px como mínimo. Las píldoras del asistente usan
+  44px fijos, no escalados: el mínimo de toque es absoluto y escalarlo
+  desbordaría la cabecera en móvil.
+- Contraste verificado: foco de tinta (13.6:1), acierto `#1F7A6E`
+  (5.16:1) y fallo `#C1462A` (5.03:1) sobre blanco. Los tonos claros
+  `--teal-500`/`--coral-500` se quedan de decoración porque con texto
+  blanco encima no llegan a 4.5:1.
 - El viewport no bloquea el zoom del navegador.
-- `prefers-reduced-motion` desactiva las animaciones.
+- `prefers-reduced-motion` desactiva los adornos, pero mantiene el
+  movimiento que informa: la barra del temporizador se sigue moviendo y
+  el fallo sigue avisando, con un borde en vez de una sacudida.
 
 ## Persistencia local (`localStorage`)
 
 | Clave | Contenido |
 |---|---|
-| `dcb_player` | Nombre del jugador actual |
+| `dcb_players_v1` | Lista de jugadores de este dispositivo (`[{name, lastPlayedAt}]`) |
+| `dcb_last_v1` | Última configuración jugada, para la tarjeta "Seguir jugando" |
 | `dcb_seen_v1` | Mapa código→veces vista, por bandera (progreso de aprendizaje) |
 | `dcb_wrong_v1` | Mapa código→nº de fallos históricos (alimenta "Repasa tus fallos") |
 | `dcb_continent` | Filtro de continente elegido (solo afecta a los niveles clásicos) |
-| `dcb_bigtext` | Ajuste de texto grande (`'1'`/`'0'`) |
+| `dcb_textsize` | Tamaño de texto (`'md'`/`'lg'`/`'xl'`) |
+
+Dos claves antiguas se migran solas al cargar y luego se borran, así que
+nadie pierde nada al actualizar: `dcb_player` (un único nombre) siembra
+`dcb_players_v1`, y `dcb_bigtext` (`'1'`/`'0'`) se convierte en
+`dcb_textsize`. **Si se vuelven a necesitar esos nombres, usar claves
+nuevas**: el código los borra a propósito.
+
+El paso de un nombre único a una lista no es cosmético. Con
+`dcb_player`, en un móvil compartido las partidas del segundo jugador se
+guardaban en Supabase con el nombre del primero, y el ranking familiar
+quedaba mal atribuido. Elegir ficha en el paso 3 es lo que lo arregla.
 
 Todo el acceso a `localStorage` está envuelto en `try/catch`: si está
 deshabilitado (modo privado estricto, cuota llena) el juego sigue
@@ -257,6 +335,9 @@ como mínimo:
   de red real al proyecto.
 - Regresión rápida de accesibilidad: zoom no bloqueado, `aria-live`
   presente, texto grande funcionando en cualquier nivel.
+- Los tres pasos del asistente en móvil (390px) y en escritorio
+  (1440px), incluyendo un modo con nivel y otro sin él, y que la
+  migración de `dcb_player`/`dcb_bigtext` conserva jugador y ajuste.
 
 ## Historial
 
