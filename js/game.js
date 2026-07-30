@@ -1,7 +1,7 @@
 import { COUNTRIES } from "./countries.js";
 import { LEVELS, DAILY_LEVEL_KEY, DAILY_ROUNDS } from "./levels.js";
 import { pickDistractors } from "./distractors.js";
-import { saveScore, getFamilyRanking, getDailyRanking } from "./db.js";
+import { saveScore, getDailyRanking } from "./db.js";
 import { describeFlag } from "./flagDescription.js";
 import { t, applyStaticI18n } from "./i18n.js";
 
@@ -275,6 +275,41 @@ function touchPlayer(name) {
 }
 function playersByRecent() {
   return players.slice().sort((a, b) => (b.lastPlayedAt || 0) - (a.lastPlayedAt || 0));
+}
+
+/* ---------- Ranking de casa, en local ----------
+   Las mejores marcas se guardan en este dispositivo, no en el servidor.
+   Antes se leían de la vista `best_scores`, que devolvía las 50 mejores
+   de toda la tabla sin filtro: se llamaba "ranking familiar" pero era un
+   tablón de cualquiera que hubiese jugado desde cualquier sitio, con los
+   nombres a la vista. En local no hace falta ni cuenta ni servidor, no
+   cuesta nada y los nombres no salen del dispositivo. El precio es que
+   no se comparten marcas entre el móvil y la tablet: para eso haría
+   falta un servidor con las partidas agrupadas por familia. */
+const SCORES_KEY = 'dcb_scores_v1';
+const SCORES_MAX = 100;
+function loadScores() {
+  try {
+    const raw = JSON.parse(lsGet(SCORES_KEY));
+    if (Array.isArray(raw)) return raw;
+  } catch { /* ignore */ }
+  return [];
+}
+let localScores = loadScores();
+
+/* Una entrada por jugador y nivel, con su mejor marca — igual que hacía
+   la vista `best_scores` con su `max(score) group by player, level`. */
+function recordLocalScore({ player: who, level: lvl, score: pts, rounds }) {
+  const i = localScores.findIndex(s => normName(s.player) === normName(who) && s.level === lvl);
+  if (i >= 0) {
+    if (pts <= localScores[i].score) return;
+    localScores[i] = { player: who, level: lvl, score: pts, rounds, at: Date.now() };
+  } else {
+    localScores.push({ player: who, level: lvl, score: pts, rounds, at: Date.now() });
+  }
+  localScores.sort((a, b) => b.score - a.score);
+  localScores = localScores.slice(0, SCORES_MAX);
+  lsSet(SCORES_KEY, JSON.stringify(localScores));
 }
 
 /* ---------- Última partida, para "Seguir jugando" ---------- */
@@ -937,14 +972,21 @@ function end() {
   $('btnEndRanking').hidden = !MODES[mode]?.scoreable;
 
   show('s-end');
-  if (mode === 'classic' || mode === 'daily' || mode === 'survival') {
+
+  /* El reto diario es lo único que va al servidor: su gracia es comparar
+     el mismo mazo con gente que juega en otro dispositivo, y eso no se
+     puede hacer en local. Todo lo demás se queda aquí. */
+  if (mode === 'daily') {
     saveScore({
-      player, level: levelKey, score, rounds: mode === 'survival' ? idx : deck.length,
-      errors: wrongList.length, daily: mode === 'daily', dailyDate: dailyDateStr,
+      player, level: levelKey, score, rounds: deck.length,
+      errors: wrongList.length, daily: true, dailyDate: dailyDateStr,
     }).then(result => {
-      if (mode === 'daily' && result.reason === 'duplicate') {
-        $('endSub').textContent += t('end.alreadyPlayedToday');
-      }
+      if (result.reason === 'duplicate') $('endSub').textContent += t('end.alreadyPlayedToday');
+    });
+  } else if (MODES[mode]?.scoreable) {
+    recordLocalScore({
+      player, level: levelKey, score,
+      rounds: mode === 'survival' ? idx : deck.length,
     });
   }
 }
@@ -967,25 +1009,32 @@ function levelIconAndLabel(levelKeyValue) {
 function emptyRow(key) { return `<div class="row row--empty">${escapeHtml(t(key))}</div>`; }
 
 async function renderRanking() {
-  $('rankFamily').innerHTML = emptyRow('common.loading');
-  $('rankDaily').innerHTML = emptyRow('common.loading');
-  $('duelResult').textContent = '';
-  const [fam, daily] = await Promise.all([getFamilyRanking(), getDailyRanking()]);
-  lastDailyRanking = daily || [];
-
-  $('rankFamily').innerHTML = (fam && fam.length)
-    ? fam.map((r, i) => {
+  /* El ranking de casa es local: se pinta al instante, sin red. */
+  $('rankFamily').innerHTML = localScores.length
+    ? localScores.map((r, i) => {
         const { icon, label } = levelIconAndLabel(r.level);
         return `<div class="row">
           <span class="row__rank">${i + 1}</span>
           <span class="row__name">${escapeHtml(r.player)}<small>${icon} ${escapeHtml(label)}</small></span>
-          <span class="row__val">${r.best_score} ⭐</span>
+          <span class="row__val">${r.score} ⭐</span>
         </div>`;
       }).join('')
     : emptyRow('ranking.noFamilyScores');
 
-  $('rankDaily').innerHTML = (lastDailyRanking.length)
-    ? lastDailyRanking.map((r, i) => `<div class="row">
+  $('rankDaily').innerHTML = emptyRow('common.loading');
+  $('duelResult').textContent = '';
+  lastDailyRanking = (await getDailyRanking()) || [];
+
+  /* De la tabla del reto diario solo se enseña a quien juega en este
+     dispositivo. El duelo sigue pudiendo consultar a cualquiera por su
+     nombre, pero la pantalla no expone la lista de desconocidos.
+     Ojo: esto es una decisión de qué se muestra, no una barrera — la
+     clave `anon` va en el repositorio, así que la protección de verdad
+     tendría que estar en el servidor. */
+  const known = new Set(players.map(p => normName(p.name)));
+  const mine = lastDailyRanking.filter(r => known.has(normName(r.player)));
+  $('rankDaily').innerHTML = mine.length
+    ? mine.map((r, i) => `<div class="row">
         <span class="row__rank">${i + 1}</span>
         <span class="row__name">${escapeHtml(r.player)}</span>
         <span class="row__val">${r.score} ⭐</span>

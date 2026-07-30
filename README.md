@@ -3,8 +3,9 @@
 Juego web de "adivina el país por su bandera", en español, pensado
 originalmente como juego familiar. HTML + CSS + JavaScript **vanilla**
 (módulos ES nativos), sin build, sin framework, sin dependencias npm.
-Persistencia opcional en Supabase para rankings; el juego funciona
-igual de bien sin conexión (solo se pierde el ranking).
+El progreso y el ranking de casa se guardan en el propio dispositivo;
+Supabase se usa solo para el reto diario compartido. El juego funciona
+igual de bien sin conexión: solo se pierden el reto diario y el duelo.
 
 Este documento es la referencia técnica del proyecto: qué hay, cómo
 funciona y qué tener en cuenta antes de tocarlo. Para el historial de
@@ -136,14 +137,14 @@ necesita comportarse distinto; el resto del bucle es compartido.
 
 | Modo | Cómo se juega | Mazo | ¿Cuenta para el ranking? |
 |---|---|---|---|
-| **Clásico** (4 niveles: Nene, Principiante, Experto, Dios) | Bandera → elegir el nombre del país | `buildDeck()`, prioriza banderas menos vistas, respeta el filtro de continente | Sí (`best_scores`) |
-| **Reto diario** (tarjeta destacada del paso 1) | Igual que Experto, pero con semilla determinista por fecha (mismo mazo para todo el mundo el mismo día) | `buildDailyDeck()`, ignora el filtro de continente | Sí, máx. 1 intento/jugador/día (`daily_ranking`) |
+| **Clásico** (4 niveles: Nene, Principiante, Experto, Dios) | Bandera → elegir el nombre del país | `buildDeck()`, prioriza banderas menos vistas, respeta el filtro de continente | Sí, en local (`dcb_scores_v1`) |
+| **Reto diario** (tarjeta destacada del paso 1) | Igual que Experto, pero con semilla determinista por fecha (mismo mazo para todo el mundo el mismo día) | `buildDailyDeck()`, ignora el filtro de continente | Sí, en Supabase, máx. 1 intento/jugador/día (`daily_ranking`) |
 | **Aprender** (`btnLearn`, fuera del asistente) | Lista navegable de banderas con nombre/capital/continente | Todas (o filtradas por continente), sin cronómetro ni puntuación | No |
 | **Repasa tus fallos** (`btnReview`, solo visible con ≥3 fallos históricos) | Igual que Clásico, pero el mazo son las banderas más falladas | Ordenado por nº de fallos; acertar una la quita del historial | No |
 | **Elige la bandera** | Se invierte el sentido: se muestra el nombre y hay que tocar la bandera | Reutiliza `pickDistractors` | No |
 | **Clasifica por continente** | Bandera → elegir el continente entre 5 opciones fijas | — | No |
 | **Bandera y capital** | Igual que Clásico, pero las opciones son capitales | — | No |
-| **Supervivencia** | Una sola vida; el tiempo baja, las opciones suben y los distractores se endurecen con cada acierto (`survivalParamsForRound`) | Las 195 banderas, mezcladas | Sí, como nivel `survival` |
+| **Supervivencia** | Una sola vida; el tiempo baja, las opciones suben y los distractores se endurecen con cada acierto (`survivalParamsForRound`) | Las 195 banderas, mezcladas | Sí, en local, como nivel `survival` |
 
 Los 4 niveles clásicos están definidos declarativamente en
 `js/levels.js` (rondas, segundos, nº de opciones, modo de distractor,
@@ -219,6 +220,7 @@ del SVG — ver la auditoría para más detalle.
 | Clave | Contenido |
 |---|---|
 | `dcb_players_v1` | Lista de jugadores de este dispositivo (`[{name, lastPlayedAt}]`) |
+| `dcb_scores_v1` | Mejor marca por jugador y nivel: **es el ranking de casa** |
 | `dcb_last_v1` | Última configuración jugada, para la tarjeta "Seguir jugando" |
 | `dcb_seen_v1` | Mapa código→veces vista, por bandera (progreso de aprendizaje) |
 | `dcb_wrong_v1` | Mapa código→nº de fallos históricos (alimenta "Repasa tus fallos") |
@@ -240,12 +242,61 @@ Todo el acceso a `localStorage` está envuelto en `try/catch`: si está
 deshabilitado (modo privado estricto, cuota llena) el juego sigue
 funcionando, solo sin persistir progreso.
 
-## Supabase (ranking)
+## Ranking
+
+Hay dos rankings y **viven en sitios distintos a propósito**:
+
+| Ranking | Dónde | Qué contiene |
+|---|---|---|
+| **Ranking de casa** | `localStorage` (`dcb_scores_v1`) | Mejor marca por jugador y nivel, del modo clásico y de Supervivencia |
+| **Reto diario** | Supabase | La partida diaria de todos los jugadores, y el duelo asíncrono |
+
+El ranking de casa era antes la vista `best_scores` de Supabase, que
+devolvía las **50 mejores marcas de la tabla entera, sin ningún filtro**:
+se llamaba "ranking familiar" pero era un tablón de cualquiera que
+hubiese jugado desde cualquier dispositivo, con los nombres a la vista.
+`docs/decisiones-producto.md` ya había descartado un ranking público
+entre desconocidos; esto lo hace cumplir. En local no hace falta ni
+cuenta ni servidor, no cuesta nada, y los nombres no salen del
+dispositivo.
+
+**El precio, y conviene tenerlo claro:** las marcas ya no se comparten
+entre el móvil y la tablet de la misma casa. Recuperar eso pide un
+servidor con las partidas agrupadas por familia (una columna nueva, una
+migración y cerrar la lectura directa de la tabla con una función
+`SECURITY DEFINER`), y ninguna de esas piezas existe hoy.
+
+El reto diario se queda en Supabase porque su gracia es comparar el mismo
+mazo con gente que juega en otro dispositivo, y eso no se puede hacer en
+local. De su tabla **solo se muestran los nombres que están en la lista
+de jugadores de este dispositivo**; el resto se filtra en el cliente.
+Ojo con lo que eso es y lo que no: es una decisión de qué se enseña en
+pantalla, no una barrera — la clave `anon` va en el repositorio, así que
+cualquiera puede consultar la tabla por su cuenta. La protección de
+verdad tendría que estar en el servidor.
+
+El duelo asíncrono no se toca: sigue comparando tu resultado con el de
+alguien a quien nombras tú, aunque esa persona no aparezca en la lista.
+
+## Supabase (reto diario)
 
 Proyecto `diversion-con-banderas` (Supabase). El cliente (`js/db.js`)
 habla directo con la API REST (PostgREST) usando la clave pública
 `anon`, sin SDK ni backend propio. **No hay datos sensibles**: solo
 nombre de jugador (texto libre), nivel, puntuación y fecha.
+
+Desde el rediseño de la interfaz, el juego **solo escribe en Supabase
+las partidas del reto diario**: las del modo clásico y las de
+Supervivencia se quedan en `localStorage`. La vista `best_scores` sigue
+existiendo en la base de datos pero ya no se consulta desde el juego.
+Esto mantiene el uso dentro del plan gratuito con holgura y reduce a una
+inserción por jugador y día lo que se envía fuera del dispositivo.
+
+Aviso operativo del plan gratuito: un proyecto de Supabase sin actividad
+durante unos días se pausa solo, y entonces las llamadas fallan. El juego
+no se rompe por eso —`safeFetch` se traga los errores de red y el
+ranking de casa es local—, pero el reto diario y el duelo dejarán de
+funcionar hasta que se reactive el proyecto desde el panel de Supabase.
 
 ### Esquema
 
@@ -273,10 +324,15 @@ CI que lo haga automáticamente).
 
 ### Si el juego deja de guardar puntuaciones
 
-1. Comprobar en la consola del navegador si `saveScore`/`getFamilyRanking`/
-   `getDailyRanking` están fallando (network tab): sin conexión el
-   juego sigue funcionando, solo no guarda ni consulta ranking
-   (`safeFetch` en `db.js` traga los errores de red a propósito).
+0. Comprobar de qué ranking se habla: el de casa es local y no depende
+   de la red en absoluto. Si lo que falta son las marcas del modo
+   clásico, mirar `dcb_scores_v1` en `localStorage`, no Supabase.
+1. Comprobar en la consola del navegador si `saveScore`/`getDailyRanking`
+   están fallando (network tab): sin conexión el juego sigue
+   funcionando, solo no guarda ni consulta el reto diario
+   (`safeFetch` en `db.js` traga los errores de red a propósito). Si
+   fallan todas las llamadas, lo más probable es que el proyecto de
+   Supabase esté pausado por inactividad (ver arriba).
 2. Si hay conexión pero la inserción falla con 403: revisar si la
    puntuación reportada excede la cota de `games_public_rls` para ese
    nivel — puede ser una partida real que rompe la fórmula esperada

@@ -82,7 +82,7 @@ const STRINGS = {
     "settings.noPlayers": "Todavía no juega nadie aquí.",
     "settings.close": "Cerrar",
 
-    "nav.ranking": "🏆 Ranking familiar",
+    "nav.ranking": "🏆 Ranking de casa",
     "nav.back": "↩ Volver",
     "nav.menu": "Menú",
 
@@ -124,8 +124,10 @@ const STRINGS = {
     "learn.flagAlt": "Bandera de {name}",
 
     "ranking.dailyTitle": "🔥 Reto diario de hoy",
-    "ranking.noFamilyScores": "Aún no hay partidas guardadas.",
-    "ranking.noDailyScores": "Nadie ha jugado el reto de hoy todavía.",
+    "ranking.homeNote": "Las mejores marcas de este dispositivo. Estos nombres no salen de aquí.",
+    "ranking.dailyNote": "Solo se muestra a quien juega en este dispositivo.",
+    "ranking.noFamilyScores": "Aún no hay marcas. Juega una partida y aparecerás aquí.",
+    "ranking.noDailyScores": "Nadie de esta casa ha hecho el reto de hoy todavía.",
     "duel.title": "⚔️ Duelo",
     "duel.sub": "Compara tu reto de hoy con alguien a quien conoces.",
     "duel.rivalPlaceholder": "Nombre del rival",
