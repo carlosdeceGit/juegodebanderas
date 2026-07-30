@@ -94,6 +94,49 @@ mecánica todavía. Esta sección es esa evaluación.
    lanzamiento: alguien tendría que vigilar el ranking público de forma
    sostenida.
 
+### Actualización: el ranking de casa pasa a ser local
+
+La evaluación de abajo se escribió dando por supuesto que el ranking
+familiar "solo lo ven las personas con el enlace del juego". **Eso no era
+cierto en el código:** `getFamilyRanking()` consultaba la vista
+`best_scores` pidiendo las 50 mejores marcas de la tabla entera, sin
+ningún filtro, así que mostraba los nombres de cualquiera que hubiese
+jugado desde cualquier dispositivo. Era, de hecho, el ranking público
+entre desconocidos que esta sección descartaba — solo que sin haberlo
+decidido.
+
+**Decisión: el ranking de casa se guarda en `localStorage`** (clave
+`dcb_scores_v1`) y el juego deja de consultar `best_scores` y de escribir
+en Supabase las partidas que no son del reto diario.
+
+Alternativas consideradas:
+
+- **Código de familia** (una columna nueva en `games`, un código
+  aleatorio por hogar y una función `SECURITY DEFINER` que solo devuelva
+  las filas de ese código). Es la solución completa y la única que
+  mantiene el ranking compartido entre el móvil y la tablet de la misma
+  casa. Requiere una migración aplicada al proyecto real de Supabase y
+  cerrar la lectura directa de la tabla; se descartó por ahora para no
+  añadir infraestructura ni depender de un despliegue de base de datos.
+- **Ranking local (elegida).** Cuesta cero, no necesita ni cuenta ni
+  servidor ni migración, y los nombres no salen del dispositivo, que era
+  justamente el punto 2 (moderación de nombres) y el punto 3 (protección
+  de menores) de la evaluación. El coste real es que las marcas dejan de
+  compartirse entre dispositivos de la misma casa.
+
+El **reto diario sigue en Supabase**, porque su sentido es comparar el
+mismo mazo determinista con gente que juega en otro dispositivo y eso no
+se puede hacer en local. De su tabla el juego **solo muestra los nombres
+que están en la lista de jugadores del dispositivo**; el resto se filtra
+en el cliente. Conviene ser preciso sobre qué es eso: una decisión de qué
+se enseña en pantalla, no una barrera de seguridad — la clave `anon` está
+en el repositorio y cualquiera puede consultar la tabla por su cuenta. La
+protección real seguiría necesitando el punto 1 (autenticación) o, como
+mínimo, el código de familia con la lectura cerrada en el servidor.
+
+El **duelo asíncrono** no cambia, y sigue siendo lo que esta sección
+recomendaba: comparar tu resultado con el de alguien a quien nombras tú.
+
 **Conclusión de la evaluación:** no se recomienda implementar un ranking
 global entre desconocidos con la arquitectura y los recursos actuales
 del proyecto (un juego familiar mantenido informalmente). El camino

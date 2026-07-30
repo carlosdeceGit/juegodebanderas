@@ -55,9 +55,12 @@ export function getHistory(player, limit = 10) {
   return safeFetch(`${SUPABASE_URL}/rest/v1/games?${q}`, { headers: headers() });
 }
 
-export function getFamilyRanking() {
-  return safeFetch(`${SUPABASE_URL}/rest/v1/best_scores?order=best_score.desc&limit=50`, { headers: headers() });
-}
+/* El ranking de casa NO se consulta aquí: vive en localStorage (ver
+   "Ranking" en el README). `best_scores` devolvía las 50 mejores marcas
+   de la tabla entera sin filtro alguno, así que enseñaba los nombres de
+   cualquiera que hubiese jugado desde cualquier dispositivo — algo que
+   docs/decisiones-producto.md ya daba por descartado. La vista sigue
+   existiendo en la base de datos; simplemente el juego no la usa. */
 
 export function getDailyRanking() {
   return safeFetch(`${SUPABASE_URL}/rest/v1/daily_ranking?order=score.desc&limit=50`, { headers: headers() });

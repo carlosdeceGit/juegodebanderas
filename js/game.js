@@ -1,7 +1,7 @@
 import { COUNTRIES } from "./countries.js";
 import { LEVELS, DAILY_LEVEL_KEY, DAILY_ROUNDS } from "./levels.js";
 import { pickDistractors } from "./distractors.js";
-import { saveScore, getFamilyRanking, getDailyRanking } from "./db.js";
+import { saveScore, getDailyRanking } from "./db.js";
 import { describeFlag } from "./flagDescription.js";
 import { t, applyStaticI18n } from "./i18n.js";
 
@@ -48,24 +48,78 @@ function survivalParamsForRound(n) {
   };
 }
 const MODE_LABELS = { survival: { icon: "💀", labelKey: "level.survival.label" } };
-const WHOCHIP_ICON = { daily: "🔥", review: "🔁", survival: "💀", invert: "🔄", classify: "🗺️", pairing: "🏛️" };
+
+/* ───────────────────────────────────────────────────────────────────
+   Catálogo de modos.
+
+   Es la única fuente de verdad de la pantalla "¿A qué jugamos?" y del
+   asistente. `needsLevel` es lo que decide si un modo tiene 3 pasos o
+   2: solo el clásico deja elegir nivel, el resto trae el suyo fijo
+   (INVERT_LEVEL, CLASSIFY_LEVEL, PAIRING_LEVEL, makeSurvivalLevel).
+   Añadir un modo nuevo es añadir una entrada aquí y su función de
+   arranque — el asistente no necesita saber nada más.
+   ─────────────────────────────────────────────────────────────────── */
+const MODES = {
+  classic: {
+    icon: "🏳️", labelKey: "modes.classic.label", taglineKey: "modes.classic.tagline",
+    needsLevel: true, usesScope: true, scoreable: true, start: () => startLevel(wizard.levelKey),
+  },
+  invert: {
+    icon: "🔄", labelKey: "modes.invert.label", taglineKey: "modes.invert.tagline",
+    needsLevel: false, usesScope: false, scoreable: false, start: startInvert,
+  },
+  pairing: {
+    icon: "🏛️", labelKey: "modes.pairing.label", taglineKey: "modes.pairing.tagline",
+    needsLevel: false, usesScope: false, scoreable: false, start: startPairing,
+  },
+  classify: {
+    icon: "🗺️", labelKey: "modes.classify.label", taglineKey: "modes.classify.tagline",
+    needsLevel: false, usesScope: false, scoreable: false, start: startClassify,
+  },
+  survival: {
+    icon: "💀", labelKey: "modes.survival.label", taglineKey: "modes.survival.tagline",
+    needsLevel: false, usesScope: false, scoreable: true, start: startSurvival,
+  },
+  daily: {
+    icon: "🔥", labelKey: "modes.daily.label", taglineKey: "modes.daily.tagline",
+    needsLevel: false, usesScope: false, scoreable: true, start: startDaily, hidden: true,
+  },
+  review: {
+    icon: "🔁", labelKey: "modes.review.label", taglineKey: "modes.review.tagline",
+    needsLevel: false, usesScope: false, scoreable: false, start: startReview, hidden: true,
+  },
+};
+/* Los que se pintan en la rejilla del paso 1. El reto diario tiene su
+   propia tarjeta destacada arriba y el repaso vive en el bloque de
+   "sin puntos", así que ambos van marcados como `hidden`. */
+const GRID_MODES = Object.entries(MODES).filter(([, m]) => !m.hidden);
 
 window.onerror = function (m, src, l, c) {
   console.error(m, src, l, c);
   if (document.getElementById('dcb-error-banner')) return;
   const d = document.createElement('div');
   d.id = 'dcb-error-banner';
-  d.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:99999;background:#E76F51;color:#fff;font:14px system-ui,sans-serif;padding:10px;text-align:center';
+  d.className = 'errorBanner';
   d.textContent = t('error.generic');
   document.body.appendChild(d);
 };
 
 const $ = id => document.getElementById(id);
+const flagSrc = code => `assets/flags/${code}.svg`;
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+/* El bloqueo de scroll se activa solo en la partida (ver style.css). */
 const show = id => {
   document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === id));
-  if (id === 's-level') { updateSeenProgress(); updateReviewAvailability(); }
+  document.documentElement.classList.toggle('is-playing', id === 's-game');
+  window.scrollTo(0, 0);
+  if (id === 's-mode') renderModeStep();
+  if (id === 's-level') renderLevelStep();
+  if (id === 's-who') renderWhoStep();
 };
-const flagSrc = code => `assets/flags/${code}.svg`;
 
 function shuffle(a) {
   const r = a.slice();
@@ -117,15 +171,18 @@ function seededShuffle(arr, rand) {
    comparable entre todos los jugadores. */
 function todayStr() { return new Date().toISOString().slice(0, 10); }
 
+/* ---------- Almacenamiento local, siempre tolerante a fallo ---------- */
+function lsGet(key) { try { return localStorage.getItem(key); } catch { return null; } }
+function lsSet(key, value) { try { localStorage.setItem(key, value); } catch { /* ignore */ } }
+function lsDel(key) { try { localStorage.removeItem(key); } catch { /* ignore */ } }
+
 /* ---------- Memoria de banderas vistas (persiste entre partidas) ---------- */
 const SEEN_KEY = 'dcb_seen_v1';
 function loadSeen() {
-  try { return new Map(JSON.parse(localStorage.getItem(SEEN_KEY)) || []); }
+  try { return new Map(JSON.parse(lsGet(SEEN_KEY)) || []); }
   catch { return new Map(); }
 }
-function saveSeenMap() {
-  try { localStorage.setItem(SEEN_KEY, JSON.stringify([...seen])); } catch { /* ignore */ }
-}
+function saveSeenMap() { lsSet(SEEN_KEY, JSON.stringify([...seen])); }
 const seen = loadSeen();
 for (const c of COUNTRIES) if (!seen.has(c.code)) seen.set(c.code, 0);
 
@@ -137,12 +194,10 @@ function updateSeenProgress() {
 /* ---------- Historial de fallos (persiste entre partidas, para "Repasa tus fallos") ---------- */
 const WRONG_KEY = 'dcb_wrong_v1';
 function loadWrongMap() {
-  try { return new Map(JSON.parse(localStorage.getItem(WRONG_KEY)) || []); }
+  try { return new Map(JSON.parse(lsGet(WRONG_KEY)) || []); }
   catch { return new Map(); }
 }
-function saveWrongMap() {
-  try { localStorage.setItem(WRONG_KEY, JSON.stringify([...wrongMap])); } catch { /* ignore */ }
-}
+function saveWrongMap() { lsSet(WRONG_KEY, JSON.stringify([...wrongMap])); }
 const wrongMap = loadWrongMap();
 function recordWrong(code) {
   wrongMap.set(code, (wrongMap.get(code) || 0) + 1);
@@ -153,37 +208,145 @@ function clearWrong(code) {
   wrongMap.delete(code);
   saveWrongMap();
 }
-function updateReviewAvailability() {
-  const count = [...wrongMap.values()].filter(v => v > 0).length;
-  $('btnReview').style.display = count >= REVIEW_MIN_FAILS ? '' : 'none';
+function wrongCodes() {
+  return [...wrongMap.entries()].filter(([, n]) => n > 0).sort((a, b) => b[1] - a[1]).map(([code]) => code);
 }
 
 /* ---------- Filtro de continente (solo afecta a los niveles clásicos) ---------- */
 const CONTINENT_KEY = 'dcb_continent';
-let continentFilter = '';
-try { continentFilter = localStorage.getItem(CONTINENT_KEY) || ''; } catch { /* ignore */ }
+let continentFilter = lsGet(CONTINENT_KEY) || '';
 function poolForContinent() {
   return continentFilter ? COUNTRIES.filter(c => c.continent === continentFilter) : COUNTRIES;
 }
-$('continentSelect').value = continentFilter;
-$('continentSelect').addEventListener('change', () => {
-  continentFilter = $('continentSelect').value;
-  try { localStorage.setItem(CONTINENT_KEY, continentFilter); } catch { /* ignore */ }
-  renderLevels();
-});
+function setContinent(value) {
+  continentFilter = value;
+  lsSet(CONTINENT_KEY, value);
+}
 
-const PLAYER_KEY = 'dcb_player';
+/* ---------- Jugadores ----------
+   Antes había un único nombre en `dcb_player`, así que en un móvil
+   compartido las partidas del segundo jugador se guardaban con el
+   nombre del primero y el ranking familiar quedaba mal atribuido.
+   Ahora hay una lista y el paso 3 del asistente es elegir tu ficha. */
+const PLAYERS_KEY = 'dcb_players_v1';
+const LEGACY_PLAYER_KEY = 'dcb_player';
+const AVATARS = ['🦊', '🐢', '🐙', '🐼', '🦉', '🐝', '🦁', '🐧', '🦄', '🐳', '🦖', '🐨'];
 
-/* ---------- Texto grande: ajuste de accesibilidad, independiente del nivel ---------- */
-const BIGTEXT_KEY = 'dcb_bigtext';
-function isBigTextEnabled() { return localStorage.getItem(BIGTEXT_KEY) === '1'; }
-$('bigToggle').checked = isBigTextEnabled();
-document.body.classList.toggle('big', isBigTextEnabled());
-$('bigToggle').addEventListener('change', () => {
-  const on = $('bigToggle').checked;
-  try { localStorage.setItem(BIGTEXT_KEY, on ? '1' : '0'); } catch { /* ignore */ }
-  document.body.classList.toggle('big', on);
-});
+function loadPlayers() {
+  try {
+    const raw = JSON.parse(lsGet(PLAYERS_KEY));
+    if (Array.isArray(raw)) return raw.filter(p => p && typeof p.name === 'string');
+  } catch { /* ignore */ }
+  return [];
+}
+let players = loadPlayers();
+function savePlayers() { lsSet(PLAYERS_KEY, JSON.stringify(players)); }
+
+/* Migración del nombre único anterior: nadie pierde su jugador. */
+(function migratePlayer() {
+  const legacy = lsGet(LEGACY_PLAYER_KEY);
+  if (legacy && !players.length) {
+    players = [{ name: legacy, lastPlayedAt: Date.now() }];
+    savePlayers();
+  }
+  if (legacy && players.length) lsDel(LEGACY_PLAYER_KEY);
+})();
+
+const normName = s => String(s).trim().toLowerCase();
+function avatarFor(name) {
+  let h = 0;
+  for (const ch of name) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return AVATARS[h % AVATARS.length];
+}
+function findPlayer(name) { return players.find(p => normName(p.name) === normName(name)); }
+function addPlayer(name) {
+  const existing = findPlayer(name);
+  if (existing) return existing;
+  const entry = { name, lastPlayedAt: 0 };
+  players.push(entry);
+  savePlayers();
+  return entry;
+}
+function touchPlayer(name) {
+  const entry = findPlayer(name);
+  if (!entry) return;
+  entry.lastPlayedAt = Date.now();
+  savePlayers();
+}
+function playersByRecent() {
+  return players.slice().sort((a, b) => (b.lastPlayedAt || 0) - (a.lastPlayedAt || 0));
+}
+
+/* ---------- Ranking de casa, en local ----------
+   Las mejores marcas se guardan en este dispositivo, no en el servidor.
+   Antes se leían de la vista `best_scores`, que devolvía las 50 mejores
+   de toda la tabla sin filtro: se llamaba "ranking familiar" pero era un
+   tablón de cualquiera que hubiese jugado desde cualquier sitio, con los
+   nombres a la vista. En local no hace falta ni cuenta ni servidor, no
+   cuesta nada y los nombres no salen del dispositivo. El precio es que
+   no se comparten marcas entre el móvil y la tablet: para eso haría
+   falta un servidor con las partidas agrupadas por familia. */
+const SCORES_KEY = 'dcb_scores_v1';
+const SCORES_MAX = 100;
+function loadScores() {
+  try {
+    const raw = JSON.parse(lsGet(SCORES_KEY));
+    if (Array.isArray(raw)) return raw;
+  } catch { /* ignore */ }
+  return [];
+}
+let localScores = loadScores();
+
+/* Una entrada por jugador y nivel, con su mejor marca — igual que hacía
+   la vista `best_scores` con su `max(score) group by player, level`. */
+function recordLocalScore({ player: who, level: lvl, score: pts, rounds }) {
+  const i = localScores.findIndex(s => normName(s.player) === normName(who) && s.level === lvl);
+  if (i >= 0) {
+    if (pts <= localScores[i].score) return;
+    localScores[i] = { player: who, level: lvl, score: pts, rounds, at: Date.now() };
+  } else {
+    localScores.push({ player: who, level: lvl, score: pts, rounds, at: Date.now() });
+  }
+  localScores.sort((a, b) => b.score - a.score);
+  localScores = localScores.slice(0, SCORES_MAX);
+  lsSet(SCORES_KEY, JSON.stringify(localScores));
+}
+
+/* ---------- Última partida, para "Seguir jugando" ---------- */
+const LAST_KEY = 'dcb_last_v1';
+function loadLast() {
+  try {
+    const raw = JSON.parse(lsGet(LAST_KEY));
+    if (raw && MODES[raw.modeKey] && raw.player) return raw;
+  } catch { /* ignore */ }
+  return null;
+}
+function saveLast() {
+  lsSet(LAST_KEY, JSON.stringify({
+    modeKey: wizard.modeKey, levelKey: wizard.levelKey,
+    scope: continentFilter, player, at: Date.now(),
+  }));
+}
+
+/* ---------- Tamaño de texto ----------
+   Sustituye al antiguo `body.big`, que solo escalaba cinco selectores
+   de la partida. Ahora es `--scale` en :root y escala toda la interfaz. */
+const TEXTSIZE_KEY = 'dcb_textsize';
+const LEGACY_BIGTEXT_KEY = 'dcb_bigtext';
+const TEXT_SIZES = ['md', 'lg', 'xl'];
+function loadTextSize() {
+  const stored = lsGet(TEXTSIZE_KEY);
+  if (TEXT_SIZES.includes(stored)) return stored;
+  return lsGet(LEGACY_BIGTEXT_KEY) === '1' ? 'lg' : 'md';
+}
+function applyTextSize(size) {
+  document.documentElement.dataset.text = size;
+  lsSet(TEXTSIZE_KEY, size);
+  lsDel(LEGACY_BIGTEXT_KEY);
+  $('textSizeSeg').querySelectorAll('[data-size]').forEach(b => {
+    b.setAttribute('aria-checked', String(b.dataset.size === size));
+  });
+}
 
 /* ---------- Estado de juego ---------- */
 /* mode: 'classic' | 'daily' | 'review' | 'survival' | 'invert' | 'classify' | 'pairing' */
@@ -195,6 +358,10 @@ let deck = [], idx = 0, score = 0, streak = 0, hintsLeft = 0;
 let answer = null, locked = false, wrongCount = 0, hintUsedThisRound = false;
 let tLeft = 0, timer = null;
 const wrongList = [];
+
+/* Selección en curso del asistente. No se persiste: al terminar una
+   partida se guarda en `dcb_last_v1` y ya. */
+const wizard = { modeKey: 'classic', levelKey: 'nene' };
 
 function streakMultiplier(s) {
   if (s >= 10) return 2;
@@ -225,65 +392,245 @@ function buildDailyDeck() {
   return { deck: shuffled.slice(0, DAILY_ROUNDS), dateStr };
 }
 
-/* ---------- Pantalla de inicio ---------- */
-(function initCoverFlags() {
-  const picks = shuffle(COUNTRIES).slice(0, 5);
-  $('coverFlags').innerHTML = picks.map(c => `<span><img src="${flagSrc(c.code)}" alt="" loading="lazy"></span>`).join('');
-})();
+/* ═══════════════════════════════════════════════════════════════════
+   ASISTENTE: tipo de juego → nivel → jugador
 
-onTap($('btnNameGo'), () => {
-  const name = $('nameInput').value.trim().slice(0, 24);
-  if (name) selectPlayer(name);
-});
-$('nameInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') $('btnNameGo').click();
-});
+   Cada paso se completa con un toque y avanza solo; no hay botón de
+   "siguiente". Los modos sin nivel propio saltan del paso 1 al 3, y el
+   indicador de progreso se pinta con dos píldoras en vez de tres.
+   ═══════════════════════════════════════════════════════════════════ */
 
-function selectPlayer(name) {
-  player = name;
-  try { localStorage.setItem(PLAYER_KEY, name); } catch { /* ignore */ }
-  $('lvlTitle').innerHTML = t('level.greeting', { name: `<span id="lvlWho">${escapeHtml(name)}</span>` });
-  renderLevels();
-  show('s-level');
+function wizardSteps() {
+  return MODES[wizard.modeKey]?.needsLevel ? ['s-mode', 's-level', 's-who'] : ['s-mode', 's-who'];
 }
 
-/* Si ya hay un nombre guardado, se entra directo sin volver a preguntar. */
-const savedPlayer = localStorage.getItem(PLAYER_KEY);
-if (savedPlayer) {
-  $('nameInput').value = savedPlayer;
-  selectPlayer(savedPlayer);
-} else {
-  $('nameInput').focus();
+function paintPills(currentId) {
+  const steps = wizardSteps();
+  document.querySelectorAll('[data-pills]').forEach(host => {
+    const screen = host.closest('.screen');
+    if (!screen || !steps.includes(screen.id)) { host.innerHTML = ''; return; }
+    host.innerHTML = '';
+    steps.forEach((stepId, i) => {
+      const pos = steps.indexOf(currentId);
+      const b = document.createElement('button');
+      b.className = 'pill';
+      b.type = 'button';
+      if (i < pos) {
+        b.dataset.state = 'done';
+        b.textContent = stepId === 's-mode'
+          ? MODES[wizard.modeKey].icon
+          : (LEVELS[wizard.levelKey]?.icon || '');
+        b.setAttribute('aria-label', t('wizard.backToStep', { n: i + 1 }));
+        onTap(b, () => show(stepId));
+      } else {
+        b.dataset.state = i === pos ? 'now' : 'todo';
+        b.disabled = true;
+        b.setAttribute('aria-label', t('wizard.step', { n: i + 1, total: steps.length }));
+      }
+      host.appendChild(b);
+    });
+  });
 }
 
-/* ---------- Pantalla de nivel ---------- */
-function renderLevels() {
-  const cont = $('levels');
+/* ---------- Paso 1: ¿A qué jugamos? ---------- */
+function renderModeStep() {
+  updateSeenProgress();
+  paintPills('s-mode');
+
+  const grid = $('modeGrid');
+  grid.innerHTML = '';
+  GRID_MODES.forEach(([key, m]) => {
+    const b = document.createElement('button');
+    b.className = 'card';
+    b.type = 'button';
+    b.innerHTML = `<span class="card__icon">${m.icon}</span>
+      <span class="card__text">
+        <span class="card__title">${escapeHtml(t(m.labelKey))}</span>
+        <span class="card__sub">${escapeHtml(t(m.taglineKey))}</span>
+      </span>` + (m.scoreable
+        ? `<span class="card__badge" role="img" aria-label="${escapeHtml(t('modes.scoresHint'))}">🏆</span>`
+        : '');
+    onTap(b, () => chooseMode(key));
+    grid.appendChild(b);
+  });
+
+  const failing = wrongCodes().length;
+  const review = $('btnReview');
+  review.hidden = failing < REVIEW_MIN_FAILS;
+  if (!review.hidden) $('reviewSub').textContent = t('modes.review.count', { count: failing });
+
+  const last = loadLast();
+  const cont = $('btnContinue');
+  cont.hidden = !last;
+  if (last) {
+    const m = MODES[last.modeKey];
+    const parts = [`${m.icon} ${t(m.labelKey)}`];
+    if (m.needsLevel && LEVELS[last.levelKey]) parts.push(t(LEVELS[last.levelKey].labelKey));
+    if (m.usesScope && last.scope) parts.push(last.scope);
+    parts.push(last.player);
+    $('continueSub').textContent = parts.join(' · ');
+  }
+}
+
+function chooseMode(key) {
+  wizard.modeKey = key;
+  if (MODES[key].needsLevel) show('s-level');
+  else show('s-who');
+}
+
+/* ---------- Paso 2: ¿Cómo de difícil? ---------- */
+function renderLevelStep() {
+  paintPills('s-level');
+  const m = MODES[wizard.modeKey];
+  $('levelModeEcho').textContent = `${m.icon} ${t(m.labelKey)}`;
+
   const poolSize = poolForContinent().length;
+  const cont = $('levels');
   cont.innerHTML = '';
   Object.values(LEVELS).forEach(lvl => {
     const rounds = Math.min(lvl.rounds, poolSize);
     const b = document.createElement('button');
-    b.className = 'level';
-    b.innerHTML = `<span class="lIcon">${lvl.icon}</span>
-      <span><span class="lLabel">${t(lvl.labelKey)}</span>
-      <span class="lTag">${t('level.tag', { tagline: t(lvl.taglineKey), rounds, secs: lvl.secs })}</span></span>`;
-    onTap(b, () => startLevel(lvl.key));
+    b.className = 'card' + (lvl.key === wizard.levelKey ? ' card--current' : '');
+    b.type = 'button';
+    b.innerHTML = `<span class="card__icon">${lvl.icon}</span>
+      <span class="card__text">
+        <span class="card__title">${escapeHtml(t(lvl.labelKey))}</span>
+        <span class="card__sub">${escapeHtml(t('level.tag', { tagline: t(lvl.taglineKey), rounds, secs: lvl.secs }))}</span>
+      </span>`;
+    onTap(b, () => { wizard.levelKey = lvl.key; show('s-who'); });
     cont.appendChild(b);
   });
+
+  renderContinentSeg($('continentSeg'), () => renderLevelStep());
+  $('scopeNote').textContent = continentFilter
+    ? t('level.scopeCount', { scope: continentFilter, count: poolSize })
+    : t('level.scopeAll', { count: poolSize });
 }
-onTap($('btnDaily'), startDaily);
+
+function renderContinentSeg(host, onChange) {
+  host.innerHTML = '';
+  const options = [['', t('level.continentAll')], ...CONTINENTS.map(c => [c, c])];
+  options.forEach(([value, label]) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.setAttribute('role', 'radio');
+    b.setAttribute('aria-checked', String(value === continentFilter));
+    b.textContent = label;
+    onTap(b, () => { setContinent(value); onChange(); });
+    host.appendChild(b);
+  });
+}
+
+/* ---------- Paso 3: ¿Quién juega? ---------- */
+function renderWhoStep() {
+  paintPills('s-who');
+  const m = MODES[wizard.modeKey];
+  const parts = [`${m.icon} ${t(m.labelKey)}`];
+  if (m.needsLevel && LEVELS[wizard.levelKey]) parts.push(t(LEVELS[wizard.levelKey].labelKey));
+  if (m.usesScope && continentFilter) parts.push(continentFilter);
+  $('whoSummary').textContent = parts.join(' · ');
+  $('whoError').textContent = '';
+
+  $('btnWhoBack').hidden = !m.needsLevel;
+
+  const list = playersByRecent();
+  const grid = $('peopleGrid');
+  grid.innerHTML = '';
+  list.forEach((p, i) => {
+    const b = document.createElement('button');
+    b.className = 'person' + (i === 0 && p.lastPlayedAt ? ' person--last' : '');
+    b.type = 'button';
+    b.innerHTML = `<span class="person__face">${avatarFor(p.name)}</span>
+      <span class="person__name">${escapeHtml(p.name)}</span>
+      <span class="person__meta">${i === 0 && p.lastPlayedAt ? escapeHtml(t('wizard.playedLast')) : ''}</span>`;
+    onTap(b, () => choosePlayer(p.name));
+    grid.appendChild(b);
+  });
+
+  /* Sin jugadores todavía, el formulario ES la pantalla: una ficha de
+     "alguien nuevo" suelta al lado de nada sobra y confunde. */
+  if (list.length) {
+    const add = document.createElement('button');
+    add.className = 'person person--new';
+    add.type = 'button';
+    add.innerHTML = `<span class="person__face">➕</span>
+      <span class="person__name">${escapeHtml(t('wizard.someoneNew'))}</span>
+      <span class="person__meta"></span>`;
+    onTap(add, () => {
+      $('newPlayerRow').hidden = false;
+      $('nameInput').focus();
+    });
+    grid.appendChild(add);
+  }
+  $('newPlayerRow').hidden = list.length > 0;
+  $('whoTitle').textContent = list.length ? t('wizard.whoPlays') : t('start.who');
+}
+
+function choosePlayer(name) {
+  player = name;
+  addPlayer(name);
+  touchPlayer(name);
+  saveLast();
+  MODES[wizard.modeKey].start();
+}
+
+function submitNewPlayer() {
+  const name = $('nameInput').value.trim().slice(0, 24);
+  if (!name) { $('whoError').textContent = t('wizard.needName'); return; }
+  if (findPlayer(name) && playersByRecent().length) {
+    $('whoError').textContent = t('wizard.nameTaken', { name });
+    return;
+  }
+  $('nameInput').value = '';
+  choosePlayer(name);
+}
+
+onTap($('btnNameGo'), submitNewPlayer);
+$('nameInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); submitNewPlayer(); }
+});
+
+/* ---------- Navegación suelta del paso 1 ---------- */
+document.querySelectorAll('[data-nav]').forEach(el => onTap(el, () => show(el.dataset.nav)));
+onTap($('btnWhoBack'), () => show('s-level'));
+onTap($('btnDaily'), () => chooseMode('daily'));
+onTap($('btnReview'), () => chooseMode('review'));
 onTap($('btnRanking'), () => { renderRanking(); show('s-ranking'); });
 onTap($('btnLearn'), () => { renderLearnList(); show('s-learn'); });
-onTap($('btnLearnBack'), () => show('s-level'));
-onTap($('btnReview'), startReview);
-onTap($('btnInvert'), startInvert);
-onTap($('btnClassify'), startClassify);
-onTap($('btnPairing'), startPairing);
-onTap($('btnSurvival'), startSurvival);
-onTap($('btnBackStart'), () => show('s-start'));
-onTap($('btnRankBack'), () => show('s-level'));
+onTap($('btnLearnBack'), () => show('s-mode'));
+onTap($('btnRankBack'), () => show('s-mode'));
 
+onTap($('btnContinue'), () => {
+  const last = loadLast();
+  if (!last) return;
+  wizard.modeKey = last.modeKey;
+  wizard.levelKey = last.levelKey || wizard.levelKey;
+  if (last.scope !== undefined) setContinent(last.scope);
+  choosePlayer(last.player);
+});
+
+/* ---------- Ajustes ---------- */
+document.querySelectorAll('[data-settings]').forEach(el => onTap(el, () => {
+  const open = el.dataset.settings === 'open';
+  if (open) renderSettingsPlayers();
+  $('settingsSheet').classList.toggle('on', open);
+}));
+$('textSizeSeg').querySelectorAll('[data-size]').forEach(b => {
+  onTap(b, () => applyTextSize(b.dataset.size));
+});
+function renderSettingsPlayers() {
+  const host = $('settingsPlayers');
+  const list = playersByRecent();
+  host.innerHTML = list.length
+    ? list.map(p => `<div class="row">
+        <span class="row__rank">${avatarFor(p.name)}</span>
+        <span class="row__name">${escapeHtml(p.name)}</span>
+        <span class="row__val"></span></div>`).join('')
+    : `<div class="row row--empty">${escapeHtml(t('settings.noPlayers'))}</div>`;
+}
+applyTextSize(loadTextSize());
+
+/* ---------- Arranque de cada modo ---------- */
 function startLevel(key) {
   levelKey = key; level = LEVELS[key]; mode = 'classic'; dailyDateStr = null;
   distractorPool = poolForContinent();
@@ -298,8 +645,8 @@ function startDaily() {
   beginGame();
 }
 function startReview() {
-  const codes = [...wrongMap.entries()].filter(([, n]) => n > 0).sort((a, b) => b[1] - a[1]).map(([code]) => code);
-  if (codes.length < REVIEW_MIN_FAILS) { show('s-level'); return; }
+  const codes = wrongCodes();
+  if (codes.length < REVIEW_MIN_FAILS) { show('s-mode'); return; }
   const bySpeed = codes.map(code => COUNTRIES.find(c => c.code === code)).filter(Boolean);
   levelKey = null; level = REVIEW_LEVEL; mode = 'review'; dailyDateStr = null;
   distractorPool = COUNTRIES;
@@ -333,6 +680,7 @@ function startSurvival() {
 
 /* ---------- Pantalla "Aprender sin prisa" (sin cronómetro ni puntuación) ---------- */
 function renderLearnList() {
+  renderContinentSeg($('learnSeg'), renderLearnList);
   const pool = poolForContinent().slice().sort((a, b) => a.name.localeCompare(b.name, 'es'));
   $('learnList').innerHTML = pool.map(c => `
     <div class="learnRow">
@@ -347,7 +695,7 @@ function renderLearnList() {
 function beginGame() {
   idx = 0; score = 0; streak = 0; hintsLeft = level.hints; wrongList.length = 0;
   $('rounds').textContent = deck.length;
-  $('whoChip').textContent = WHOCHIP_ICON[mode] || '✨';
+  $('whoChip').textContent = `${MODES[mode]?.icon || '✨'} ${player || ''}`.trim();
   $('score').textContent = 0;
   show('s-game');
   nextRound();
@@ -377,7 +725,7 @@ function nextRound() {
     const choices = shuffle([answer, ...distractors]);
     choices.forEach(c => {
       const b = document.createElement('button');
-      b.className = 'opt optFlag'; b.dataset.code = c.code;
+      b.className = 'btn opt optFlag'; b.dataset.code = c.code;
       b.innerHTML = `<img src="${flagSrc(c.code)}" alt="${escapeHtml(describeFlag(c))}">`;
       onTap(b, () => pick(b, c));
       optsEl.appendChild(b);
@@ -386,7 +734,7 @@ function nextRound() {
     box.innerHTML = `<img src="${flagSrc(answer.code)}" alt="${escapeHtml(describeFlag(answer))}" loading="eager">`;
     shuffle(CONTINENTS).forEach(name => {
       const b = document.createElement('button');
-      b.className = 'opt'; b.textContent = name; b.dataset.continent = name;
+      b.className = 'btn opt'; b.textContent = name; b.dataset.continent = name;
       onTap(b, () => pickClassify(b, name));
       optsEl.appendChild(b);
     });
@@ -396,7 +744,7 @@ function nextRound() {
     const choices = shuffle([answer, ...distractors]);
     choices.forEach(c => {
       const b = document.createElement('button');
-      b.className = 'opt'; b.dataset.code = c.code;
+      b.className = 'btn opt'; b.dataset.code = c.code;
       b.textContent = mode === 'pairing' ? c.capital : c.name;
       onTap(b, () => pick(b, c));
       optsEl.appendChild(b);
@@ -423,17 +771,17 @@ function paintTimer() {
 function updateStreakChip() {
   const chip = $('streakChip');
   if (streak >= 3) {
-    chip.style.display = '';
+    chip.hidden = false;
     $('streakMult').textContent = 'x' + streakMultiplier(streak);
   } else {
-    chip.style.display = 'none';
+    chip.hidden = true;
   }
 }
 
 function updateHintButton() {
   const btn = $('btnHint');
-  if (level.hints <= 0) { btn.style.display = 'none'; return; }
-  btn.style.display = '';
+  if (level.hints <= 0) { btn.hidden = true; return; }
+  btn.hidden = false;
   btn.disabled = hintsLeft <= 0 || hintUsedThisRound;
   $('hintCount').textContent = hintsLeft;
 }
@@ -571,15 +919,7 @@ function timeout() {
 }
 
 /* Reproduce el modo actual (usado por "reiniciar" y "jugar otra vez"). */
-function replay() {
-  if (mode === 'daily') startDaily();
-  else if (mode === 'review') startReview();
-  else if (mode === 'survival') startSurvival();
-  else if (mode === 'invert') startInvert();
-  else if (mode === 'classify') startClassify();
-  else if (mode === 'pairing') startPairing();
-  else startLevel(levelKey);
-}
+function replay() { MODES[mode].start(); }
 
 /* ---------- Menú en partida (reiniciar / terminar, sin pausa) ---------- */
 onTap($('btnMenu'), () => $('menuOverlay').classList.add('on'));
@@ -591,7 +931,7 @@ onTap($('btnRestart'), () => {
 onTap($('btnQuit'), () => {
   $('menuOverlay').classList.remove('on');
   clearInterval(timer);
-  show('s-level');
+  show('s-mode');
 });
 
 /* ---------- Fin de partida ---------- */
@@ -606,56 +946,100 @@ function end() {
       : t('end.survivalSubMany', { icon: level.icon, count: idx });
   } else {
     const max = Math.round(deck.length * 100 * level.mult);
-    $('endTitle').textContent = score > max * .8 ? t('end.excellent') : score > max * .5 ? t('end.great') : t('end.goodTry');
+    $('endTitle').textContent = score > max * .8 ? t('end.excellent', { name: player })
+      : score > max * .5 ? t('end.great', { name: player })
+      : t('end.goodTry', { name: player });
     $('endSub').textContent = `${level.icon} ${t(level.labelKey)}${mode === 'daily' ? ' ' + t('end.dailyTag') : ''} · ${t('end.approxMax', { max })}`;
   }
+
   const list = $('endList');
-  list.innerHTML = wrongList.length === 0
-    ? `<div>${t('end.noMistakes')}</div>`
-    : `<div>${t('end.forReview')}</div>` + [...new Set(wrongList)].map(n => `<div>• ${n}</div>`).join('');
+  const missed = [...new Set(wrongList)];
+  list.innerHTML = missed.length === 0
+    ? `<div class="row row--empty">${escapeHtml(t('end.noMistakes'))}</div>`
+    : `<div class="row row--empty"><b>${escapeHtml(t('end.forReview'))}</b></div>`
+      + missed.map(n => {
+          const c = COUNTRIES.find(x => x.name === n);
+          return `<div class="row">
+            ${c ? `<img class="row__flag" src="${flagSrc(c.code)}" alt="" loading="lazy">` : '<span class="row__rank"></span>'}
+            <span class="row__name">${escapeHtml(n)}</span>
+            <span class="row__val">${c ? '🏛️ ' + escapeHtml(c.capital) : ''}</span>
+          </div>`;
+        }).join('');
+
+  /* Los botones de salida apuntan a pasos concretos del asistente. */
+  $('btnChangeLevel').hidden = !MODES[mode]?.needsLevel;
+  $('btnEndReview').hidden = wrongCodes().length < REVIEW_MIN_FAILS;
+  $('btnEndRanking').hidden = !MODES[mode]?.scoreable;
+
   show('s-end');
-  if (mode === 'classic' || mode === 'daily' || mode === 'survival') {
+
+  /* El reto diario es lo único que va al servidor: su gracia es comparar
+     el mismo mazo con gente que juega en otro dispositivo, y eso no se
+     puede hacer en local. Todo lo demás se queda aquí. */
+  if (mode === 'daily') {
     saveScore({
-      player, level: levelKey, score, rounds: mode === 'survival' ? idx : deck.length,
-      errors: wrongList.length, daily: mode === 'daily', dailyDate: dailyDateStr,
+      player, level: levelKey, score, rounds: deck.length,
+      errors: wrongList.length, daily: true, dailyDate: dailyDateStr,
     }).then(result => {
-      if (mode === 'daily' && result.reason === 'duplicate') {
-        $('endSub').textContent += t('end.alreadyPlayedToday');
-      }
+      if (result.reason === 'duplicate') $('endSub').textContent += t('end.alreadyPlayedToday');
+    });
+  } else if (MODES[mode]?.scoreable) {
+    recordLocalScore({
+      player, level: levelKey, score,
+      rounds: mode === 'survival' ? idx : deck.length,
     });
   }
 }
 
 onTap($('btnAgain'), replay);
 onTap($('btnChangeLevel'), () => show('s-level'));
-onTap($('btnHome'), () => show('s-start'));
+onTap($('btnChangeMode'), () => show('s-mode'));
+onTap($('btnEndReview'), () => chooseMode('review'));
+onTap($('btnEndRanking'), () => { renderRanking(); show('s-ranking'); });
+onTap($('btnHome'), () => show('s-who'));
 
 /* ---------- Ranking familiar + duelo asíncrono sobre el mazo diario ---------- */
 let lastDailyRanking = [];
-const normName = s => String(s).trim().toLowerCase();
 
 function levelIconAndLabel(levelKeyValue) {
   const src = LEVELS[levelKeyValue] || MODE_LABELS[levelKeyValue];
   return { icon: src?.icon || '', label: src?.labelKey ? t(src.labelKey) : levelKeyValue };
 }
 
+function emptyRow(key) { return `<div class="row row--empty">${escapeHtml(t(key))}</div>`; }
+
 async function renderRanking() {
-  $('rankFamily').innerHTML = `<div>${t('common.loading')}</div>`;
-  $('rankDaily').innerHTML = `<div>${t('common.loading')}</div>`;
-  $('duelResult').textContent = '';
-  const [fam, daily] = await Promise.all([getFamilyRanking(), getDailyRanking()]);
-  lastDailyRanking = daily || [];
-
-  $('rankFamily').innerHTML = (fam && fam.length)
-    ? fam.map(r => {
+  /* El ranking de casa es local: se pinta al instante, sin red. */
+  $('rankFamily').innerHTML = localScores.length
+    ? localScores.map((r, i) => {
         const { icon, label } = levelIconAndLabel(r.level);
-        return `<div><span>${icon} ${escapeHtml(r.player)} · ${label}</span><b>${r.best_score} ⭐</b></div>`;
+        return `<div class="row">
+          <span class="row__rank">${i + 1}</span>
+          <span class="row__name">${escapeHtml(r.player)}<small>${icon} ${escapeHtml(label)}</small></span>
+          <span class="row__val">${r.score} ⭐</span>
+        </div>`;
       }).join('')
-    : `<div>${t('ranking.noFamilyScores')}</div>`;
+    : emptyRow('ranking.noFamilyScores');
 
-  $('rankDaily').innerHTML = (lastDailyRanking.length)
-    ? lastDailyRanking.map(r => `<div><span>${escapeHtml(r.player)}</span><b>${r.score} ⭐</b></div>`).join('')
-    : `<div>${t('ranking.noDailyScores')}</div>`;
+  $('rankDaily').innerHTML = emptyRow('common.loading');
+  $('duelResult').textContent = '';
+  lastDailyRanking = (await getDailyRanking()) || [];
+
+  /* De la tabla del reto diario solo se enseña a quien juega en este
+     dispositivo. El duelo sigue pudiendo consultar a cualquiera por su
+     nombre, pero la pantalla no expone la lista de desconocidos.
+     Ojo: esto es una decisión de qué se muestra, no una barrera — la
+     clave `anon` va en el repositorio, así que la protección de verdad
+     tendría que estar en el servidor. */
+  const known = new Set(players.map(p => normName(p.name)));
+  const mine = lastDailyRanking.filter(r => known.has(normName(r.player)));
+  $('rankDaily').innerHTML = mine.length
+    ? mine.map((r, i) => `<div class="row">
+        <span class="row__rank">${i + 1}</span>
+        <span class="row__name">${escapeHtml(r.player)}</span>
+        <span class="row__val">${r.score} ⭐</span>
+      </div>`).join('')
+    : emptyRow('ranking.noDailyScores');
 }
 
 onTap($('btnDuel'), () => {
@@ -670,10 +1054,6 @@ onTap($('btnDuel'), () => {
   else if (mine.score < rival.score) resultEl.textContent = t('duel.lose', { mine: mine.score, rival: rival.score });
   else resultEl.textContent = t('duel.tie', { score: mine.score });
 });
-
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-}
 
 /* ---------- Si se bloquea el móvil o se cambia de app, se descuenta el tiempo real transcurrido ---------- */
 let hiddenAt = null;
@@ -696,3 +1076,11 @@ document.addEventListener('visibilitychange', () => {
     }, 100);
   }
 });
+
+/* ---------- Arranque ---------- */
+const lastSession = loadLast();
+if (lastSession) {
+  wizard.modeKey = lastSession.modeKey;
+  wizard.levelKey = lastSession.levelKey || wizard.levelKey;
+}
+show('s-mode');
