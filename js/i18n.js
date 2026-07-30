@@ -20,7 +20,7 @@ const STRINGS = {
     "wizard.backToStep": "Volver al paso {n}",
     "wizard.continue": "Seguir jugando",
     "wizard.continueBadge": "1 toque",
-    "wizard.pickGame": "Elige un juego",
+    "wizard.moreGames": "Más juegos",
     "wizard.noPressure": "Sin prisa y sin puntos",
     "wizard.pickLevel": "Elige tu nivel",
     "wizard.pickScope": "¿Con qué banderas?",
@@ -88,6 +88,7 @@ const STRINGS = {
 
     "game.chooseOne": "Elige una",
     "game.scoreLabel": "Puntos",
+    "game.roundLabel": "Ronda",
     "game.correctFirstTry": "¡Muy bien! +{pts} ⭐",
     "game.correctAfterRetry": "¡Esa es! +{pts} ⭐",
     "game.wasAnswer": "Era {name}",

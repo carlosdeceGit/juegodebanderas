@@ -63,6 +63,7 @@ const MODES = {
   classic: {
     icon: "🏳️", labelKey: "modes.classic.label", taglineKey: "modes.classic.tagline",
     needsLevel: true, usesScope: true, scoreable: true, start: () => startLevel(wizard.levelKey),
+    hidden: true,
   },
   invert: {
     icon: "🔄", labelKey: "modes.invert.label", taglineKey: "modes.invert.tagline",
@@ -89,9 +90,10 @@ const MODES = {
     needsLevel: false, usesScope: false, scoreable: false, start: startReview, hidden: true,
   },
 };
-/* Los que se pintan en la rejilla del paso 1. El reto diario tiene su
-   propia tarjeta destacada arriba y el repaso vive en el bloque de
-   "sin puntos", así que ambos van marcados como `hidden`. */
+/* Los que se pintan en la rejilla de "Más juegos" del paso 1. El clásico
+   y el reto diario son los dos protagonistas de la portada y tienen su
+   propia tarjeta destacada arriba; el repaso vive en el bloque de "sin
+   puntos". Los tres van marcados como `hidden` para no repetirse. */
 const GRID_MODES = Object.entries(MODES).filter(([, m]) => !m.hidden);
 
 window.onerror = function (m, src, l, c) {
@@ -593,6 +595,7 @@ $('nameInput').addEventListener('keydown', e => {
 /* ---------- Navegación suelta del paso 1 ---------- */
 document.querySelectorAll('[data-nav]').forEach(el => onTap(el, () => show(el.dataset.nav)));
 onTap($('btnWhoBack'), () => show('s-level'));
+onTap($('btnClassic'), () => chooseMode('classic'));
 onTap($('btnDaily'), () => chooseMode('daily'));
 onTap($('btnReview'), () => chooseMode('review'));
 onTap($('btnRanking'), () => { renderRanking(); show('s-ranking'); });
@@ -695,7 +698,12 @@ function renderLearnList() {
 function beginGame() {
   idx = 0; score = 0; streak = 0; hintsLeft = level.hints; wrongList.length = 0;
   $('rounds').textContent = deck.length;
-  $('whoChip').textContent = `${MODES[mode]?.icon || '✨'} ${player || ''}`.trim();
+  /* El nombre va en su propio span: antes se metía tal cual en el chip y
+     en un móvil estrecho desbordaba la cápsula, se montaba encima del
+     contador y descuadraba todo el marcador. */
+  $('whoChip').innerHTML = `<span class="chip__ico">${player ? avatarFor(player) : '✨'}</span>`
+    + `<span class="chip__name">${escapeHtml(player || '')}</span>`;
+  fitWhoChip();
   $('score').textContent = 0;
   show('s-game');
   nextRound();
@@ -776,7 +784,19 @@ function updateStreakChip() {
   } else {
     chip.hidden = true;
   }
+  fitWhoChip();  /* el chip de racha aparece y desaparece: cambia el sitio disponible */
 }
+
+/* El nombre del jugador se muestra solo si cabe entero. Recortado a una o
+   dos letras no identifica a nadie, y el avatar —que es fijo para cada
+   nombre— ya cumple esa función en un marcador estrecho. */
+function fitWhoChip() {
+  const name = $('whoChip').querySelector('.chip__name');
+  if (!name) return;
+  name.hidden = false;
+  if (name.scrollWidth > name.clientWidth + 1) name.hidden = true;
+}
+addEventListener('resize', fitWhoChip);
 
 function updateHintButton() {
   const btn = $('btnHint');

@@ -25,6 +25,26 @@
     <h1 class="h1 cover-name" data-i18n-html="start.titleHtml">Diversión con<br>Banderas</h1>
     <p class="note" id="seenProgress"></p>
 
+    <div class="heroes">
+      <button class="card card--hero card--classic" id="btnClassic">
+        <span class="card__icon">🏳️</span>
+        <span class="card__text">
+          <span class="card__title" data-i18n="modes.classic.label">¿Qué bandera es?</span>
+          <span class="card__sub" data-i18n="modes.classic.tagline">Ves una bandera y dices el país</span>
+        </span>
+        <span class="card__badge" data-i18n-aria-label="modes.scoresHint" role="img" aria-label="Cuenta para el ranking">🏆</span>
+      </button>
+
+      <button class="card card--hero card--daily" id="btnDaily">
+        <span class="card__icon">🔥</span>
+        <span class="card__text">
+          <span class="card__title" data-i18n="modes.daily.label">El reto de hoy</span>
+          <span class="card__sub" data-i18n="modes.daily.tagline">Las mismas banderas para toda la familia</span>
+        </span>
+        <span class="card__badge" data-i18n-aria-label="modes.scoresHint" role="img" aria-label="Cuenta para el ranking">🏆</span>
+      </button>
+    </div>
+
     <button class="card card--continue" id="btnContinue" hidden>
       <span class="card__icon">▶</span>
       <span class="card__text">
@@ -34,16 +54,7 @@
       <span class="card__badge" data-i18n="wizard.continueBadge">1 toque</span>
     </button>
 
-    <button class="card card--hero" id="btnDaily">
-      <span class="card__icon">🔥</span>
-      <span class="card__text">
-        <span class="card__title" data-i18n="modes.daily.label">El reto de hoy</span>
-        <span class="card__sub" data-i18n="modes.daily.tagline">Las mismas banderas para toda la familia</span>
-      </span>
-      <span class="card__badge" data-i18n-aria-label="modes.scoresHint" role="img" aria-label="Cuenta para el ranking">🏆</span>
-    </button>
-
-    <p class="divider" data-i18n="wizard.pickGame">Elige un juego</p>
+    <p class="divider" data-i18n="wizard.moreGames">Más juegos</p>
     <div class="grid" id="modeGrid"></div>
 
     <p class="divider" data-i18n="wizard.noPressure">Sin prisa y sin puntos</p>
@@ -113,7 +124,7 @@
   <div class="screen__body">
     <div class="hud">
       <span class="chip" id="whoChip">🧒</span>
-      <span class="chip">🏳️ <b id="round">1</b>/<b id="rounds">20</b></span>
+      <span class="chip" data-i18n-aria-label="game.roundLabel" aria-label="Ronda"><b id="round">1</b>/<b id="rounds">20</b></span>
       <span class="chip" id="streakChip" hidden>🔥 <b id="streakMult">x1</b></span>
       <span class="chip" data-i18n-aria-label="game.scoreLabel" aria-label="Puntos">⭐ <b id="score" aria-live="polite" aria-atomic="true">0</b></span>
       <span class="chip" id="timeChip" role="timer">⏱️ <b id="time">20</b></span>

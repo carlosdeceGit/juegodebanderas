@@ -164,8 +164,32 @@ body{
 /* En pantallas de contenido largo, el contenido arranca arriba. */
 #s-mode .screen__body,#s-ranking .screen__body{ justify-content:flex-start }
 
+/* La partida ocupa la pantalla, pero NUNCA puede recortar las opciones:
+   con 5 opciones, texto grande o un móvil bajo, las últimas se quedaban
+   fuera del `overflow:hidden` y la respuesta correcta era literalmente
+   intocable. Ahora la columna es un contenedor con scroll propio (red de
+   seguridad) y la caja de la bandera cede altura antes que nadie.
+   `safe center` es imprescindible: con `center` a secas, al desbordar se
+   corta por arriba y el marcador desaparece. */
 .screen--game.on{ height:100dvh; overflow:hidden }
-.screen--game .screen__body{ justify-content:center; padding-block:var(--sp-3) }
+.screen--game .screen__body{
+  justify-content:center;
+  justify-content:safe center;
+  overflow-y:auto; overscroll-behavior:contain;
+  padding-block:var(--sp-3); gap:clamp(6px,1.2vh,14px);
+}
+.screen--game .hud,.screen--game .meter,.screen--game .fbwrap,
+.screen--game .options,.screen--game #btnHint{ flex:0 0 auto }
+.screen--game .flag-box{ flex:0 1 auto; min-height:calc(80px * var(--scale)) }
+
+/* Móviles bajos: se recortan huecos antes que obligar a hacer scroll en
+   mitad de la cuenta atrás. 44px sigue siendo el mínimo de zona de toque. */
+@media (max-height:640px){
+  .screen--game .screen__body{ gap:6px; padding-block:var(--sp-2) }
+  .screen--game .fbwrap{ min-height:calc(var(--fs-h2) * 1.5) }
+  .screen--game .flag-box{ min-height:min(calc(80px * var(--scale)),16dvh) }
+  .screen--game .opt{ min-height:var(--tap) }
+}
 
 /* ─────────────────────── CABECERA DEL ASISTENTE ─────────────────────── */
 /* El fondo ocupa todo el ancho (si no, al hacer scroll se ven los
@@ -205,6 +229,7 @@ body{
   display:inline-flex; align-items:center; justify-content:center; gap:var(--sp-2);
   font-family:inherit; font-weight:var(--fw-black); font-size:var(--fs-body); line-height:1.2;
   min-height:var(--tap); padding:var(--sp-3) var(--sp-5); text-align:center;
+  min-width:0; max-width:100%;
   color:var(--fg); background:var(--bg);
   border:var(--bw-2) solid var(--border); border-radius:var(--r-lg);
   box-shadow:var(--lift) var(--lift) 0 var(--border);
@@ -238,10 +263,15 @@ body{
 .btn--block{ width:100% }
 .btn--icon{ padding:0; width:var(--tap); min-width:var(--tap); flex:0 0 auto; border-radius:var(--r-pill) }
 
-/* Opción de respuesta */
+/* Opción de respuesta.
+   `break-word` y no `anywhere`: los dos parten un nombre que no cabe
+   ("República Democrática del Congo"), pero `anywhere` además encoge el
+   ancho mínimo del botón y acababa cortando "Mongolia" en "Mongoli/a"
+   cuando las opciones van a dos columnas. */
 .opt{
-  width:100%; font-size:calc(clamp(16px,4.2vw,21px) * var(--scale));
-  min-height:max(var(--tap),54px); padding:clamp(10px,1.8vh,16px) var(--sp-4);
+  width:100%; font-size:calc(clamp(15px,4vw,21px) * var(--scale));
+  min-height:max(var(--tap),50px); padding:clamp(8px,1.5vh,15px) var(--sp-3);
+  overflow-wrap:break-word;
 }
 .opt.good{ --bg:var(--success); --fg:var(--white) }
 .opt.bad{ --bg:var(--danger); --fg:var(--white) }
@@ -250,8 +280,8 @@ body{
   --lift:0; box-shadow:none; --bg:var(--surface-sunken); --fg:var(--ink-muted);
   text-decoration:line-through; text-decoration-thickness:3px;
 }
-.optFlag{ padding:var(--sp-2); min-height:0 }
-.optFlag img{ width:100%; aspect-ratio:3/2; object-fit:cover; display:block; border-radius:var(--r-sm) }
+.optFlag{ padding:var(--sp-2); min-height:0; --bg:var(--surface-sunken) }
+.optFlag img{ width:100%; aspect-ratio:4/3; object-fit:contain; display:block; border-radius:var(--r-sm) }
 .options.flagOptions{ grid-template-columns:1fr 1fr }
 
 /* ─────────────────────── TARJETA SELECCIONABLE ─────────────────────── */
@@ -269,7 +299,7 @@ body{
 .card[hidden]{ display:none }
 
 .card__icon{ font-size:calc(28px * var(--scale)); line-height:1 }
-.card__text{ min-width:0 }
+.card__text{ min-width:0; overflow-wrap:break-word }
 .card__title{ display:block; font-size:var(--fs-body); font-weight:var(--fw-black); line-height:1.2 }
 .card__sub{ display:block; font-size:var(--fs-xs); color:var(--ink-muted); font-weight:var(--fw-reg); margin-top:2px }
 /* Distintivo compacto: en una rejilla de dos columnas, una etiqueta de
@@ -279,23 +309,45 @@ body{
   font-size:var(--fs-sm); line-height:1;
   border:var(--bw-hair) solid var(--border); border-radius:var(--r-pill); background:var(--surface);
 }
-.card--hero{ background:var(--coral-300) }
+/* La portada tiene dos protagonistas —"¿Qué bandera es?" y el reto de
+   hoy— y todo lo demás por debajo. Se distinguen por tamaño, color y
+   posición, no por esconder al resto. */
+.card--hero{
+  min-height:calc(90px * var(--scale));
+  border-width:var(--bw-3); box-shadow:var(--sh-3);
+}
+.card--hero .card__icon{ font-size:calc(38px * var(--scale)) }
+.card--hero .card__title{ font-size:var(--fs-h2); line-height:1.15 }
+.card--classic{ background:var(--sun-300) }
+.card--daily{ background:var(--coral-300) }
 .card--continue{ background:var(--paper-50); border-style:dashed }
 .card--current{ background:var(--sun-300); border-width:var(--bw-3) }
 
 .grid{ display:grid; gap:var(--sp-3); width:100%; grid-template-columns:1fr }
 @media (min-width:640px){ .grid{ grid-template-columns:1fr 1fr } }
+.heroes{ display:grid; gap:var(--sp-3); width:100%; grid-template-columns:1fr }
+@media (min-width:640px){ .heroes{ grid-template-columns:1fr 1fr } }
 
 /* ─────────────────────── HUD, CHIPS Y BARRA ─────────────────────── */
-.hud{ display:flex; gap:var(--sp-2); align-items:center; width:100% }
+/* El marcador tiene que caber en 320px con el nombre del jugador dentro.
+   Antes los chips eran `flex:1 1 auto` + `nowrap` sin `overflow`: el
+   nombre largo desbordaba su cápsula, se montaba encima del contador y
+   empujaba el menú fuera de la pantalla. Ahora el texto se recorta dentro
+   del chip y el nombre es lo único que cede espacio de verdad. */
+.hud{ display:flex; gap:5px; align-items:center; width:100%; min-width:0 }
 .chip{
-  flex:1 1 auto; min-width:0; white-space:nowrap;
-  display:inline-flex; align-items:center; justify-content:center; gap:5px;
-  padding:var(--sp-2) var(--sp-3); min-height:36px;
+  /* Factor de encogido bajo a propósito: cuando falta sitio, quien cede
+     es el nombre del jugador, no el contador de rondas ni el reloj. */
+  flex:0 .2 auto; min-width:0; white-space:nowrap; overflow:hidden;
+  display:inline-flex; align-items:center; justify-content:center; gap:4px;
+  padding:var(--sp-2) clamp(6px,1.8vw,12px); min-height:36px;
   font-size:var(--fs-sm); font-weight:var(--fw-bold); font-variant-numeric:tabular-nums;
   background:var(--surface-raised); color:var(--ink);
   border:var(--bw-1) solid var(--border); border-radius:var(--r-pill); box-shadow:var(--sh-1);
 }
+#whoChip{ flex:1 1 auto }
+.chip__ico{ flex:0 0 auto }
+.chip__name{ min-width:0; overflow:hidden; text-overflow:ellipsis }
 .chip.warn{ background:var(--danger); color:var(--white) }
 .chip[hidden]{ display:none }
 
@@ -309,12 +361,19 @@ body{
 .meter>i.low{ background:var(--coral-500) }
 
 /* ─────────────────────── BANDERA Y FEEDBACK ─────────────────────── */
+/* Todos los SVG de flag-icons vienen en 4:3. Con `object-fit:cover` en
+   una caja 3:2 se recortaba un 11% por arriba y por abajo: las franjas
+   quedaban con el grosor cambiado, Nepal perdía la punta y las banderas
+   con emblema aparecían descuadradas. `contain` no recorta ni deforma
+   nunca, y el papel que sobra a los lados hace de paspartú — por eso el
+   fondo es papel y no blanco: con fondo blanco, las banderas de borde
+   blanco (Bulgaria, Japón, Polonia) se fundían con la caja. */
 .flag-box{
-  width:100%; aspect-ratio:3/2; max-height:min(34dvh,300px); margin-inline:auto;
-  overflow:hidden; background:var(--surface-raised);
+  width:100%; aspect-ratio:3/2; max-height:min(30dvh,280px); margin-inline:auto;
+  overflow:hidden; background:var(--surface-sunken);
   border:var(--bw-3) solid var(--border); border-radius:var(--r-lg); box-shadow:var(--sh-3);
 }
-.flag-box img{ width:100%; height:100%; display:block; object-fit:cover }
+.flag-box img{ width:100%; height:100%; display:block; object-fit:contain }
 /* En "Elige la bandera" el enunciado es solo texto: la caja no necesita
    la proporción 3:2 de una bandera y quedaría medio vacía. */
 .flag-box:has(.promptName){ aspect-ratio:auto; min-height:calc(96px * var(--scale)) }
@@ -323,10 +382,14 @@ body{
   font-size:calc(clamp(22px,6vw,40px) * var(--scale)); font-weight:var(--fw-black);
   text-align:center; letter-spacing:-.02em; line-height:1.1;
 }
-.fbwrap{ width:100% }
+/* Hueco reservado para el mensaje: "Se acabó el tiempo: República
+   Democrática del Congo" ocupa dos o tres líneas y, sin reserva, empujaba
+   las opciones hacia abajo justo cuando hay que tocarlas. */
+.fbwrap{ width:100%; display:flex; flex-direction:column; justify-content:center;
+         min-height:calc(var(--fs-h2) * 2.6) }
 .feedback{
-  margin:0; min-height:1.4em; font-size:var(--fs-h2);
-  font-weight:var(--fw-black); text-align:center; line-height:1.15;
+  margin:0; font-size:var(--fs-h2); overflow-wrap:break-word;
+  font-weight:var(--fw-black); text-align:center; line-height:1.15; text-wrap:balance;
 }
 .fact{ margin:2px 0 0; min-height:1.3em; font-size:var(--fs-xs); color:var(--ink-muted); text-align:center }
 .options{ display:grid; gap:clamp(7px,1.4vh,12px); width:100% }
@@ -338,8 +401,8 @@ body{
   border-radius:var(--r-lg); box-shadow:var(--sh-1); overflow:hidden;
 }
 .seg button{
-  font-family:inherit; font-size:var(--fs-sm); font-weight:var(--fw-black);
-  min-height:var(--tap); padding:var(--sp-2);
+  font-family:inherit; font-size:min(var(--fs-sm),4vw); font-weight:var(--fw-black);
+  min-height:var(--tap); padding:var(--sp-2) 4px; min-width:0; overflow-wrap:break-word;
   display:flex; align-items:center; justify-content:center; gap:4px;
   color:var(--ink); background:transparent; border:0; cursor:pointer;
   border-right:var(--bw-hair) solid var(--border);
@@ -410,8 +473,8 @@ body{
 .row__name{ min-width:0; overflow:hidden; text-overflow:ellipsis }
 .row__name small{ display:block; font-size:var(--fs-xs); color:var(--ink-muted) }
 .row__val{ font-weight:var(--fw-black); font-variant-numeric:tabular-nums; white-space:nowrap }
-.row__flag{ width:calc(36px * var(--scale)); aspect-ratio:3/2; flex:0 0 auto;
-            border:var(--bw-hair) solid var(--border); border-radius:var(--r-sm); object-fit:cover }
+.row__flag{ width:calc(36px * var(--scale)); aspect-ratio:4/3; flex:0 0 auto;
+            border:var(--bw-hair) solid var(--border); border-radius:var(--r-sm); object-fit:contain }
 .row--empty{ grid-template-columns:1fr; text-align:center; color:var(--ink-muted) }
 
 .end-score{
@@ -428,8 +491,8 @@ body{
   padding:var(--sp-2) var(--sp-3); background:var(--surface-raised);
   border:var(--bw-hair) solid var(--border); border-radius:var(--r-md); box-shadow:var(--sh-1);
 }
-.learnRow img{ width:calc(48px * var(--scale)); aspect-ratio:3/2; flex:0 0 auto;
-               object-fit:cover; border:var(--bw-hair) solid var(--border); border-radius:var(--r-sm) }
+.learnRow img{ width:calc(48px * var(--scale)); aspect-ratio:4/3; flex:0 0 auto;
+               object-fit:contain; border:var(--bw-hair) solid var(--border); border-radius:var(--r-sm) }
 .learnInfo{ display:flex; flex-direction:column; min-width:0; font-size:var(--fs-xs); line-height:1.3 }
 .learnInfo b{ font-size:var(--fs-sm) }
 .learnInfo span{ color:var(--ink-muted) }
@@ -479,9 +542,15 @@ body{
   .screen--game .options{ grid-area:opts; align-self:start }
   .screen--game #btnHint{ grid-area:hint; justify-self:start }
 }
-/* Con 5 opciones y muy poca altura, dos columnas para que quepan. */
+/* Con 5 opciones y muy poca altura, dos columnas para que quepan. Al
+   partirse en dos, cada botón se queda con la mitad del ancho: sin bajar
+   la tipografía, los nombres largos se rompían por la mitad. */
 @media (orientation:landscape) and (max-height:520px){
   .options:not(.flagOptions):has(> :nth-child(5)){ grid-template-columns:1fr 1fr }
+  .options:not(.flagOptions):has(> :nth-child(5)) .opt{
+    font-size:calc(clamp(13px,1.9vw,17px) * var(--scale));
+    padding-inline:var(--sp-2); hyphens:auto;
+  }
 }
 
 /* ─────────────────────── ANIMACIONES ─────────────────────── */
