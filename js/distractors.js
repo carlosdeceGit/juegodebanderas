@@ -50,7 +50,10 @@ export function pickDistractors(countries, answer, n, mode) {
 
   const seen = new Set();
   const out = [];
-  for (const c of ordered) {
+  /* El relleno final importa: en modo "mixed" las dos mitades (difíciles
+     y fáciles) pueden solaparse y dejar la lista corta, y una ronda con
+     menos opciones de las que pide el nivel se nota. */
+  for (const c of [...ordered, ...shuffle(pool)]) {
     if (seen.has(c.code)) continue;
     seen.add(c.code);
     out.push(c);
