@@ -206,7 +206,13 @@ body{
 #s-learn .topbar{ padding-inline:max(var(--sp-4), calc((100% - var(--w-widest)) / 2)) }
 .topbar__mid{ flex:1; display:flex; justify-content:center }
 
-.pills{ display:flex; gap:6px; align-items:center }
+/* Todas las cabeceras son iguales: acción a la izquierda, ajustes a la
+   derecha, ambas con etiqueta. Las píldoras de progreso NO caben ahí en
+   medio — con tres píldoras y las dos etiquetas se desbordaba un móvil
+   de 390px, y con el texto en XL cualquiera — así que viven en su propia
+   fila, ya dentro del contenido de la pantalla. */
+.pills{ display:flex; gap:6px; align-items:center; justify-content:center }
+.pills:empty{ display:none }
 /* 44px fijos, no escalados: el mínimo de zona de toque es absoluto, y
    escalarlo con el texto grande desbordaría la cabecera en móvil. */
 .pill{

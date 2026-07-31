@@ -79,12 +79,13 @@
 <!-- ══════════ PASO 2 · ¿Cómo de difícil? ══════════ -->
 <section class="screen" id="s-level">
   <header class="topbar">
-    <button class="btn btn--sm btn--ghost" data-nav="s-mode" data-i18n="wizard.backToModes">← Otro juego</button>
-    <div class="topbar__mid"><div class="pills" data-pills aria-label="Progreso"></div></div>
-    <button class="btn btn--sm btn--icon" data-settings="open" data-i18n-aria-label="settings.title" aria-label="Ajustes">⚙️</button>
+    <button class="btn btn--sm" data-nav="s-mode" data-i18n="wizard.backToModes">← Otro juego</button>
+    <div class="topbar__mid"></div>
+    <button class="btn btn--sm" data-settings="open" data-i18n="settings.short">⚙️ Ajustes</button>
   </header>
 
   <div class="screen__body screen__body--wide">
+    <div class="pills" data-pills aria-label="Progreso"></div>
     <p class="eyebrow" id="levelModeEcho"></p>
     <h1 class="h1" data-i18n="wizard.pickLevel">Elige tu nivel</h1>
     <div class="grid" id="levels"></div>
@@ -98,12 +99,13 @@
 <!-- ══════════ PASO 3 · ¿Quién juega? ══════════ -->
 <section class="screen" id="s-who">
   <header class="topbar">
-    <button class="btn btn--sm btn--ghost" id="btnWhoBack" data-i18n="wizard.backToLevels">← Nivel</button>
-    <div class="topbar__mid"><div class="pills" data-pills aria-label="Progreso"></div></div>
-    <button class="btn btn--sm btn--icon" data-settings="open" data-i18n-aria-label="settings.title" aria-label="Ajustes">⚙️</button>
+    <button class="btn btn--sm" id="btnWhoBack" data-i18n="wizard.backToLevels">← Nivel</button>
+    <div class="topbar__mid"></div>
+    <button class="btn btn--sm" data-settings="open" data-i18n="settings.short">⚙️ Ajustes</button>
   </header>
 
   <div class="screen__body screen__body--wide">
+    <div class="pills" data-pills aria-label="Progreso"></div>
     <h1 class="h1" id="whoTitle" data-i18n="wizard.whoPlays">¿Quién juega?</h1>
     <p class="note" id="whoSummary"></p>
 
@@ -142,6 +144,12 @@
 
 <!-- ══════════ FIN DE PARTIDA ══════════ -->
 <section class="screen" id="s-end">
+  <header class="topbar">
+    <button class="btn btn--sm" id="btnEndRanking" data-i18n="nav.rankingShort">🏆 Ranking</button>
+    <div class="topbar__mid"></div>
+    <button class="btn btn--sm" data-settings="open" data-i18n="settings.short">⚙️ Ajustes</button>
+  </header>
+
   <div class="screen__body screen__body--wide">
     <h1 class="h1" id="endTitle">¡Fin!</h1>
     <p class="end-score" id="endScore">0</p>
@@ -152,7 +160,6 @@
       <button class="btn btn--sm" id="btnChangeLevel" data-i18n="end.changeLevel">Cambiar de nivel</button>
       <button class="btn btn--sm" id="btnChangeMode" data-i18n="end.changeMode">Otro juego</button>
       <button class="btn btn--sm" id="btnEndReview" hidden data-i18n="end.reviewThese">Repasar estas</button>
-      <button class="btn btn--sm" id="btnEndRanking" data-i18n="nav.ranking">🏆 Ranking familiar</button>
     </div>
     <button class="btn btn--sm btn--ghost" id="btnHome" data-i18n="end.changePlayer">¿No eres tú? Cambiar de jugador</button>
   </div>
@@ -161,9 +168,9 @@
 <!-- ══════════ APRENDER ══════════ -->
 <section class="screen" id="s-learn">
   <header class="topbar">
-    <button class="btn btn--sm btn--ghost" id="btnLearnBack" data-i18n="nav.back">↩ Volver</button>
+    <button class="btn btn--sm" id="btnLearnBack" data-i18n="nav.back">↩ Volver</button>
     <div class="topbar__mid"></div>
-    <button class="btn btn--sm btn--icon" data-settings="open" data-i18n-aria-label="settings.title" aria-label="Ajustes">⚙️</button>
+    <button class="btn btn--sm" data-settings="open" data-i18n="settings.short">⚙️ Ajustes</button>
   </header>
   <div class="screen__body screen__body--widest">
     <h1 class="h1" data-i18n="learn.title">📖 Aprender banderas</h1>
@@ -176,9 +183,9 @@
 <!-- ══════════ RANKING ══════════ -->
 <section class="screen" id="s-ranking">
   <header class="topbar">
-    <button class="btn btn--sm btn--ghost" id="btnRankBack" data-i18n="nav.back">↩ Volver</button>
+    <button class="btn btn--sm" id="btnRankBack" data-i18n="nav.back">↩ Volver</button>
     <div class="topbar__mid"></div>
-    <button class="btn btn--sm btn--icon" data-settings="open" data-i18n-aria-label="settings.title" aria-label="Ajustes">⚙️</button>
+    <button class="btn btn--sm" data-settings="open" data-i18n="settings.short">⚙️ Ajustes</button>
   </header>
   <div class="screen__body screen__body--wide">
     <h1 class="h1" data-i18n="nav.ranking">🏆 Ranking de casa</h1>

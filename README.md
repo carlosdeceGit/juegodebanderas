@@ -96,6 +96,30 @@ sitio en la pantalla — tarjeta destacada arriba y bloque de "sin
 puntos" abajo. "Aprender" no está en `MODES` porque no es una partida:
 no tiene nivel, ni jugador, ni puntuación.
 
+### La cabecera
+
+Todas las pantallas menos la partida llevan la misma `<header class="topbar">`,
+con la misma forma: **acción a la izquierda, ajustes a la derecha, las dos
+con etiqueta y con las mismas clases** (`.btn .btn--sm`). La acción de la
+izquierda cambia según dónde estés — `🏆 Ranking` en la portada y en el
+fin de partida, `← Otro juego` / `← Nivel` en los pasos del asistente,
+`↩ Volver` en aprender y en el ranking — pero el marco es idéntico.
+
+Dos cosas que conviene no deshacer:
+
+- **Nada de botones que sean solo un emoji en un círculo.** Se probaron y
+  no se entendían. Si hace falta una acción nueva en la cabecera, va con
+  su etiqueta.
+- **Las píldoras de progreso no van dentro de la cabecera**, sino en su
+  propia fila dentro del contenido. Metidas en medio, con tres píldoras
+  más las dos etiquetas, se desbordaba un móvil de 390px — y con el
+  tamaño de texto en XL, cualquiera. Tampoco se pintan en la portada:
+  antes de elegir nada no informan de nada.
+
+La partida es la excepción a propósito: su cabecera es el HUD (marcador,
+rondas, tiempo) y ahí el `☰` sí va sin etiqueta porque compite por el
+espacio con cinco indicadores.
+
 ### Sistema de diseño
 
 `style.css` está organizado en tokens → componentes → layout, y la

@@ -1048,7 +1048,6 @@ function end() {
   /* Los botones de salida apuntan a pasos concretos del asistente. */
   $('btnChangeLevel').hidden = !MODES[mode]?.needsLevel;
   $('btnEndReview').hidden = wrongCodes().length < REVIEW_MIN_FAILS;
-  $('btnEndRanking').hidden = !MODES[mode]?.scoreable;
 
   show('s-end');
 
