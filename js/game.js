@@ -1,8 +1,11 @@
 import { COUNTRIES } from "./countries.js";
-import { LEVELS, DAILY_LEVEL_KEY, DAILY_ROUNDS } from "./levels.js";
+import { LEVELS } from "./levels.js";
 import { pickDistractors } from "./distractors.js";
-import { saveScore, getDailyRanking } from "./db.js";
+import { getDailyRanking } from "./db.js";
 import { describeFlag } from "./flagDescription.js";
+import { createDailyChallenge } from "./daily.js";
+import { $, escapeHtml, onTap } from "./dom.js";
+import { lsGet, lsSet, lsDel } from "./storage.js";
 import { t, applyStaticI18n } from "./i18n.js";
 
 applyStaticI18n();
@@ -106,12 +109,7 @@ window.onerror = function (m, src, l, c) {
   document.body.appendChild(d);
 };
 
-const $ = id => document.getElementById(id);
 const flagSrc = code => `assets/flags/${code}.svg`;
-
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-}
 
 /* El bloqueo de scroll se activa solo en la partida (ver style.css). */
 const show = id => {
@@ -131,62 +129,6 @@ function shuffle(a) {
   }
   return r;
 }
-
-/* Solo `click`, nunca `touchend`.
-
-   Con `touchend` cualquier dedo que se levantase encima de un botón lo
-   activaba, aunque el gesto hubiese sido un scroll de media pantalla: en
-   el móvil era imposible desplazarse por la portada sin entrar en alguna
-   tarjeta sin querer. El navegador ya distingue el scroll del toque y no
-   emite `click` si el dedo se ha desplazado, así que hace el trabajo
-   bien. No se pierde reactividad: `touch-action:manipulation` en el body
-   ya elimina el retardo de 300ms que motivaba el atajo.
-
-   Tampoco se llama a `preventDefault()`: en `click` no aporta nada y
-   estropea el foco de teclado. El antirrebote de 500ms se queda, que es
-   lo que evita el doble disparo. */
-function onTap(el, fn) {
-  let last = 0;
-  el.addEventListener('click', e => {
-    const now = Date.now();
-    if (now - last < 500) return;
-    last = now;
-    fn(e);
-  });
-}
-
-/* ---------- PRNG determinista para el reto diario ---------- */
-function seedFromDate(d) {
-  let h = 0;
-  for (const ch of d) h = (h * 31 + ch.charCodeAt(0)) | 0;
-  return h;
-}
-function mulberry32(seed) {
-  let t = seed;
-  return function () {
-    t |= 0; t = (t + 0x6D2B79F5) | 0;
-    let x = Math.imul(t ^ (t >>> 15), 1 | t);
-    x = (x + Math.imul(x ^ (x >>> 7), 61 | x)) ^ x;
-    return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
-  };
-}
-function seededShuffle(arr, rand) {
-  const r = arr.slice();
-  for (let i = r.length - 1; i > 0; i--) {
-    const j = Math.floor(rand() * (i + 1));
-    [r[i], r[j]] = [r[j], r[i]];
-  }
-  return r;
-}
-/* Fecha en UTC, no local: decisión de producto explícita, ver
-   docs/decisiones-producto.md — es lo que mantiene un único mazo diario
-   comparable entre todos los jugadores. */
-function todayStr() { return new Date().toISOString().slice(0, 10); }
-
-/* ---------- Almacenamiento local, siempre tolerante a fallo ---------- */
-function lsGet(key) { try { return localStorage.getItem(key); } catch { return null; } }
-function lsSet(key, value) { try { localStorage.setItem(key, value); } catch { /* ignore */ } }
-function lsDel(key) { try { localStorage.removeItem(key); } catch { /* ignore */ } }
 
 /* ---------- Memoria de banderas vistas (persiste entre partidas) ---------- */
 const SEEN_KEY = 'dcb_seen_v1';
@@ -361,10 +303,12 @@ function applyTextSize(size) {
 }
 
 /* ---------- Estado de juego ---------- */
-/* mode: 'classic' | 'daily' | 'review' | 'survival' | 'invert' | 'classify' | 'pairing' */
+/* mode: 'classic' | 'review' | 'survival' | 'invert' | 'classify' | 'pairing'.
+   El reto de hoy no aparece aquí: no pasa por este bucle, tiene su
+   propia pantalla y su propio estado en js/daily.js. */
 let player = null;
 let levelKey = null, level = null;
-let mode = 'classic', dailyDateStr = null;
+let mode = 'classic';
 let distractorPool = COUNTRIES;
 let deck = [], idx = 0, score = 0, streak = 0, hintsLeft = 0;
 let answer = null, locked = false, wrongCount = 0, hintUsedThisRound = false;
@@ -396,12 +340,6 @@ function buildDeck(lvl) {
   chosen.forEach(c => seen.set(c.code, (seen.get(c.code) || 0) + 1));
   saveSeenMap();
   return chosen;
-}
-function buildDailyDeck() {
-  const dateStr = todayStr();
-  const rand = mulberry32(seedFromDate(dateStr));
-  const shuffled = seededShuffle(COUNTRIES, rand);
-  return { deck: shuffled.slice(0, DAILY_ROUNDS), dateStr };
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -645,47 +583,52 @@ applyTextSize(loadTextSize());
 
 /* ---------- Arranque de cada modo ---------- */
 function startLevel(key) {
-  levelKey = key; level = LEVELS[key]; mode = 'classic'; dailyDateStr = null;
+  levelKey = key; level = LEVELS[key]; mode = 'classic';
   distractorPool = poolForContinent();
   deck = buildDeck(level);
   beginGame();
 }
+/* El reto de hoy no es una partida de este bucle: tiene su pantalla, sus
+   reglas y su propio módulo (js/daily.js). Aquí solo se le pasa el
+   jugador elegido en el asistente y las dos salidas de su pantalla. */
+const dailyChallenge = createDailyChallenge({
+  show,
+  onExit: () => show('s-mode'),
+  onRanking: () => { renderRanking(); show('s-ranking'); },
+});
 function startDaily() {
-  levelKey = DAILY_LEVEL_KEY; level = LEVELS[DAILY_LEVEL_KEY]; mode = 'daily'; dailyDateStr = null;
-  distractorPool = COUNTRIES;
-  const d = buildDailyDeck();
-  deck = d.deck; dailyDateStr = d.dateStr;
-  beginGame();
+  clearInterval(timer);
+  dailyChallenge.start(player);
 }
 function startReview() {
   const codes = wrongCodes();
   if (codes.length < REVIEW_MIN_FAILS) { show('s-mode'); return; }
   const bySpeed = codes.map(code => COUNTRIES.find(c => c.code === code)).filter(Boolean);
-  levelKey = null; level = REVIEW_LEVEL; mode = 'review'; dailyDateStr = null;
+  levelKey = null; level = REVIEW_LEVEL; mode = 'review';
   distractorPool = COUNTRIES;
   deck = bySpeed.slice(0, Math.min(bySpeed.length, 20));
   beginGame();
 }
 function startInvert() {
-  levelKey = null; level = INVERT_LEVEL; mode = 'invert'; dailyDateStr = null;
+  levelKey = null; level = INVERT_LEVEL; mode = 'invert';
   distractorPool = COUNTRIES;
   deck = shuffle(COUNTRIES).slice(0, level.rounds);
   beginGame();
 }
 function startClassify() {
-  levelKey = null; level = CLASSIFY_LEVEL; mode = 'classify'; dailyDateStr = null;
+  levelKey = null; level = CLASSIFY_LEVEL; mode = 'classify';
   distractorPool = COUNTRIES;
   deck = shuffle(COUNTRIES).slice(0, level.rounds);
   beginGame();
 }
 function startPairing() {
-  levelKey = null; level = PAIRING_LEVEL; mode = 'pairing'; dailyDateStr = null;
+  levelKey = null; level = PAIRING_LEVEL; mode = 'pairing';
   distractorPool = COUNTRIES;
   deck = shuffle(COUNTRIES).slice(0, level.rounds);
   beginGame();
 }
 function startSurvival() {
-  levelKey = 'survival'; level = makeSurvivalLevel(); mode = 'survival'; dailyDateStr = null;
+  levelKey = 'survival'; level = makeSurvivalLevel(); mode = 'survival';
   distractorPool = COUNTRIES;
   deck = shuffle(COUNTRIES);
   beginGame();
@@ -1028,7 +971,7 @@ function end() {
     $('endTitle').textContent = score > max * .8 ? t('end.excellent', { name: player })
       : score > max * .5 ? t('end.great', { name: player })
       : t('end.goodTry', { name: player });
-    $('endSub').textContent = `${level.icon} ${t(level.labelKey)}${mode === 'daily' ? ' ' + t('end.dailyTag') : ''} · ${t('end.approxMax', { max })}`;
+    $('endSub').textContent = `${level.icon} ${t(level.labelKey)} · ${t('end.approxMax', { max })}`;
   }
 
   const list = $('endList');
@@ -1052,17 +995,10 @@ function end() {
 
   show('s-end');
 
-  /* El reto diario es lo único que va al servidor: su gracia es comparar
-     el mismo mazo con gente que juega en otro dispositivo, y eso no se
-     puede hacer en local. Todo lo demás se queda aquí. */
-  if (mode === 'daily') {
-    saveScore({
-      player, level: levelKey, score, rounds: deck.length,
-      errors: wrongList.length, daily: true, dailyDate: dailyDateStr,
-    }).then(result => {
-      if (result.reason === 'duplicate') $('endSub').textContent += t('end.alreadyPlayedToday');
-    });
-  } else if (MODES[mode]?.scoreable) {
+  /* Estas partidas no salen del dispositivo: el ranking de casa es
+     local. Lo único que viaja al servidor es el reto de hoy, y de eso se
+     encarga js/daily.js, que no pasa por esta pantalla. */
+  if (MODES[mode]?.scoreable) {
     recordLocalScore({
       player, level: levelKey, score,
       rounds: mode === 'survival' ? idx : deck.length,

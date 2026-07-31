@@ -148,3 +148,53 @@ requerir autenticación nueva. Si en el futuro se decide explícitamente
 abrir el juego a un público más amplio que la familia actual, esta
 sección debería revisarse teniendo ya resueltos los puntos 1-4 de
 arriba, no antes.
+
+## 4. Formato del reto diario: una bandera tapada, no doce rondas
+
+**Decisión: el reto diario pasa a ser una única bandera al día,
+tapada en nueve piezas, con seis intentos escribiendo el nombre del
+país** (`js/daily.js`). Sustituye al formato anterior: 12 rondas de
+opción múltiple con cronómetro, en dificultad Experto, con el mazo
+sembrado por la fecha.
+
+**Alternativas consideradas:**
+
+- **Mantener las 12 rondas cronometradas.** Reutiliza el bucle de juego
+  entero, así que no cuesta nada mantenerlo, y ya funcionaba. El
+  problema es qué mide: con opciones dadas y cronómetro, la puntuación
+  del reto depende sobre todo de la velocidad de tocar la pantalla, y
+  dos personas que aciertan las mismas doce banderas quedan separadas
+  por décimas de segundo. Además no deja nada que contar: no hay
+  "por dónde ibas tú", solo un número.
+- **Una bandera tapada en piezas, escribiendo el país (elegida).** Se
+  juega en un minuto, se puede compartir el resultado sin destriparlo,
+  y escribir el nombre en vez de elegir entre cuatro opciones es
+  bastante más difícil y más satisfactorio. El coste es que ya no
+  reutiliza el bucle de juego: es una pantalla y un módulo aparte, con
+  su propio estado guardado.
+- **Piezas fijas frente a 9 piezas con pista de distancia.** Sin
+  ninguna pista, adivinar un país por un noveno de su bandera es casi
+  imposible salvo para banderas muy reconocibles, y el reto se vuelve
+  frustrante justo el día que toca una bandera difícil. La pista de
+  distancia y rumbo (`js/geo.js`) convierte cada fallo en información
+  útil, que es lo que hace que valga la pena seguir intentándolo.
+
+**Razón de la decisión:** el reto diario es la pieza social del juego —
+lo que hace que varias personas jueguen "lo mismo" el mismo día. Para
+eso importa más que dé conversación y que se pueda comparar sin
+ambigüedad que medir con precisión la destreza de cada uno. El formato
+de bandera tapada cumple las dos cosas y añade una tercera que el
+anterior no tenía: un resultado compartible en cuadrados (🟥🟩) que no
+revela la respuesta a quien todavía no ha jugado.
+
+**Lo que no cambia y conviene no romper:** la fecha sigue siendo UTC
+(sección 1 de este documento) por el mismo motivo de siempre — que todo
+el mundo juegue exactamente la misma bandera —, el límite sigue siendo
+de un intento por jugador y día (ahora también reforzado en local, para
+que recargar la página no regale intentos), y el catálogo de países
+sigue siendo el de la sección 2. La bandera de cada día se saca
+recorriendo el catálogo barajado, no sorteando: **dentro de cada vuelta
+de 195 días no se repite ninguna**, y en el salto de una vuelta a la
+siguiente se fuerza un margen extra, de modo que dos apariciones de la
+misma bandera nunca caen a menos de tres semanas. Es lo que evita que el
+reto de hoy sea la misma bandera que la de hace tres días.
