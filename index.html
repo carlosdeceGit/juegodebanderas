@@ -214,6 +214,11 @@
   <div class="sheet__panel" role="dialog" aria-modal="true" data-i18n-aria-label="settings.title" aria-label="Ajustes">
     <h2 class="h2" data-i18n="settings.title">Ajustes</h2>
 
+    <p class="field__label" data-i18n="settings.language">🌍 Idioma</p>
+    <!-- seg--3: seis idiomas en dos filas de tres. En una sola fila de seis
+         no caben nombres como "Français" sin partirlos. -->
+    <div class="seg seg--3" id="languageSeg" role="radiogroup" data-i18n-aria-label="settings.language" aria-label="Idioma"></div>
+
     <p class="field__label" data-i18n="settings.textSize">🔠 Tamaño del texto</p>
     <div class="seg seg--3" id="textSizeSeg" role="radiogroup" data-i18n-aria-label="settings.textSize" aria-label="Tamaño del texto">
       <button type="button" role="radio" data-size="md" aria-checked="true">Aa</button>

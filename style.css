@@ -408,7 +408,11 @@ body{
 }
 .seg button{
   font-family:inherit; font-size:min(var(--fs-sm),4vw); font-weight:var(--fw-black);
-  min-height:var(--tap); padding:var(--sp-2) 4px; min-width:0; overflow-wrap:break-word;
+  /* `anywhere` y no `break-word`: solo `anywhere` reduce el ancho mínimo del
+     contenido, que es lo que deja encoger al hijo del flex. Con `break-word`
+     una palabra larga ("Français", "Ozeanien") con el texto en XL no se
+     partía, se salía del botón y se veía recortada. */
+  min-height:var(--tap); padding:var(--sp-2) 4px; min-width:0; overflow-wrap:anywhere;
   display:flex; align-items:center; justify-content:center; gap:4px;
   color:var(--ink); background:transparent; border:0; cursor:pointer;
   border-right:var(--bw-hair) solid var(--border);
