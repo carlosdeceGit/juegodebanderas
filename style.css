@@ -243,10 +243,16 @@ body{
   }
 }
 .btn:active:not(:disabled){ transform:translate(var(--lift),var(--lift)); box-shadow:0 0 0 var(--border) }
-.btn:disabled{
+/* El `:not(...)` es imprescindible, no un adorno: al resolver la ronda
+   se deshabilitan TODAS las opciones, y esta regla pinta el fondo
+   directamente (no vía `--bg`), así que sin la exclusión se comía el
+   verde del acierto y el rojo del fallo y las dejaba a todas en gris. */
+.btn:disabled:not(.good):not(.bad):not(.removed){
   --lift:0; box-shadow:none; cursor:default; transform:none;
   background:var(--surface-sunken); color:var(--ink-muted); border-color:var(--ink-500);
 }
+.btn:disabled{ cursor:default; transform:none }
+.opt.good,.opt.bad{ --lift:0; box-shadow:none }
 .btn[hidden]{ display:none }
 
 .btn--primary{ --bg:var(--primary); --fg:var(--primary-ink) }

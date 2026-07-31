@@ -132,17 +132,27 @@ function shuffle(a) {
   return r;
 }
 
+/* Solo `click`, nunca `touchend`.
+
+   Con `touchend` cualquier dedo que se levantase encima de un botón lo
+   activaba, aunque el gesto hubiese sido un scroll de media pantalla: en
+   el móvil era imposible desplazarse por la portada sin entrar en alguna
+   tarjeta sin querer. El navegador ya distingue el scroll del toque y no
+   emite `click` si el dedo se ha desplazado, así que hace el trabajo
+   bien. No se pierde reactividad: `touch-action:manipulation` en el body
+   ya elimina el retardo de 300ms que motivaba el atajo.
+
+   Tampoco se llama a `preventDefault()`: en `click` no aporta nada y
+   estropea el foco de teclado. El antirrebote de 500ms se queda, que es
+   lo que evita el doble disparo. */
 function onTap(el, fn) {
   let last = 0;
-  const handler = e => {
+  el.addEventListener('click', e => {
     const now = Date.now();
     if (now - last < 500) return;
     last = now;
-    if (e.cancelable) e.preventDefault();
     fn(e);
-  };
-  el.addEventListener('click', handler);
-  el.addEventListener('touchend', handler, { passive: false });
+  });
 }
 
 /* ---------- PRNG determinista para el reto diario ---------- */
@@ -761,11 +771,60 @@ function nextRound() {
   box.classList.remove('pop'); void box.offsetWidth; box.classList.add('pop');
 
   tLeft = level.secs; paintTimer();
+  /* En "Elige la bandera" el enunciado es texto y las banderas están en
+     las opciones, así que hay que esperar a esas: si no, el reloj corría
+     igual sobre botones vacíos. */
+  startCountdownWhenReady([...box.querySelectorAll('img'), ...optsEl.querySelectorAll('img')]);
+  preloadNextFlag();
+}
+
+/* ---------- El reloj no corre hasta que se ve la bandera ----------
+   Antes el cronómetro arrancaba en el mismo momento en que se pedía el
+   SVG: con una conexión lenta se veían caer los segundos sobre una caja
+   vacía, y en nivel Dios (6s) eso se comía media ronda. Ahora se espera
+   a que la imagen esté pintada.
+
+   El tope de 3s es la red de seguridad: si el SVG no llega (sin datos,
+   404), la ronda arranca igualmente en vez de quedarse colgada para
+   siempre. Y `roundToken` evita que una imagen que llega tarde arranque
+   el reloj de una ronda que ya no es la actual. */
+let roundToken = 0;
+const READY_TIMEOUT_MS = 3000;
+
+function startCountdown() {
+  clearInterval(timer);
   timer = setInterval(() => {
     tLeft = Math.max(0, +(tLeft - 0.1).toFixed(1));
     paintTimer();
     if (tLeft <= 0) timeout();
   }, 100);
+}
+
+function startCountdownWhenReady(imgs) {
+  const token = ++roundToken;
+  const pending = imgs.filter(img => !img.complete);
+  if (!pending.length) { startCountdown(); return; }
+
+  let left = pending.length, started = false;
+  const go = () => {
+    if (started || token !== roundToken) return;
+    started = true;
+    clearTimeout(guard);
+    startCountdown();
+  };
+  const one = () => { if (--left <= 0) go(); };
+  const guard = setTimeout(go, READY_TIMEOUT_MS);
+  pending.forEach(img => {
+    img.addEventListener('load', one, { once: true });
+    img.addEventListener('error', one, { once: true });
+  });
+}
+
+/* La bandera de la ronda siguiente se pide mientras se juega la actual,
+   así que casi siempre está en caché cuando toca enseñarla. */
+function preloadNextFlag() {
+  const next = deck[idx + 1];
+  if (next) new Image().src = flagSrc(next.code);
 }
 
 function paintTimer() {
@@ -1086,14 +1145,9 @@ document.addEventListener('visibilitychange', () => {
       tLeft = Math.max(0, +(tLeft - (Date.now() - hiddenAt) / 1000).toFixed(1));
       hiddenAt = null;
     }
-    clearInterval(timer);
-    if (tLeft <= 0) { timeout(); return; }
+    if (tLeft <= 0) { clearInterval(timer); timeout(); return; }
     paintTimer();
-    timer = setInterval(() => {
-      tLeft = Math.max(0, +(tLeft - 0.1).toFixed(1));
-      paintTimer();
-      if (tLeft <= 0) timeout();
-    }, 100);
+    startCountdown();
   }
 });
 
