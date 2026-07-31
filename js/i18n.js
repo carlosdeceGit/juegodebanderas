@@ -19,7 +19,6 @@ const STRINGS = {
     "wizard.step": "Paso {n} de {total}",
     "wizard.backToStep": "Volver al paso {n}",
     "wizard.continue": "Seguir jugando",
-    "wizard.continueBadge": "1 toque",
     "wizard.moreGames": "Más juegos",
     "wizard.noPressure": "Sin prisa y sin puntos",
     "wizard.pickLevel": "Elige tu nivel",
@@ -77,12 +76,14 @@ const STRINGS = {
 
     /* ---- Ajustes ---- */
     "settings.title": "Ajustes",
+    "settings.short": "⚙️ Ajustes",
     "settings.textSize": "🔠 Tamaño del texto",
     "settings.players": "👤 Jugadores de este dispositivo",
     "settings.noPlayers": "Todavía no juega nadie aquí.",
     "settings.close": "Cerrar",
 
     "nav.ranking": "🏆 Ranking de casa",
+    "nav.rankingShort": "🏆 Ranking",
     "nav.back": "↩ Volver",
     "nav.menu": "Menú",
 

@@ -108,6 +108,27 @@ dos que más se incumplen por descuido:
   un contraste medido. Con opacidad el contraste depende del fondo que
   toque debajo y deja de ser verificable.
 
+Dos trampas que ya han mordido una vez y conviene no repetir:
+
+- **`.btn:disabled` lleva `:not(.good):not(.bad):not(.removed)` a
+  propósito.** Al resolver una ronda se deshabilitan todas las opciones,
+  y esa regla pinta `background` directamente en vez de usar `--bg`, así
+  que sin la exclusión se llevaba por delante el verde del acierto y el
+  rojo del fallo y las dejaba todas en gris.
+- **Todo lo que se oculte desde JS necesita la regla global
+  `[hidden]{display:none !important}`.** El `display:none` que el
+  navegador aplica a `[hidden]` viene de la hoja de usuario y lo pisa
+  cualquier `display:flex` o `display:grid` propio.
+
+**Los toques se escuchan solo con `click`, nunca con `touchend`**
+(`onTap()` en `game.js`). Con `touchend`, cualquier dedo que se levantara
+encima de un botón lo activaba aunque el gesto hubiera sido un scroll de
+media pantalla: en el móvil era imposible recorrer la portada sin entrar
+en alguna tarjeta sin querer. El navegador ya distingue el scroll del
+toque y no emite `click` si el dedo se ha desplazado. No hace falta
+compensar el retardo de 300ms: `touch-action:manipulation` en el `body`
+ya lo elimina.
+
 El diseño es responsive de verdad, no una columna de móvil estirada: a
 partir de 640px las rejillas pasan a dos columnas, y a partir de 1024px
 (o en móvil apaisado) la partida se reorganiza en dos columnas con la
@@ -132,6 +153,17 @@ Esto se controla con una única variable de estado, `mode`:
 Casi toda la lógica de ronda (`nextRound`, `resolveRound`, `timeout`,
 `end`) hace `if (mode === '...')` en los puntos donde un modo concreto
 necesita comportarse distinto; el resto del bucle es compartido.
+
+**El cronómetro no arranca hasta que la bandera está pintada.** Antes se
+lanzaba en el mismo momento en que se pedía el SVG, así que con conexión
+lenta los segundos caían sobre una caja vacía — y en nivel Dios, con 6
+segundos, eso se comía media ronda. `startCountdownWhenReady()` espera al
+`load` de las imágenes de la ronda (la del enunciado, o las de las
+opciones en "Elige la bandera"), con un tope de 3 segundos por si el SVG
+no llega nunca, y un testigo de ronda para que una imagen que llega tarde
+no arranque el reloj de la ronda siguiente. Además se precarga la bandera
+de la ronda siguiente mientras se juega la actual. **Si se añade un modo
+cuyo enunciado sea una imagen, hay que pasarla por ahí.**
 
 ### Modos de juego
 
