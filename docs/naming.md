@@ -288,6 +288,9 @@ Unos 45 $ el primer año por cerrar el nombre entero. Si hay que recortar,
   construir marca. Es el posicionamiento del nombre actual sin el
   problema legal, pero es indefendible: cualquiera puede lanzar
   `banderas.app` mañana y no hay nada que hacer.
+- **El Juego de las Banderas** (`juegodebanderas.com`, $11.25) — la vía
+  descriptiva, tipo "The Flags Game". Tiene su propia sección con el
+  intercambio completo y los dominios comprobados: ver la **sección 10**.
 
 ## 9. Copy que cambia con el nombre
 
@@ -347,7 +350,117 @@ El tono del juego dentro de partida está bien y no depende del nombre:
 registro cálido y sin condescendencia es parte del activo #1 y del #2.
 Un cambio de nombre no es excusa para reescribirlo.
 
-## 10. Método y límites
+## 10. Variante descriptiva: el estilo "The Flags Game"
+
+Se pidió explorar expresamente el patrón **artículo + sustantivo +
+"juego"** (`theflagsgame.com`), que es otra escuela de naming: renuncia
+a ser una marca para ganar claridad literal y coincidencia exacta con lo
+que la gente busca.
+
+### El intercambio, dicho claro
+
+Lo que ganas: **nadie tiene que preguntar qué es**, y el dominio es
+palabra por palabra la consulta que se teclea en Google. Para un juego
+gratuito que no va a hacer publicidad, la búsqueda orgánica es el único
+canal, y esto juega a favor.
+
+Lo que pierdes, y no es menor:
+
+- **No es registrable como marca.** "El juego de las banderas" es un
+  genérico descriptivo puro. Cualquiera puede lanzar mañana algo
+  llamado igual y no hay nada que hacer. Es el mismo techo que tiene el
+  nombre actual, por un motivo distinto.
+- **No dice nada de los cinco activos.** Ni familia, ni niveles, ni
+  reto diario. Todo el peso recae en el descriptivo y en la portada.
+- **En inglés, la categoría está saturada.** Las tiendas de aplicaciones
+  ya tienen *Flags Game – Quiz*, *Flag Game – Juego de Banderas*, *Flags
+  Quiz – Adivina banderas*, *Juego de Banderas* y *El juego de las
+  banderas*, entre otras. "The Flags Game" no se distingue de ninguna de
+  ellas. El `.com` estar libre no significa que el nombre destaque:
+  significa que nadie ha visto valor en apropiárselo.
+
+### Recomendación dentro de este estilo: en español, no en inglés
+
+Si se elige el camino descriptivo, hay que hacerlo **en español**. La
+razón es puramente competitiva: en inglés se entra el último a una
+categoría con docenas de productos idénticos, mientras que en español la
+consulta "juego de banderas" tiene mucha menos competencia y, además, el
+nombre no rompe el activo #3 (español nativo), que es justo lo que
+diferencia al producto de Flagle y compañía. Un nombre en inglés para un
+juego que solo existe en español es lo peor de los dos mundos.
+
+**Nombre: El Juego de las Banderas. Dominio: `juegodebanderas.com`.**
+
+El artículo y el "las" viven en la marca hablada ("¿jugamos al juego de
+las banderas?"); el dominio los suelta, que es lo que hacen todos los
+dominios y lo que la gente teclea de todas formas. De propina, coincide
+con el nombre del repositorio.
+
+### Disponibilidad comprobada
+
+| Dominio | Precio 1er año | Nota |
+|---|---|---|
+| **juegodebanderas.com** | **$11.25** | ⭐ principal en este escenario |
+| **juegodebanderas.app** | **$9.99** | |
+| juegodebanderas.es | — | Libre; Vercel no vende `.es`, hay que ir a registrador español |
+| eljuegodelasbanderas.com | $11.25 | Defensivo, redirige al principal |
+| eljuegodebanderas.com | $11.25 | Defensivo |
+| juegodelasbanderas.com | $11.25 | Defensivo |
+| eljuegodelabandera.com | $11.25 | |
+| **theflagsgame.com** | **$11.25** | Libre, pero indistinguible de media docena de apps |
+| theflagsgame.app | $9.99 | |
+| theflagsgame.io | $37.99 | |
+| theflagchallenge.com | $11.25 | |
+| theflagsquiz.com | $11.25 | |
+| theflagsclub.com | $11.25 | |
+| theflagsdaily.com | $11.25 | |
+| theworldflagsgame.com | $11.25 | |
+| thebigflagsgame.com | $11.25 | |
+
+**Ocupados en inglés:** `theflaggame.com`, `flagsgame.com`,
+`flaggame.com`, `guesstheflag.com`, `theflagquiz.com`, `flagquiz.com`,
+`playflags.com`, `dailyflags.com`, `worldflagsgame.com`. Es decir: todo
+lo bueno y corto del patrón inglés ya está cogido; lo que queda libre es
+lo que sobra.
+
+### Compra sugerida en este escenario
+
+`juegodebanderas.com` + `juegodebanderas.app` + `eljuegodelasbanderas.com`
+como defensivo ≈ 32 $ el primer año. Si además se quiere reservar la
+puerta al inglés por si el juego se traduce algún día,
+`theflagsgame.com` son 11 $ más; es barato como opción de futuro, pero
+no debería ser el nombre principal hoy.
+
+### Copy con este nombre
+
+```js
+"app.title":        "El Juego de las Banderas",
+"start.eyebrow":    "195 países, una bandera cada vez",
+"start.titleHtml":  "El juego de<br>las banderas",
+```
+
+Aquí `modes.classic.label` ("¿Qué bandera es?") **se puede dejar tal
+cual**: no choca con el nombre, lo complementa.
+
+Descriptivo de una línea, que en este escenario carga con todo el peso
+diferencial porque el nombre no lo hace:
+
+> **El Juego de las Banderas** — En español y para toda la casa, del
+> Nivel Nene al Nivel Dios.
+
+### Cuándo elegir esta opción y cuándo la otra
+
+- **Descriptivo** (`juegodebanderas.com`) si el objetivo es que el juego
+  se encuentre y se entienda **hoy**, y no importa que el nombre no sea
+  defendible ni propio.
+- **QuéBandera** (sección 8) si el objetivo es construir algo con
+  nombre propio, que se pueda registrar y que no se confunda con las
+  cinco aplicaciones que ya se llaman casi igual.
+
+Las dos salen del problema de Warner, que era lo urgente. La diferencia
+entre ellas no es de riesgo, es de ambición.
+
+## 11. Método y límites
 
 Los datos de disponibilidad son consultas reales al buscador de dominios
 de Vercel hechas en julio de 2026; los precios son de alta del primer
