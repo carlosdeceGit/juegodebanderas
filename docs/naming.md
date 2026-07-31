@@ -460,7 +460,125 @@ diferencial porque el nombre no lo hace:
 Las dos salen del problema de Warner, que era lo urgente. La diferencia
 entre ellas no es de riesgo, es de ambición.
 
-## 11. Método y límites
+## 11. Dos dominios, dos idiomas
+
+El plan: `juegodebanderas.com` → versión en español, `theflagsgame.com`
+→ versión en inglés. **Sí, funciona, y además es coherente con la
+estrategia descriptiva.** Pero hay un blocker técnico concreto y un
+coste de contenido que conviene ver antes de comprar.
+
+### Por qué encaja bien aquí (y no encajaría con una marca)
+
+La objeción estándar a repartir un producto en dos dominios es que
+**parte la autoridad de dominio**: cada uno construye sus enlaces desde
+cero, y lo recomendado suele ser un solo dominio con `/es/` y `/en/`.
+
+Esa objeción **no aplica a este caso**, y el motivo es justo la sección
+10: aquí no se está construyendo autoridad de marca, se está capturando
+la consulta literal. "Juego de banderas" y "flags game" son dos búsquedas
+distintas, en dos idiomas distintos, y tener el dominio de coincidencia
+exacta en cada una es exactamente lo que hace valiosa esta vía. Dos
+dominios descriptivos son dos anzuelos; dos dominios de marca serían una
+marca partida en dos.
+
+Dicho de otro modo: si se elige QuéBandera (sección 8), esto **no** hay
+que hacerlo — sería `quebandera.com/en/`. Si se elige la vía
+descriptiva, esto es la forma correcta de ejecutarla.
+
+### El blocker: hoy el HTML es español, y el inglés lo pinta JavaScript
+
+Esto es lo que hay que resolver, y no es evidente desde fuera:
+
+- `index.html` lleva **`<html lang="es">` fijo**, y nada en el código lo
+  cambia nunca (comprobado: `documentElement.lang` no aparece en `js/`).
+- El marcado trae **el texto español escrito a mano** como contenido de
+  respaldo; `applyStaticI18n()` lo sobrescribe al cargar, incluido el
+  `<title>`.
+- `LOCALE` es una **constante fija** en `js/i18n.js:149`.
+
+Consecuencia: si los dos dominios sirven el mismo fichero, lo que
+`theflagsgame.com` entrega a Google es **un documento declarado en
+español, con texto español, que JavaScript convierte en inglés después**.
+Google ejecuta JavaScript, pero es la parte más frágil de su
+indexación — y el único motivo para elegir un dominio descriptivo era el
+buscador. Sería pagar el coste de la estrategia sin cobrar el beneficio.
+
+Además es un fallo de accesibilidad real: un lector de pantalla leería
+el texto inglés con voz y fonética españolas, porque el `lang` miente.
+
+**Arreglo, en dos tiempos:**
+
+1. **Ahora (5 líneas):** `LOCALE` deja de ser constante y sale del
+   hostname (`location.hostname.includes('theflagsgame') ? 'en' : 'es'`),
+   y `applyStaticI18n()` fija también
+   `document.documentElement.lang = LOCALE`. Con esto un humano ve el
+   idioma correcto en cada dominio. Es correcto para personas y flojo
+   para robots.
+2. **Al lanzar el inglés:** que cada dominio sirva un HTML con su idioma
+   ya escrito en el fichero. Como el proyecto no tiene build a propósito
+   y duplicar `index.html` a mano garantiza que las dos copias se
+   separen con el tiempo, lo sensato es un script mínimo que genere
+   `en/index.html` desde `index.html` + el diccionario. Es la primera
+   pieza de build del proyecto: pequeña, pero hay que decidirla a
+   conciencia.
+
+En ambos casos, los dos dominios necesitan `hreflang` cruzado y un
+`canonical` a sí mismos, o Google los tratará como contenido duplicado.
+
+### Lo que cuesta la versión en inglés
+
+Traducir no es el 90% del trabajo que parece; el reparto real:
+
+| Pieza | Volumen | Dificultad |
+|---|---|---|
+| `js/i18n.js` | ~130 cadenas de interfaz | **Fácil.** La infraestructura ya existe: es rellenar un objeto `en` hermano de `es`. Fase 4 se hizo para esto. |
+| `js/countries.js` | 195 nombres + 195 capitales + 5 continentes | **Medio y tedioso.** Ojo con los exónimos: Yibuti→Djibouti, Uagadugú→Ouagadougou, Yamena→N'Djamena. Un error aquí es una respuesta incorrecta en el juego, no una errata. |
+| `js/flagDescription.js` | ~60 tokens + 9 colores | **Más fácil de lo esperado.** Las etiquetas `pattern`/`palette` ya están en inglés (`crescent-star`, `green-white-red`), así que es un segundo diccionario y cambiar el `" y "` del `joinList` por `" and "`. No hay que reescribir ninguna gramática. |
+| Nombres de nivel | 4 | **No es traducción, es copy.** "Nivel Dios" es jerga española; su equivalente idiomático inglés existe y es *God Tier*. "Nivel Nene" no es *Baby Level*: es *Baby Steps*. Traducirlos literalmente los mata. |
+
+Propuesta para los cuatro niveles en inglés, respetando el registro
+cálido y sin condescendencia del original:
+
+```
+Nivel Nene        → Baby Steps
+Nivel Principiante → Getting There
+Nivel Experto     → Expert
+Nivel Dios        → God Tier
+```
+
+### Una buena noticia: el reto diario funciona en los dos dominios sin tocar nada
+
+El mazo del reto diario se genera con una **semilla determinista por
+fecha UTC** (`buildDailyDeck()`), no por idioma. Eso significa que un
+jugador en `theflagsgame.com` y otro en `juegodebanderas.com` reciben
+**exactamente las mismas doce banderas el mismo día**, así que comparten
+tabla de Supabase y ranking diario sin ninguna migración ni columna
+nueva. El duelo asíncrono también cruza idiomas tal cual.
+
+Es un efecto secundario afortunado de la decisión 1 de
+`docs/decisiones-producto.md` (fecha en UTC, no local). Merece la pena
+saberlo antes de que a alguien le tiente cambiarla.
+
+### Qué hacer, en orden
+
+1. **Comprar los dos dominios ya.** $11.25 + $11.25 = **$22.50**. Es
+   barato como opción de futuro y `theflagsgame.com` puede desaparecer
+   cualquier día; no hay motivo para esperar a tener el inglés listo.
+2. **Apuntar `theflagsgame.com` al español con un redirect 301
+   temporal.** No dejarlo aparcado (una página de *coming soon* vacía no
+   aporta nada y ensucia el dominio), y no lanzar un inglés a medias: un
+   juego con la interfaz en inglés y 195 países en español es peor que
+   no tener versión inglesa.
+3. **Hacer la versión inglesa** en el orden de la tabla: `i18n.js` →
+   `flagDescription.js` → `countries.js` → nombres de nivel.
+4. **Quitar el redirect** y activar el cambio por hostname, el
+   `lang` correcto, el `hreflang` cruzado y los `canonical`.
+
+Los pasos 1 y 2 se pueden hacer hoy y son reversibles. El 3 es el
+trabajo de verdad, y hasta que esté hecho el segundo dominio es solo una
+reserva.
+
+## 12. Método y límites
 
 Los datos de disponibilidad son consultas reales al buscador de dominios
 de Vercel hechas en julio de 2026; los precios son de alta del primer
