@@ -15,13 +15,19 @@ parte, enseña "Spanien" con capital "Madrid" en el continente "Europa".
 
 Hay **dos selectores**, y hacen exactamente lo mismo:
 
-- **En la portada**, arriba del todo, siempre a la vista: una fila con los
-  seis códigos de dos letras (`ES · CA · EN · FR · DE · IT`). Es el que
-  importa: si el juego arranca en el idioma equivocado —lo detecta del
-  navegador, y un móvil configurado en inglés en una casa que habla español
-  es de lo más normal— se arregla ahí mismo, sin tener que ir a buscarlo a
-  ningún menú. Va en código corto porque está encima del rótulo de portada y
-  no puede robarle altura; el nombre entero sigue en el `aria-label`.
+- **En el paso "¿Cómo te llamas?"**, junto al formulario de nombre: una
+  fila con los seis códigos de dos letras (`ES · CA · EN · FR · DE · IT`).
+  Solo aparece cuando ese formulario está visible, es decir, cuando alguien
+  nuevo llega al juego — que es justo el momento en que puede hacer falta:
+  si arranca en el idioma equivocado (lo detecta del navegador, y un móvil
+  configurado en inglés en una casa que habla español es de lo más normal),
+  se arregla ahí mismo. Con jugadores ya guardados desaparece de esa
+  pantalla y queda solo en Ajustes. Va en código corto para no robar
+  altura al formulario; el nombre entero sigue en el `aria-label`.
+
+  **Estuvo en la portada y se quitó**: ocupaba la primera fila de la
+  pantalla principal, encima del rótulo, para un ajuste que se toca una vez
+  en la vida.
 - **En Ajustes → 🌍 Idioma**, con los nombres completos ("Español",
   "Deutsch"), que es donde hay sitio para escribirlos.
 
@@ -71,7 +77,7 @@ distractores y la descripción accesible. El nombre y la capital se piden con
 3. Añadir `{ code, label, short }` a `LOCALES` en `js/i18n.js`. El `label` va
    escrito **en ese mismo idioma** ("Deutsch", no "alemán"): quien busca su
    idioma en la lista no sabe cómo se llama en español. `short` son las dos
-   letras del selector de portada. Con más de seis idiomas, esa fila deja de
+   letras del selector corto. Con más de seis idiomas, esa fila deja de
    caber en una pantalla estrecha y habría que replantearla.
 4. `node tools/check-i18n.mjs` tiene que pasar.
 

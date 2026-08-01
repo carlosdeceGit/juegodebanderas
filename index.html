@@ -23,7 +23,6 @@
     <!-- El idioma, lo primero y siempre a la vista. Si el juego arranca en
          un idioma que no es el de quien lo abre, se arregla aquí mismo sin
          tener que entrar en los ajustes a buscarlo. -->
-    <div class="langbar" id="langBar" role="radiogroup" data-i18n-aria-label="settings.language" aria-label="Idioma"></div>
 
     <div class="bunting" aria-hidden="true"></div>
     <p class="eyebrow" data-i18n="start.eyebrow">El gran juego de banderas</p>
@@ -90,7 +89,6 @@
   </header>
 
   <div class="screen__body screen__body--wide">
-    <div class="pills" data-pills aria-label="Progreso"></div>
     <p class="eyebrow" id="levelModeEcho"></p>
     <h1 class="h1" data-i18n="wizard.pickLevel">Elige tu nivel</h1>
     <div class="grid" id="levels"></div>
@@ -110,7 +108,6 @@
   </header>
 
   <div class="screen__body screen__body--wide">
-    <div class="pills" data-pills aria-label="Progreso"></div>
     <h1 class="h1" id="whoTitle" data-i18n="wizard.whoPlays">¿Quién juega?</h1>
     <p class="note" id="whoSummary"></p>
 
@@ -121,6 +118,11 @@
       <button class="btn btn--primary" id="btnNameGo" data-i18n="wizard.letsGo">¡Vamos!</button>
     </div>
     <p class="note" id="whoError" role="alert"></p>
+
+    <div class="langPick" id="langBarWrap" hidden>
+      <p class="note" data-i18n="settings.language">🌍 Idioma</p>
+      <div class="langbar" id="langBar" role="radiogroup" data-i18n-aria-label="settings.language" aria-label="Idioma"></div>
+    </div>
     <p class="note" data-i18n="wizard.namesArePrivate">Estos nombres se guardan solo en este dispositivo.</p>
   </div>
 </section>

@@ -16,8 +16,6 @@ export default {
     "start.namePlaceholder": "Type your name",
 
     /* ---- Three-step wizard ---- */
-    "wizard.step": "Step {n} of {total}",
-    "wizard.backToStep": "Back to step {n}",
     "wizard.continue": "Keep playing",
     "wizard.moreGames": "More games",
     "wizard.noPressure": "No rush, no points",
@@ -116,7 +114,7 @@ export default {
     "end.forReview": "To review",
     "end.playAgain": "🔄 Again",
     "end.changeLevel": "🧠 Change level",
-    "end.changeMode": "🏳️ Another game",
+    "end.changeMode": "🏠 Back to home",
     "end.reviewThese": "🔁 Review misses",
     "end.changePlayer": "Change player",
     /* ---- Today's challenge: one flag covered by nine tiles ---- */
