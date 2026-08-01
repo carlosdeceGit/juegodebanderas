@@ -20,6 +20,11 @@
   </header>
 
   <div class="screen__body screen__body--wide">
+    <!-- El idioma, lo primero y siempre a la vista. Si el juego arranca en
+         un idioma que no es el de quien lo abre, se arregla aquí mismo sin
+         tener que entrar en los ajustes a buscarlo. -->
+    <div class="langbar" id="langBar" role="radiogroup" data-i18n-aria-label="settings.language" aria-label="Idioma"></div>
+
     <div class="bunting" aria-hidden="true"></div>
     <p class="eyebrow" data-i18n="start.eyebrow">El gran juego de banderas</p>
     <h1 class="h1 cover-name" data-i18n-html="start.titleHtml">Diversión con<br>Banderas</h1>
@@ -79,12 +84,13 @@
 <!-- ══════════ PASO 2 · ¿Cómo de difícil? ══════════ -->
 <section class="screen" id="s-level">
   <header class="topbar">
-    <button class="btn btn--sm btn--ghost" data-nav="s-mode" data-i18n="wizard.backToModes">← Otro juego</button>
-    <div class="topbar__mid"><div class="pills" data-pills aria-label="Progreso"></div></div>
-    <button class="btn btn--sm btn--icon" data-settings="open" data-i18n-aria-label="settings.title" aria-label="Ajustes">⚙️</button>
+    <button class="btn btn--sm" data-nav="s-mode" data-i18n="wizard.backToModes">← Otro juego</button>
+    <div class="topbar__mid"></div>
+    <button class="btn btn--sm" data-settings="open" data-i18n="settings.short">⚙️ Ajustes</button>
   </header>
 
   <div class="screen__body screen__body--wide">
+    <div class="pills" data-pills aria-label="Progreso"></div>
     <p class="eyebrow" id="levelModeEcho"></p>
     <h1 class="h1" data-i18n="wizard.pickLevel">Elige tu nivel</h1>
     <div class="grid" id="levels"></div>
@@ -98,12 +104,13 @@
 <!-- ══════════ PASO 3 · ¿Quién juega? ══════════ -->
 <section class="screen" id="s-who">
   <header class="topbar">
-    <button class="btn btn--sm btn--ghost" id="btnWhoBack" data-i18n="wizard.backToLevels">← Nivel</button>
-    <div class="topbar__mid"><div class="pills" data-pills aria-label="Progreso"></div></div>
-    <button class="btn btn--sm btn--icon" data-settings="open" data-i18n-aria-label="settings.title" aria-label="Ajustes">⚙️</button>
+    <button class="btn btn--sm" id="btnWhoBack" data-i18n="wizard.backToLevels">← Nivel</button>
+    <div class="topbar__mid"></div>
+    <button class="btn btn--sm" data-settings="open" data-i18n="settings.short">⚙️ Ajustes</button>
   </header>
 
   <div class="screen__body screen__body--wide">
+    <div class="pills" data-pills aria-label="Progreso"></div>
     <h1 class="h1" id="whoTitle" data-i18n="wizard.whoPlays">¿Quién juega?</h1>
     <p class="note" id="whoSummary"></p>
 
@@ -142,6 +149,12 @@
 
 <!-- ══════════ FIN DE PARTIDA ══════════ -->
 <section class="screen" id="s-end">
+  <header class="topbar">
+    <button class="btn btn--sm" id="btnEndRanking" data-i18n="nav.rankingShort">🏆 Ranking</button>
+    <div class="topbar__mid"></div>
+    <button class="btn btn--sm" data-settings="open" data-i18n="settings.short">⚙️ Ajustes</button>
+  </header>
+
   <div class="screen__body screen__body--wide">
     <h1 class="h1" id="endTitle">¡Fin!</h1>
     <p class="end-score" id="endScore">0</p>
@@ -152,7 +165,6 @@
       <button class="btn btn--sm" id="btnChangeLevel" data-i18n="end.changeLevel">Cambiar de nivel</button>
       <button class="btn btn--sm" id="btnChangeMode" data-i18n="end.changeMode">Otro juego</button>
       <button class="btn btn--sm" id="btnEndReview" hidden data-i18n="end.reviewThese">Repasar estas</button>
-      <button class="btn btn--sm" id="btnEndRanking" data-i18n="nav.ranking">🏆 Ranking familiar</button>
     </div>
     <button class="btn btn--sm btn--ghost" id="btnHome" data-i18n="end.changePlayer">¿No eres tú? Cambiar de jugador</button>
   </div>
@@ -161,9 +173,12 @@
 <!-- ══════════ EL RETO DE HOY (bandera tapada en 9 piezas) ══════════ -->
 <section class="screen" id="s-daily">
   <header class="topbar">
-    <button class="btn btn--sm btn--ghost" id="btnDailyBack" data-i18n="nav.back">↩ Volver</button>
+    <button class="btn btn--sm" id="btnDailyBack" data-i18n="nav.back">↩ Volver</button>
+    <!-- Quién juega, a la vista: el reto es de un intento por persona y
+         día, y en un móvil compartido hay que saber de quién es el que
+         está en pantalla antes de gastarlo. -->
     <div class="topbar__mid"><span class="chip" id="dailyWho"></span></div>
-    <button class="btn btn--sm btn--icon" data-settings="open" data-i18n-aria-label="settings.title" aria-label="Ajustes">⚙️</button>
+    <button class="btn btn--sm" data-settings="open" data-i18n="settings.short">⚙️ Ajustes</button>
   </header>
 
   <div class="screen__body screen__body--wide">
@@ -207,9 +222,9 @@
 <!-- ══════════ APRENDER ══════════ -->
 <section class="screen" id="s-learn">
   <header class="topbar">
-    <button class="btn btn--sm btn--ghost" id="btnLearnBack" data-i18n="nav.back">↩ Volver</button>
+    <button class="btn btn--sm" id="btnLearnBack" data-i18n="nav.back">↩ Volver</button>
     <div class="topbar__mid"></div>
-    <button class="btn btn--sm btn--icon" data-settings="open" data-i18n-aria-label="settings.title" aria-label="Ajustes">⚙️</button>
+    <button class="btn btn--sm" data-settings="open" data-i18n="settings.short">⚙️ Ajustes</button>
   </header>
   <div class="screen__body screen__body--widest">
     <h1 class="h1" data-i18n="learn.title">📖 Aprender banderas</h1>
@@ -222,9 +237,9 @@
 <!-- ══════════ RANKING ══════════ -->
 <section class="screen" id="s-ranking">
   <header class="topbar">
-    <button class="btn btn--sm btn--ghost" id="btnRankBack" data-i18n="nav.back">↩ Volver</button>
+    <button class="btn btn--sm" id="btnRankBack" data-i18n="nav.back">↩ Volver</button>
     <div class="topbar__mid"></div>
-    <button class="btn btn--sm btn--icon" data-settings="open" data-i18n-aria-label="settings.title" aria-label="Ajustes">⚙️</button>
+    <button class="btn btn--sm" data-settings="open" data-i18n="settings.short">⚙️ Ajustes</button>
   </header>
   <div class="screen__body screen__body--wide">
     <h1 class="h1" data-i18n="nav.ranking">🏆 Ranking de casa</h1>
@@ -259,6 +274,11 @@
 <div class="sheet" id="settingsSheet">
   <div class="sheet__panel" role="dialog" aria-modal="true" data-i18n-aria-label="settings.title" aria-label="Ajustes">
     <h2 class="h2" data-i18n="settings.title">Ajustes</h2>
+
+    <p class="field__label" data-i18n="settings.language">🌍 Idioma</p>
+    <!-- seg--3: seis idiomas en dos filas de tres. En una sola fila de seis
+         no caben nombres como "Français" sin partirlos. -->
+    <div class="seg seg--3" id="languageSeg" role="radiogroup" data-i18n-aria-label="settings.language" aria-label="Idioma"></div>
 
     <p class="field__label" data-i18n="settings.textSize">🔠 Tamaño del texto</p>
     <div class="seg seg--3" id="textSizeSeg" role="radiogroup" data-i18n-aria-label="settings.textSize" aria-label="Tamaño del texto">

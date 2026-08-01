@@ -28,7 +28,7 @@ import { describeFlag } from "./flagDescription.js";
 import { distanceKm, direction, proximity } from "./geo.js";
 import { $, escapeHtml, onTap, normText } from "./dom.js";
 import { lsGetJSON, lsSetJSON } from "./storage.js";
-import { t } from "./i18n.js";
+import { t, countryName, countryCapital, continentName, getLocale } from "./i18n.js";
 
 const TILES = 9;        /* 3 × 3 */
 const ATTEMPTS = 6;
@@ -88,8 +88,14 @@ const GUARD = 20;
    deja al menos 21 días entre repeticiones también en la costura. Es
    determinista: cualquier dispositivo calcula lo mismo para la misma
    fecha, que es lo único que el reto necesita. */
+/* Se baraja siempre partiendo del catálogo ordenado por código ISO, no
+   del orden en que estén escritos los países en countries.js: ese
+   archivo se regenera de vez en cuando y, si el sorteo dependiera de su
+   orden, reordenarlo cambiaría el reto de todo el mundo de golpe. */
+const BY_CODE = [...COUNTRIES].sort((a, b) => (a.code < b.code ? -1 : 1));
+
 function cycleOrder(cycle) {
-  const shuffleFor = c => seededShuffle(COUNTRIES, mulberry32(seedFrom(`dcb-daily-${c}`)));
+  const shuffleFor = c => seededShuffle(BY_CODE, mulberry32(seedFrom(`dcb-daily-${c}`)));
   const order = shuffleFor(cycle);
   if (cycle <= 0) return order;
 
@@ -110,6 +116,14 @@ export function flagOfTheDay(dateStr) {
   const size = COUNTRIES.length;
   const cycle = Math.floor(n / size);
   return cycleOrder(cycle)[((n % size) + size) % size];
+}
+
+/* Números y fechas se escriben como toque en el idioma activo: el
+   separador de miles no es el mismo en 9.704 y en 9,704, y una fecha
+   numérica tampoco se ordena igual en todas partes. */
+function formatKm(km) { return km.toLocaleString(getLocale()); }
+function prettyDate(dateStr) {
+  return new Date(`${dateStr}T00:00:00Z`).toLocaleDateString(getLocale(), { timeZone: 'UTC' });
 }
 
 /* Qué pieza se destapa con cada fallo. También va sembrado por la fecha:
@@ -199,16 +213,16 @@ export function createDailyChallenge({ show, onExit, onRanking }) {
     const c = byCode.get(code);
     if (code === answer.code) {
       return `<div class="guess guess--hit">
-        <span class="guess__name">🎯 ${escapeHtml(c.name)}</span>
+        <span class="guess__name">🎯 ${escapeHtml(countryName(c))}</span>
         <span class="guess__val">${escapeHtml(t('daily.gotIt'))}</span>
       </div>`;
     }
     const km = distanceKm(c, answer);
     const dir = direction(c, answer);
     return `<div class="guess">
-      <span class="guess__name">${escapeHtml(c.name)}</span>
-      <span class="guess__val">${km.toLocaleString('es')} km</span>
-      <span class="guess__val" role="img" aria-label="${escapeHtml(t('daily.towards', { dir: dir.label }))}">${dir.arrow}</span>
+      <span class="guess__name">${escapeHtml(countryName(c))}</span>
+      <span class="guess__val">${formatKm(km)} km</span>
+      <span class="guess__val" role="img" aria-label="${escapeHtml(t('daily.towards', { dir: t(`daily.dir.${dir.key}`) }))}">${dir.arrow}</span>
       <span class="guess__val">${proximity(km)}%</span>
     </div>`;
   }
@@ -237,8 +251,8 @@ export function createDailyChallenge({ show, onExit, onRanking }) {
     if (!q) return [];
     const already = new Set(guesses);
     const pool = COUNTRIES.filter(c => !already.has(c.code));
-    const starts = pool.filter(c => normText(c.name).startsWith(q));
-    const inside = pool.filter(c => !normText(c.name).startsWith(q) && normText(c.name).includes(q));
+    const starts = pool.filter(c => normText(countryName(c)).startsWith(q));
+    const inside = pool.filter(c => !normText(countryName(c)).startsWith(q) && normText(countryName(c)).includes(q));
     return [...starts, ...inside].slice(0, SUGGESTIONS);
   }
 
@@ -246,7 +260,7 @@ export function createDailyChallenge({ show, onExit, onRanking }) {
     const host = $('dailySuggest');
     if (done) { host.hidden = true; return; }
     const list = matches($('dailyInput').value);
-    host.innerHTML = list.map(c => `<li><button type="button" class="suggest__item" data-code="${c.code}">${escapeHtml(c.name)}</button></li>`).join('');
+    host.innerHTML = list.map(c => `<li><button type="button" class="suggest__item" data-code="${c.code}">${escapeHtml(countryName(c))}</button></li>`).join('');
     host.hidden = !list.length;
     host.querySelectorAll('.suggest__item').forEach(b => {
       onTap(b, () => submitGuess(byCode.get(b.dataset.code)));
@@ -259,13 +273,13 @@ export function createDailyChallenge({ show, onExit, onRanking }) {
   function resolveTyped(text) {
     const q = normText(text);
     if (!q) return null;
-    return COUNTRIES.find(c => normText(c.name) === q) || matches(text)[0] || null;
+    return COUNTRIES.find(c => normText(countryName(c)) === q) || matches(text)[0] || null;
   }
 
   function submitGuess(country) {
     if (done || !country) return;
     if (guesses.includes(country.code)) {
-      say(t('daily.alreadyTried', { name: country.name }));
+      say(t('daily.alreadyTried', { name: countryName(country) }));
       return;
     }
     guesses.push(country.code);
@@ -276,7 +290,7 @@ export function createDailyChallenge({ show, onExit, onRanking }) {
     else if (guesses.length >= ATTEMPTS) finish(false);
     else {
       const km = distanceKm(country, answer);
-      say(t('daily.miss', { name: country.name, km: km.toLocaleString('es'), pct: proximity(km) }));
+      say(t('daily.miss', { name: countryName(country), km: formatKm(km), pct: proximity(km) }));
       persist();
       renderGrid();
       renderGuesses();
@@ -349,7 +363,8 @@ export function createDailyChallenge({ show, onExit, onRanking }) {
     $('dailyResultTitle').textContent = won
       ? t('daily.resultWin', { n: guesses.length, total: ATTEMPTS })
       : t('daily.resultLose');
-    $('dailyResultFlag').textContent = `${answer.name} · 🏛️ ${answer.capital} · ${answer.continent}`;
+    $('dailyResultFlag').textContent =
+      `${countryName(answer)} · 🏛️ ${countryCapital(answer)} · ${continentName(answer.continent)}`;
     $('dailyResultScore').textContent = t('daily.scoreLine', { score: scoreFor() });
     $('dailyResultNote').textContent = '';
   }
@@ -377,9 +392,18 @@ export function createDailyChallenge({ show, onExit, onRanking }) {
     }
   }
 
-  function prettyDate(s) {
-    const [y, m, d] = s.split('-');
-    return `${d}/${m}/${y}`;
+  /* Repinta lo que ya hay, sin tocar el estado del reto. Lo llama
+     js/game.js al cambiar de idioma: los nombres de país de los
+     intentos ya hechos, las distancias y el mensaje están en el idioma
+     con el que se jugaron y hay que rehacerlos en el nuevo. */
+  function repaint() {
+    if (!answer) return;
+    $('dailyDate').textContent = prettyDate(dateStr);
+    renderGrid();
+    renderGuesses();
+    renderSuggestions();
+    renderResult();
+    say(done ? winMessage() : t('daily.howTo'));
   }
 
   /* ---------- Arranque ---------- */
@@ -431,5 +455,5 @@ export function createDailyChallenge({ show, onExit, onRanking }) {
     if (!e.target.closest('.combo')) hideSuggestions();
   });
 
-  return { start };
+  return { start, repaint };
 }

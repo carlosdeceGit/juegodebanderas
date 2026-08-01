@@ -1,4 +1,4 @@
-import { COUNTRIES } from "./countries.js";
+import { COUNTRIES, CONTINENTS } from "./countries.js";
 import { LEVELS } from "./levels.js";
 import { pickDistractors } from "./distractors.js";
 import { getDailyRanking } from "./db.js";
@@ -6,8 +6,15 @@ import { describeFlag } from "./flagDescription.js";
 import { createDailyChallenge } from "./daily.js";
 import { $, escapeHtml, onTap } from "./dom.js";
 import { lsGet, lsSet, lsDel } from "./storage.js";
-import { t, applyStaticI18n } from "./i18n.js";
+import {
+  t, applyStaticI18n, initI18n, setLocale, getLocale, LOCALES,
+  countryName, countryCapital, continentName, compareText,
+} from "./i18n.js";
 
+/* Lo primero de todo, y a la espera: sin idioma cargado no hay ni una
+   cadena que pintar ni un nombre de país que enseñar. Todo lo que viene
+   después de esta línea da por hecho que el idioma ya está. */
+await initI18n();
 applyStaticI18n();
 
 /* Modo "repasa tus fallos": no es un nivel fijo, se arma con las banderas
@@ -32,8 +39,6 @@ const PAIRING_LEVEL = {
   key: "pairing", labelKey: "level.pairing.label", icon: "🏛️",
   rounds: 16, secs: 14, opts: 3, distractorMode: "mixed", retry: true, hints: 2, mult: 1,
 };
-const CONTINENTS = ["África", "América", "Asia", "Europa", "Oceanía"];
-
 /* Supervivencia: una sola vida, la dificultad sube con cada acierto.
    Se genera un objeto nuevo por partida porque sus campos se mutan ronda a ronda. */
 function makeSurvivalLevel() {
@@ -166,15 +171,27 @@ function wrongCodes() {
   return [...wrongMap.entries()].filter(([, n]) => n > 0).sort((a, b) => b[1] - a[1]).map(([code]) => code);
 }
 
-/* ---------- Filtro de continente (solo afecta a los niveles clásicos) ---------- */
+/* ---------- Filtro de continente (solo afecta a los niveles clásicos) ----------
+   El continente se guarda como código ("af", "am"…). Antes se guardaba el
+   nombre en español, así que quien ya tenía un filtro puesto lo traía
+   escrito "África": se traduce al vuelo y se vuelve a guardar. */
 const CONTINENT_KEY = 'dcb_continent';
-let continentFilter = lsGet(CONTINENT_KEY) || '';
+const LEGACY_CONTINENTS = {
+  'África': 'af', 'América': 'am', 'Asia': 'as', 'Europa': 'eu', 'Oceanía': 'oc',
+};
+function normalizeContinent(value) {
+  if (CONTINENTS.includes(value)) return value;
+  return LEGACY_CONTINENTS[value] || '';
+}
+let continentFilter = normalizeContinent(lsGet(CONTINENT_KEY));
+lsSet(CONTINENT_KEY, continentFilter);
+
 function poolForContinent() {
   return continentFilter ? COUNTRIES.filter(c => c.continent === continentFilter) : COUNTRIES;
 }
 function setContinent(value) {
-  continentFilter = value;
-  lsSet(CONTINENT_KEY, value);
+  continentFilter = normalizeContinent(value);
+  lsSet(CONTINENT_KEY, continentFilter);
 }
 
 /* ---------- Jugadores ----------
@@ -386,6 +403,7 @@ function paintPills(currentId) {
 function renderModeStep() {
   updateSeenProgress();
   paintPills('s-mode');
+  renderLangBar();
 
   const grid = $('modeGrid');
   grid.innerHTML = '';
@@ -416,7 +434,8 @@ function renderModeStep() {
     const m = MODES[last.modeKey];
     const parts = [`${m.icon} ${t(m.labelKey)}`];
     if (m.needsLevel && LEVELS[last.levelKey]) parts.push(t(LEVELS[last.levelKey].labelKey));
-    if (m.usesScope && last.scope) parts.push(last.scope);
+    const scope = normalizeContinent(last.scope);
+    if (m.usesScope && scope) parts.push(continentName(scope));
     parts.push(last.player);
     $('continueSub').textContent = parts.join(' · ');
   }
@@ -453,13 +472,13 @@ function renderLevelStep() {
 
   renderContinentSeg($('continentSeg'), () => renderLevelStep());
   $('scopeNote').textContent = continentFilter
-    ? t('level.scopeCount', { scope: continentFilter, count: poolSize })
+    ? t('level.scopeCount', { scope: continentName(continentFilter), count: poolSize })
     : t('level.scopeAll', { count: poolSize });
 }
 
 function renderContinentSeg(host, onChange) {
   host.innerHTML = '';
-  const options = [['', t('level.continentAll')], ...CONTINENTS.map(c => [c, c])];
+  const options = [['', t('level.continentAll')], ...CONTINENTS.map(c => [c, continentName(c)])];
   options.forEach(([value, label]) => {
     const b = document.createElement('button');
     b.type = 'button';
@@ -477,7 +496,7 @@ function renderWhoStep() {
   const m = MODES[wizard.modeKey];
   const parts = [`${m.icon} ${t(m.labelKey)}`];
   if (m.needsLevel && LEVELS[wizard.levelKey]) parts.push(t(LEVELS[wizard.levelKey].labelKey));
-  if (m.usesScope && continentFilter) parts.push(continentFilter);
+  if (m.usesScope && continentFilter) parts.push(continentName(continentFilter));
   $('whoSummary').textContent = parts.join(' · ');
   $('whoError').textContent = '';
 
@@ -563,9 +582,74 @@ onTap($('btnContinue'), () => {
 /* ---------- Ajustes ---------- */
 document.querySelectorAll('[data-settings]').forEach(el => onTap(el, () => {
   const open = el.dataset.settings === 'open';
-  if (open) renderSettingsPlayers();
+  if (open) { renderSettingsPlayers(); renderLanguageSeg(); }
   $('settingsSheet').classList.toggle('on', open);
 }));
+
+/* ---------- Idioma ----------
+   Hay dos selectores y hacen lo mismo: uno en la portada, siempre a la
+   vista, y otro en los ajustes. El de la portada es el que importa —
+   si el juego arranca en el idioma equivocado (lo detecta del navegador),
+   se arregla ahí mismo sin tener que ir a buscarlo a ningún menú.
+
+   El cambio es en caliente: se trae el paquete nuevo, se vuelven a pintar
+   las cadenas fijas del HTML y se repinta la pantalla que esté puesta.
+   Cuando se cambia desde los ajustes, la hoja se queda abierta a propósito:
+   así se ve el cambio sin salir de donde se ha hecho.
+
+   Ninguno de los dos está en la partida: cambiar de idioma a media ronda,
+   con el reloj corriendo y las opciones ya en pantalla, no es algo que
+   haga falta poder hacer. */
+async function changeLanguage(code) {
+  await setLocale(code);
+  applyStaticI18n();
+  renderLangBar();
+  renderLanguageSeg();
+  renderSettingsPlayers();
+  renderCurrentScreen();
+}
+
+/* Un botón de idioma. Se pinta el código corto o el nombre entero según
+   quepa, pero el nombre completo va siempre en el `aria-label` y el `lang`
+   propio hace que un lector de pantalla lo lea con su pronunciación —
+   "Français" leído en español no lo entiende nadie. */
+function languageButton({ code, label, short }, useShortLabel) {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.setAttribute('role', 'radio');
+  b.setAttribute('aria-checked', String(code === getLocale()));
+  b.setAttribute('aria-label', label);
+  b.lang = code;
+  b.textContent = useShortLabel ? short : label;
+  if (useShortLabel) b.title = label;
+  onTap(b, () => changeLanguage(code));
+  return b;
+}
+
+function renderLangBar() {
+  const host = $('langBar');
+  host.innerHTML = '';
+  LOCALES.forEach(loc => host.appendChild(languageButton(loc, true)));
+}
+
+function renderLanguageSeg() {
+  const host = $('languageSeg');
+  host.innerHTML = '';
+  LOCALES.forEach(loc => host.appendChild(languageButton(loc, false)));
+}
+
+/* Repinta la pantalla visible sin navegar (no toca el scroll ni el paso del
+   asistente). Las que no salen aquí no llevan texto que dependa del idioma
+   fuera de lo que ya arregla applyStaticI18n(). */
+function renderCurrentScreen() {
+  const id = document.querySelector('.screen.on')?.id;
+  if (id === 's-mode') renderModeStep();
+  else if (id === 's-level') renderLevelStep();
+  else if (id === 's-who') renderWhoStep();
+  else if (id === 's-learn') renderLearnList();
+  else if (id === 's-ranking') renderRanking();
+  else if (id === 's-daily') dailyChallenge.repaint();
+}
 $('textSizeSeg').querySelectorAll('[data-size]').forEach(b => {
   onTap(b, () => applyTextSize(b.dataset.size));
 });
@@ -637,13 +721,16 @@ function startSurvival() {
 /* ---------- Pantalla "Aprender sin prisa" (sin cronómetro ni puntuación) ---------- */
 function renderLearnList() {
   renderContinentSeg($('learnSeg'), renderLearnList);
-  const pool = poolForContinent().slice().sort((a, b) => a.name.localeCompare(b.name, 'es'));
+  /* El alfabético depende del idioma: "Ãland" y "Zimbabue" no caen en el
+     mismo sitio en sueco que en español. */
+  const pool = poolForContinent().slice()
+    .sort((a, b) => compareText(countryName(a), countryName(b)));
   $('learnList').innerHTML = pool.map(c => `
     <div class="learnRow">
-      <img src="${flagSrc(c.code)}" alt="${escapeHtml(t('learn.flagAlt', { name: c.name }))}" loading="lazy">
+      <img src="${flagSrc(c.code)}" alt="${escapeHtml(t('learn.flagAlt', { name: countryName(c) }))}" loading="lazy">
       <div class="learnInfo">
-        <b>${escapeHtml(c.name)}</b>
-        <span>${escapeHtml(c.continent)} · 🏛️ ${escapeHtml(c.capital)}</span>
+        <b>${escapeHtml(countryName(c))}</b>
+        <span>${escapeHtml(continentName(c.continent))} · 🏛️ ${escapeHtml(countryCapital(c))}</span>
       </div>
     </div>`).join('');
 }
@@ -681,7 +768,7 @@ function nextRound() {
   optsEl.classList.toggle('flagOptions', mode === 'invert');
 
   if (mode === 'invert') {
-    box.innerHTML = `<div class="promptName">${escapeHtml(answer.name)}</div>`;
+    box.innerHTML = `<div class="promptName">${escapeHtml(countryName(answer))}</div>`;
     const distractors = pickDistractors(distractorPool, answer, level.opts - 1, level.distractorMode);
     const choices = shuffle([answer, ...distractors]);
     choices.forEach(c => {
@@ -693,10 +780,10 @@ function nextRound() {
     });
   } else if (mode === 'classify') {
     box.innerHTML = `<img src="${flagSrc(answer.code)}" alt="${escapeHtml(describeFlag(answer))}" loading="eager">`;
-    shuffle(CONTINENTS).forEach(name => {
+    shuffle(CONTINENTS).forEach(code => {
       const b = document.createElement('button');
-      b.className = 'btn opt'; b.textContent = name; b.dataset.continent = name;
-      onTap(b, () => pickClassify(b, name));
+      b.className = 'btn opt'; b.textContent = continentName(code); b.dataset.continent = code;
+      onTap(b, () => pickClassify(b, code));
       optsEl.appendChild(b);
     });
   } else {
@@ -706,7 +793,7 @@ function nextRound() {
     choices.forEach(c => {
       const b = document.createElement('button');
       b.className = 'btn opt'; b.dataset.code = c.code;
-      b.textContent = mode === 'pairing' ? c.capital : c.name;
+      b.textContent = mode === 'pairing' ? countryCapital(c) : countryName(c);
       onTap(b, () => pick(b, c));
       optsEl.appendChild(b);
     });
@@ -861,7 +948,9 @@ const buzz = p => { try { navigator.vibrate && navigator.vibrate(p); } catch { /
 
 /* ---------- Resolución de ronda ---------- */
 function factText() {
-  return mode === 'pairing' ? t('game.factCountry', { name: answer.name }) : t('game.factCapital', { capital: answer.capital });
+  return mode === 'pairing'
+    ? t('game.factCountry', { name: countryName(answer) })
+    : t('game.factCapital', { capital: countryCapital(answer) });
 }
 function markCorrectOption() {
   const opts = [...$('options').children];
@@ -885,7 +974,7 @@ function resolveRound(btn, isCorrect) {
     [...$('options').children].forEach(b => b.disabled = true);
     $('feedback').textContent = wrongCount === 0 ? t('game.correctFirstTry', { pts }) : t('game.correctAfterRetry', { pts });
     $('fact').textContent = factText();
-    if (wrongCount > 0) { wrongList.push(answer.name); recordWrong(answer.code); }
+    if (wrongCount > 0) { wrongList.push(answer.code); recordWrong(answer.code); }
     if (mode === 'review') clearWrong(answer.code);
     idx++;
     setTimeout(nextRound, 1000);
@@ -898,11 +987,11 @@ function resolveRound(btn, isCorrect) {
     if (!level.retry) {
       locked = true; clearInterval(timer);
       streak = 0; updateStreakChip();
-      wrongList.push(answer.name);
+      wrongList.push(answer.code);
       recordWrong(answer.code);
       [...$('options').children].forEach(b => b.disabled = true);
       markCorrectOption();
-      $('feedback').textContent = t('game.wasAnswer', { name: answer.name });
+      $('feedback').textContent = t('game.wasAnswer', { name: countryName(answer) });
       $('fact').textContent = factText();
       if (mode === 'survival') {
         setTimeout(end, 1500);
@@ -920,17 +1009,17 @@ function resolveRound(btn, isCorrect) {
 }
 
 function pick(btn, choice) { resolveRound(btn, choice.code === answer.code); }
-function pickClassify(btn, continentName) { resolveRound(btn, continentName === answer.continent); }
+function pickClassify(btn, continentCode) { resolveRound(btn, continentCode === answer.continent); }
 
 function timeout() {
   clearInterval(timer); locked = true;
   buzz(140); burst('lose');
   streak = 0; updateStreakChip();
-  wrongList.push(answer.name);
+  wrongList.push(answer.code);
   recordWrong(answer.code);
   [...$('options').children].forEach(b => b.disabled = true);
   markCorrectOption();
-  $('feedback').textContent = t('game.timeUp', { name: answer.name });
+  $('feedback').textContent = t('game.timeUp', { name: countryName(answer) });
   $('fact').textContent = factText();
   if (mode === 'survival') {
     setTimeout(end, 1600);
@@ -979,19 +1068,15 @@ function end() {
   list.innerHTML = missed.length === 0
     ? `<div class="row row--empty">${escapeHtml(t('end.noMistakes'))}</div>`
     : `<div class="row row--empty"><b>${escapeHtml(t('end.forReview'))}</b></div>`
-      + missed.map(n => {
-          const c = COUNTRIES.find(x => x.name === n);
-          return `<div class="row">
-            ${c ? `<img class="row__flag" src="${flagSrc(c.code)}" alt="" loading="lazy">` : '<span class="row__rank"></span>'}
-            <span class="row__name">${escapeHtml(n)}</span>
-            <span class="row__val">${c ? '🏛️ ' + escapeHtml(c.capital) : ''}</span>
-          </div>`;
-        }).join('');
+      + missed.map(code => `<div class="row">
+            <img class="row__flag" src="${flagSrc(code)}" alt="" loading="lazy">
+            <span class="row__name">${escapeHtml(countryName(code))}</span>
+            <span class="row__val">🏛️ ${escapeHtml(countryCapital(code))}</span>
+          </div>`).join('');
 
   /* Los botones de salida apuntan a pasos concretos del asistente. */
   $('btnChangeLevel').hidden = !MODES[mode]?.needsLevel;
   $('btnEndReview').hidden = wrongCodes().length < REVIEW_MIN_FAILS;
-  $('btnEndRanking').hidden = !MODES[mode]?.scoreable;
 
   show('s-end');
 

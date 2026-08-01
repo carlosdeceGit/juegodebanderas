@@ -1,8 +1,9 @@
 # Diversión con Banderas
 
-Juego web de "adivina el país por su bandera", en español, pensado
-originalmente como juego familiar. HTML + CSS + JavaScript **vanilla**
-(módulos ES nativos), sin build, sin framework, sin dependencias npm.
+Juego web de "adivina el país por su bandera", en seis idiomas (español,
+catalán, inglés, francés, alemán e italiano), pensado originalmente como
+juego familiar. HTML + CSS + JavaScript **vanilla** (módulos ES nativos),
+sin build, sin framework, sin dependencias npm.
 El progreso y el ranking de casa se guardan en el propio dispositivo;
 Supabase se usa solo para el ranking del reto diario. El juego funciona
 igual de bien sin conexión —el reto de hoy incluido, porque la bandera
@@ -14,7 +15,8 @@ funciona y qué tener en cuenta antes de tocarlo. Para el historial de
 por qué se tomó cada decisión, ver `docs/auditoria-juegodebanderas.md`
 (la auditoría original) y `docs/decisiones-producto.md` (decisiones de
 producto explícitas: fecha del reto diario, criterio de países,
-evaluación del ranking global).
+evaluación del ranking global). Para todo lo relativo a idiomas, ver
+`docs/idiomas.md`.
 
 ## Cómo ejecutarlo
 
@@ -38,9 +40,10 @@ style.css                   Sistema de diseño y todo el CSS (sin preprocesador)
 js/
   game.js                   Estado del juego, bucle de ronda, todos los modos por turnos
   daily.js                  El reto de hoy: una bandera tapada en 9 piezas (pantalla propia)
-  countries.js              Datos de los 195 países (nombre, capital, continente,
-                             coordenadas lat/lon, y etiquetas pattern/palette para
-                             calcular distractores)
+  countries.js              Datos de los 195 países que NO dependen del idioma
+                             (código ISO, código de continente, coordenadas
+                             lat/lon, y etiquetas pattern/palette para calcular
+                             distractores)
   levels.js                 Configuración declarativa de los 4 niveles clásicos
   distractors.js            Algoritmo de similitud para elegir opciones incorrectas
   confusables.js            Lista curada a mano de banderas clásicamente confundibles
@@ -48,17 +51,23 @@ js/
   geo.js                    Distancia, rumbo y proximidad entre países (pistas del reto)
   dom.js                    Helpers de interfaz compartidos ($, escapeHtml, onTap, normText)
   storage.js                localStorage tolerante a fallo (lsGet/lsSet/lsGetJSON…)
-  i18n.js                   Diccionario de cadenas de la interfaz (solo "es" por ahora)
+  i18n.js                   Motor de idiomas (elige, carga y sirve; sin cadenas dentro)
+  i18n/<idioma>.js          Un archivo por idioma: interfaz, continentes, vocabulario
+  i18n/names.<idioma>.js    Nombres de país y capitales de ese idioma
   db.js                     Cliente REST directo contra Supabase (sin SDK)
 assets/flags/                196 SVG (proyecto flag-icons, MIT) + LICENSE-flag-icons.txt
 supabase/migrations/         Esquema y políticas RLS de la base de datos, versionados
+tools/check-i18n.mjs         Comprueba que los seis idiomas están completos
+tools/build-names.mjs        Regenera los nombres de país de los idiomas derivados
+docs/idiomas.md               Cómo funcionan los idiomas y cómo añadir uno
 docs/decisiones-producto.md   Decisiones de producto explícitas (fecha UTC, países, ranking global)
 docs/auditoria-juegodebanderas.md  Auditoría original y roadmap por fases (histórico)
 ```
 
-No hay carpeta de tests, ni linter, ni CI configurados. Ver
-"Cómo probar cambios" más abajo para cómo se ha verificado cada cambio
-hasta ahora.
+No hay carpeta de tests, ni linter, ni CI configurados. La única
+comprobación automática del proyecto es `node tools/check-i18n.mjs`, que
+no necesita dependencias. Ver "Cómo probar cambios" más abajo para cómo se
+ha verificado cada cambio hasta ahora.
 
 ## Cómo está montada la interfaz
 
@@ -102,6 +111,30 @@ asistente), pero no se pintan en la rejilla porque tienen su propio
 sitio en la pantalla — tarjeta destacada arriba y bloque de "sin
 puntos" abajo. "Aprender" no está en `MODES` porque no es una partida:
 no tiene nivel, ni jugador, ni puntuación.
+
+### La cabecera
+
+Todas las pantallas menos la partida llevan la misma `<header class="topbar">`,
+con la misma forma: **acción a la izquierda, ajustes a la derecha, las dos
+con etiqueta y con las mismas clases** (`.btn .btn--sm`). La acción de la
+izquierda cambia según dónde estés — `🏆 Ranking` en la portada y en el
+fin de partida, `← Otro juego` / `← Nivel` en los pasos del asistente,
+`↩ Volver` en aprender y en el ranking — pero el marco es idéntico.
+
+Dos cosas que conviene no deshacer:
+
+- **Nada de botones que sean solo un emoji en un círculo.** Se probaron y
+  no se entendían. Si hace falta una acción nueva en la cabecera, va con
+  su etiqueta.
+- **Las píldoras de progreso no van dentro de la cabecera**, sino en su
+  propia fila dentro del contenido. Metidas en medio, con tres píldoras
+  más las dos etiquetas, se desbordaba un móvil de 390px — y con el
+  tamaño de texto en XL, cualquiera. Tampoco se pintan en la portada:
+  antes de elegir nada no informan de nada.
+
+La partida es la excepción a propósito: su cabecera es el HUD (marcador,
+rondas, tiempo) y ahí el `☰` sí va sin etiqueta porque compite por el
+espacio con cinco indicadores.
 
 ### Sistema de diseño
 
@@ -241,6 +274,12 @@ Piezas que conviene conocer antes de tocarlo:
   mayúsculas (`normText`). Un país que no existe o uno ya probado
   **no gasta intento**: gastarlo por una errata sería injusto cuando
   solo hay un intento al día.
+- **En el idioma que se esté jugando.** Los nombres se comparan contra
+  los del idioma activo (`countryName`), no contra los españoles, y los
+  rumbos, las distancias y la fecha se escriben con las reglas de ese
+  idioma. La bandera del día, en cambio, **no depende del idioma**: sale
+  del código ISO, así que media familia puede jugarlo en catalán y la
+  otra media en inglés y seguir comparando el mismo reto.
 - **El estado se guarda** en `dcb_daily_v2`, por fecha y jugador:
   recargar la página no regala intentos. Se guarda el día entero en una
   sola clave y se descarta cuando cambia la fecha, así que el
@@ -294,10 +333,17 @@ del SVG — ver la auditoría para más detalle.
   `flagDescription.js` a partir de `pattern`/`palette` (p. ej. "Bandera
   con franjas horizontales y tres colores, en rojo y amarillo") —
   describe la forma sin nombrar el país, así que no revela la
-  respuesta pero permite jugar con lector de pantalla. **Importante:**
-  si se añade un modo nuevo que muestre una bandera como pregunta, usar
-  siempre `describeFlag(country)` para el `alt`, nunca `alt=""` ni el
-  nombre del país.
+  respuesta pero permite jugar con lector de pantalla. La descripción va
+  en el idioma activo: su vocabulario (colores, formas, patrones con
+  nombre propio como la Union Jack) está en el bloque `flag` de cada
+  archivo de idioma, y `flagDescription.js` solo pone la gramática.
+  **Importante:** si se añade un modo nuevo que muestre una bandera como
+  pregunta, usar siempre `describeFlag(country)` para el `alt`, nunca
+  `alt=""` ni el nombre del país.
+- `<html lang>` se actualiza al idioma activo, para que el lector de
+  pantalla lea cada idioma con su propia pronunciación. Los botones del
+  selector de idioma llevan su propio `lang`, que es lo que hace que
+  "Français" no se lea con acento español.
 - `aria-live="polite"` en el feedback, el dato de la capital y la
   puntuación.
 - Ajuste de tamaño de texto (3 pasos) en la hoja de ajustes, accesible
@@ -328,8 +374,9 @@ del SVG — ver la auditoría para más detalle.
 | `dcb_seen_v1` | Mapa código→veces vista, por bandera (progreso de aprendizaje) |
 | `dcb_wrong_v1` | Mapa código→nº de fallos históricos (alimenta "Repasa tus fallos") |
 | `dcb_daily_v2` | El reto de hoy en curso: `{date, players:{jugador:{guesses,done,won,saved}}}`. Se descarta entero al cambiar la fecha |
-| `dcb_continent` | Filtro de continente elegido (solo afecta a los niveles clásicos) |
+| `dcb_continent` | Filtro de continente elegido, por código (solo afecta a los niveles clásicos) |
 | `dcb_textsize` | Tamaño de texto (`'md'`/`'lg'`/`'xl'`) |
+| `dcb_lang` | Idioma elegido a mano (`'es'`/`'ca'`/`'en'`/`'fr'`/`'de'`/`'it'`) |
 
 Dos claves antiguas se migran solas al cargar y luego se borran, así que
 nadie pierde nada al actualizar: `dcb_player` (un único nombre) siembra
@@ -446,21 +493,57 @@ CI que lo haga automáticamente).
 
 ## Internacionalización
 
-`js/i18n.js` tiene un diccionario `STRINGS.es` con **todas** las
-cadenas de la interfaz; `index.html` marca los elementos estáticos con
-`data-i18n`/`data-i18n-html`/`data-i18n-placeholder`/`data-i18n-aria-label`,
-y `applyStaticI18n()` los rellena al cargar. Las cadenas dinámicas
-(feedback de ronda, pantalla de fin, ranking, duelo) se generan con
-`t('clave', { variables })` directamente en `game.js`.
+El juego está en **seis idiomas**: español, catalán, inglés, francés,
+alemán e italiano. Está traducido todo lo que ve el jugador, no solo la
+interfaz: los nombres de país, las capitales, los continentes y las
+descripciones de bandera para lector de pantalla.
 
-**Para añadir un idioma nuevo:** añadir un objeto hermano de `es` en
-`STRINGS` con las mismas claves traducidas, y cambiar la constante
-`LOCALE` (o convertirla en configurable) — no hace falta tocar
-`game.js`, `index.html` ni la lógica de juego. Lo que **no** está
-traducido todavía son los datos de contenido (nombre/capital/continente
-de cada país en `countries.js`, y las descripciones generadas por
-`flagDescription.js`): eso requeriría su propio conjunto de datos
-traducidos, ver `docs/decisiones-producto.md`.
+Se detecta el del navegador la primera vez, y se cambia desde **dos sitios
+que hacen lo mismo**: la fila de códigos (`ES · CA · EN · FR · DE · IT`) de
+lo alto de la portada, siempre a la vista, y **Ajustes → 🌍 Idioma**, con
+los nombres completos. Ambos pasan por `changeLanguage()` en `game.js`, que
+recarga el paquete, repinta las cadenas fijas, repinta la pantalla en curso
+y deja los dos selectores sincronizados. El de la portada es el que
+resuelve el caso real: un móvil configurado en inglés en una casa que juega
+en español.
+
+`js/i18n.js` es solo el motor —elige el idioma, lo carga con `import()`
+dinámico y lo sirve— y no contiene ni una cadena traducible. Cada idioma
+vive entero en `js/i18n/<código>.js` (interfaz, continentes, vocabulario de
+las descripciones de bandera) más su `js/i18n/names.<código>.js` (nombres de
+país y capitales). Como el paquete se carga bajo demanda, un móvil se
+descarga un idioma, no seis.
+
+`index.html` marca los elementos estáticos con
+`data-i18n`/`data-i18n-html`/`data-i18n-placeholder`/`data-i18n-aria-label`,
+y `applyStaticI18n()` los rellena; el HTML conserva el texto en español
+dentro de las etiquetas a propósito, que es lo que se ve si el JavaScript no
+llega a correr. Las cadenas dinámicas se generan con `t('clave', { vars })`,
+y el contenido con `countryName(c)`, `countryCapital(c)` y
+`continentName(code)`.
+
+Como el arranque tiene que esperar al idioma, `js/game.js` empieza con un
+`await initI18n()` en el nivel superior del módulo. Todo lo que va debajo da
+por hecho que el idioma ya está cargado.
+
+**Reglas al tocar código:**
+
+- Nada de texto suelto en `game.js`, `daily.js`, `geo.js`, `index.html` ni
+  `flagDescription.js`: toda cadena nueva es una clave en los seis archivos
+  de idioma. `geo.js` devuelve la *clave* del rumbo (`"ne"`), no su nombre;
+  quien lo pinta busca `daily.dir.ne` en el idioma activo.
+- Los números y las fechas también son idioma: `toLocaleString(getLocale())`
+  y `toLocaleDateString(getLocale())`, no un formato fijo. El separador de
+  miles de 9.704 no vale para todos.
+- El continente es un código (`"af"`, `"am"`, `"as"`, `"eu"`, `"oc"`), nunca
+  su nombre. Comparar por código, pintar con `continentName()`.
+- Los países se identifican por su código ISO en todas partes (mazo,
+  historial de fallos, ranking). Nunca por su nombre: cambiaría al cambiar
+  de idioma y se perdería el historial.
+- Después de tocar idiomas, `node tools/check-i18n.mjs` tiene que pasar.
+
+Para añadir un idioma, de dónde salen los datos de CLDR y qué no se traduce
+a propósito, ver **`docs/idiomas.md`**.
 
 ## Decisiones de producto a respetar
 
@@ -502,6 +585,13 @@ como mínimo:
 - Los tres pasos del asistente en móvil (390px) y en escritorio
   (1440px), incluyendo un modo con nivel y otro sin él, y que la
   migración de `dcb_player`/`dcb_bigtext` conserva jugador y ajuste.
+- Si se tocan idiomas: `node tools/check-i18n.mjs`, más el juego real en
+  al menos dos idiomas, cambiando de idioma **desde los dos selectores**
+  (la fila de la portada y el de ajustes) y comprobando que la pantalla se
+  repinta, que el otro selector queda marcado igual, que el idioma
+  sobrevive a una recarga y que ninguna etiqueta se sale de su botón con
+  el texto en XL (los nombres largos —"Français", "Ozeanien"— son el caso
+  que lo rompe).
 
 **Trampa al guionizar los tests:** `onTap()` ignora dos toques seguidos
 sobre el mismo elemento en menos de 500ms (antirrebote). Un guion que

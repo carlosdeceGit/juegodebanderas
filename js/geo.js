@@ -31,17 +31,19 @@ function bearing(a, b) {
   return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
 }
 
-/* Los ocho rumbos, con su nombre para quien navegue con lector de
-   pantalla (una flecha suelta no dice nada en voz alta). */
+/* Los ocho rumbos. Aquí no hay ni una palabra escrita: se devuelve la
+   flecha y la clave del rumbo, y quien lo pinta busca el nombre en el
+   idioma activo (`daily.dir.*`) — una flecha suelta no dice nada leída
+   en voz alta por un lector de pantalla. */
 const ARROWS = [
-  ['⬆️', 'norte'], ['↗️', 'noreste'], ['➡️', 'este'], ['↘️', 'sureste'],
-  ['⬇️', 'sur'], ['↙️', 'suroeste'], ['⬅️', 'oeste'], ['↖️', 'noroeste'],
+  ['⬆️', 'n'], ['↗️', 'ne'], ['➡️', 'e'], ['↘️', 'se'],
+  ['⬇️', 's'], ['↙️', 'sw'], ['⬅️', 'w'], ['↖️', 'nw'],
 ];
 
 export function direction(a, b) {
   const i = Math.round(bearing(a, b) / 45) % 8;
-  const [arrow, label] = ARROWS[i];
-  return { arrow, label };
+  const [arrow, key] = ARROWS[i];
+  return { arrow, key };
 }
 
 /* "Lo cerca que estás", de 0 a 100. Es lineal sobre la distancia máxima
