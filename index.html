@@ -20,6 +20,11 @@
   </header>
 
   <div class="screen__body screen__body--wide">
+    <!-- El idioma, lo primero y siempre a la vista. Si el juego arranca en
+         un idioma que no es el de quien lo abre, se arregla aquí mismo sin
+         tener que entrar en los ajustes a buscarlo. -->
+    <div class="langbar" id="langBar" role="radiogroup" data-i18n-aria-label="settings.language" aria-label="Idioma"></div>
+
     <div class="bunting" aria-hidden="true"></div>
     <p class="eyebrow" data-i18n="start.eyebrow">El gran juego de banderas</p>
     <h1 class="h1 cover-name" data-i18n-html="start.titleHtml">Diversión con<br>Banderas</h1>

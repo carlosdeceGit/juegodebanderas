@@ -13,11 +13,30 @@ parte, enseña "Spanien" con capital "Madrid" en el continente "Europa".
    orden de preferencia, quedándose con la parte base: `de-AT` → `de`).
 3. Si no, español.
 
-Se cambia desde **Ajustes → 🌍 Idioma**, sin recargar la página: se descarga
-el paquete del idioma, se repintan las cadenas fijas del HTML y se vuelve a
-pintar la pantalla que esté puesta. El selector no aparece durante una
-partida porque el botón de ajustes tampoco: no hace falta poder cambiar de
-idioma a media ronda, con el reloj corriendo.
+Hay **dos selectores**, y hacen exactamente lo mismo:
+
+- **En la portada**, arriba del todo, siempre a la vista: una fila con los
+  seis códigos de dos letras (`ES · CA · EN · FR · DE · IT`). Es el que
+  importa: si el juego arranca en el idioma equivocado —lo detecta del
+  navegador, y un móvil configurado en inglés en una casa que habla español
+  es de lo más normal— se arregla ahí mismo, sin tener que ir a buscarlo a
+  ningún menú. Va en código corto porque está encima del rótulo de portada y
+  no puede robarle altura; el nombre entero sigue en el `aria-label`.
+- **En Ajustes → 🌍 Idioma**, con los nombres completos ("Español",
+  "Deutsch"), que es donde hay sitio para escribirlos.
+
+El cambio es en caliente, sin recargar: se descarga el paquete del idioma,
+se repintan las cadenas fijas del HTML y se vuelve a pintar la pantalla que
+esté puesta. Los dos selectores pasan por `changeLanguage()` en `game.js`,
+que además los mantiene sincronizados entre sí.
+
+Ninguno de los dos aparece durante una partida —el botón de ajustes tampoco—
+porque cambiar de idioma a media ronda, con el reloj corriendo y las
+opciones ya en pantalla, no es algo que haga falta poder hacer.
+
+**No se usan banderas para representar idiomas.** En un juego de banderas
+sería confuso, y además no cuadran: el catalán no tiene bandera en emoji y
+el inglés no es de ningún país en particular.
 
 ## Dónde vive cada cosa
 
@@ -49,9 +68,11 @@ distractores y la descripción accesible. El nombre y la capital se piden con
    dependencias y ejecutarlo para generar `js/i18n/names.<código>.js`.
    Si CLDR no trae ese idioma, se escribe el archivo a mano con el mismo
    formato: `código ISO: [nombre, capital]`.
-3. Añadir `{ code, label }` a `LOCALES` en `js/i18n.js`. El `label` va
+3. Añadir `{ code, label, short }` a `LOCALES` en `js/i18n.js`. El `label` va
    escrito **en ese mismo idioma** ("Deutsch", no "alemán"): quien busca su
-   idioma en la lista no sabe cómo se llama en español.
+   idioma en la lista no sabe cómo se llama en español. `short` son las dos
+   letras del selector de portada. Con más de seis idiomas, esa fila deja de
+   caber en una pantalla estrecha y habría que replantearla.
 4. `node tools/check-i18n.mjs` tiene que pasar.
 
 No hay que tocar `game.js`, `index.html` ni la lógica de juego.

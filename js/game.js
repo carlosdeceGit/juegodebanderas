@@ -465,6 +465,7 @@ function paintPills(currentId) {
 function renderModeStep() {
   updateSeenProgress();
   paintPills('s-mode');
+  renderLangBar();
 
   const grid = $('modeGrid');
   grid.innerHTML = '';
@@ -647,35 +648,56 @@ document.querySelectorAll('[data-settings]').forEach(el => onTap(el, () => {
   $('settingsSheet').classList.toggle('on', open);
 }));
 
-/* El idioma se cambia sin recargar: se trae el paquete nuevo, se vuelven a
-   pintar las cadenas fijas del HTML y se repinta la pantalla que esté
-   puesta. Los ajustes se quedan abiertos a propósito — así se ve el cambio
-   sin salir de donde se ha hecho.
+/* ---------- Idioma ----------
+   Hay dos selectores y hacen lo mismo: uno en la portada, siempre a la
+   vista, y otro en los ajustes. El de la portada es el que importa —
+   si el juego arranca en el idioma equivocado (lo detecta del navegador),
+   se arregla ahí mismo sin tener que ir a buscarlo a ningún menú.
 
-   El selector no está en la partida: el botón de ajustes solo aparece en el
-   asistente, en "aprender" y en el ranking. Cambiar de idioma a media
-   ronda, con el reloj corriendo y las opciones ya en pantalla, no es algo
-   que haga falta poder hacer. */
+   El cambio es en caliente: se trae el paquete nuevo, se vuelven a pintar
+   las cadenas fijas del HTML y se repinta la pantalla que esté puesta.
+   Cuando se cambia desde los ajustes, la hoja se queda abierta a propósito:
+   así se ve el cambio sin salir de donde se ha hecho.
+
+   Ninguno de los dos está en la partida: cambiar de idioma a media ronda,
+   con el reloj corriendo y las opciones ya en pantalla, no es algo que
+   haga falta poder hacer. */
+async function changeLanguage(code) {
+  await setLocale(code);
+  applyStaticI18n();
+  renderLangBar();
+  renderLanguageSeg();
+  renderSettingsPlayers();
+  renderCurrentScreen();
+}
+
+/* Un botón de idioma. Se pinta el código corto o el nombre entero según
+   quepa, pero el nombre completo va siempre en el `aria-label` y el `lang`
+   propio hace que un lector de pantalla lo lea con su pronunciación —
+   "Français" leído en español no lo entiende nadie. */
+function languageButton({ code, label, short }, useShortLabel) {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.setAttribute('role', 'radio');
+  b.setAttribute('aria-checked', String(code === getLocale()));
+  b.setAttribute('aria-label', label);
+  b.lang = code;
+  b.textContent = useShortLabel ? short : label;
+  if (useShortLabel) b.title = label;
+  onTap(b, () => changeLanguage(code));
+  return b;
+}
+
+function renderLangBar() {
+  const host = $('langBar');
+  host.innerHTML = '';
+  LOCALES.forEach(loc => host.appendChild(languageButton(loc, true)));
+}
+
 function renderLanguageSeg() {
   const host = $('languageSeg');
   host.innerHTML = '';
-  const current = getLocale();
-  LOCALES.forEach(({ code, label }) => {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.setAttribute('role', 'radio');
-    b.setAttribute('aria-checked', String(code === current));
-    b.lang = code;
-    b.textContent = label;
-    onTap(b, async () => {
-      await setLocale(code);
-      applyStaticI18n();
-      renderLanguageSeg();
-      renderSettingsPlayers();
-      renderCurrentScreen();
-    });
-    host.appendChild(b);
-  });
+  LOCALES.forEach(loc => host.appendChild(languageButton(loc, false)));
 }
 
 /* Repinta la pantalla visible sin navegar (no toca el scroll ni el paso del

@@ -396,6 +396,15 @@ alemán e italiano. Está traducido todo lo que ve el jugador, no solo la
 interfaz: los nombres de país, las capitales, los continentes y las
 descripciones de bandera para lector de pantalla.
 
+Se detecta el del navegador la primera vez, y se cambia desde **dos sitios
+que hacen lo mismo**: la fila de códigos (`ES · CA · EN · FR · DE · IT`) de
+lo alto de la portada, siempre a la vista, y **Ajustes → 🌍 Idioma**, con
+los nombres completos. Ambos pasan por `changeLanguage()` en `game.js`, que
+recarga el paquete, repinta las cadenas fijas, repinta la pantalla en curso
+y deja los dos selectores sincronizados. El de la portada es el que
+resuelve el caso real: un móvil configurado en inglés en una casa que juega
+en español.
+
 `js/i18n.js` es solo el motor —elige el idioma, lo carga con `import()`
 dinámico y lo sirve— y no contiene ni una cadena traducible. Cada idioma
 vive entero en `js/i18n/<código>.js` (interfaz, continentes, vocabulario de
@@ -466,10 +475,12 @@ como mínimo:
   (1440px), incluyendo un modo con nivel y otro sin él, y que la
   migración de `dcb_player`/`dcb_bigtext` conserva jugador y ajuste.
 - Si se tocan idiomas: `node tools/check-i18n.mjs`, más el juego real en
-  al menos dos idiomas, cambiando de idioma desde los ajustes y
-  comprobando que la pantalla se repinta, que el idioma sobrevive a una
-  recarga y que ninguna etiqueta se sale de su botón con el texto en XL
-  (los nombres largos —"Français", "Ozeanien"— son el caso que lo rompe).
+  al menos dos idiomas, cambiando de idioma **desde los dos selectores**
+  (la fila de la portada y el de ajustes) y comprobando que la pantalla se
+  repinta, que el otro selector queda marcado igual, que el idioma
+  sobrevive a una recarga y que ninguna etiqueta se sale de su botón con
+  el texto en XL (los nombres largos —"Français", "Ozeanien"— son el caso
+  que lo rompe).
 
 ## Historial
 

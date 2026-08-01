@@ -19,14 +19,20 @@
    selector de idioma se lee en el idioma de destino, no en el de origen —
    quien busca "Deutsch" no sabe que en español eso pone "alemán". Por eso
    los nombres viven aquí y no dentro de cada paquete: hay que poder
-   pintarlos todos sin haber cargado los seis. */
+   pintarlos todos sin haber cargado los seis.
+
+   `short` es la versión de dos letras para el selector de la portada, donde
+   no hay sitio para el nombre entero; el nombre completo sigue estando ahí
+   como etiqueta accesible. No se usan banderas para representar idiomas: en
+   un juego de banderas sería confuso, y además no cuadran — el catalán no
+   tiene bandera en emoji y el inglés no es de ningún país en particular. */
 export const LOCALES = [
-  { code: "es", label: "Español" },
-  { code: "ca", label: "Català" },
-  { code: "en", label: "English" },
-  { code: "fr", label: "Français" },
-  { code: "de", label: "Deutsch" },
-  { code: "it", label: "Italiano" },
+  { code: "es", label: "Español", short: "ES" },
+  { code: "ca", label: "Català", short: "CA" },
+  { code: "en", label: "English", short: "EN" },
+  { code: "fr", label: "Français", short: "FR" },
+  { code: "de", label: "Deutsch", short: "DE" },
+  { code: "it", label: "Italiano", short: "IT" },
 ];
 export const LOCALE_CODES = LOCALES.map(l => l.code);
 export const DEFAULT_LOCALE = "es";
