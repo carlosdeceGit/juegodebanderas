@@ -292,10 +292,27 @@ Piezas que conviene conocer antes de tocarlo:
   `experto` (ver el comentario en `js/levels.js`): la política RLS solo
   admite cinco valores en esa columna, y el ranking diario lista
   jugador y puntos, no niveles.
+- **Cuenta para el progreso del juego.** Al terminar, la bandera del día
+  suma en "banderas vistas" (se acaba enseñando entera, con nombre y
+  capital) y, si no se ha sacado, entra en `dcb_wrong_v1` para que
+  aparezca en "Repasa tus fallos": es exactamente una bandera que no se
+  supo reconocer. Acertarla **no** la quita del repaso, al revés que en
+  el modo de repaso — allí se acierta viendo la bandera entera, y aquí se
+  puede llegar al país por descarte y por las pistas de distancia. El
+  reto no toca esos mapas por su cuenta: los actualiza `onFinish`, que le
+  pasa `js/game.js`, que es donde viven.
 - **Compartir** genera cuadrados 🟥/🟩 con el número de intentos, **sin
   decir qué bandera era** — se comparte con gente que aún no ha jugado.
   Usa `navigator.share` si existe, si no el portapapeles, y si tampoco,
   enseña el texto para copiarlo a mano.
+
+Quién juega y de qué día es el reto van en una línea bajo el título, no
+en la cabecera. Estuvieron ahí, en una cápsula, y con el texto en XL y un
+nombre largo empujaban los ajustes fuera de la pantalla en un móvil de
+320px: la cabecera es solo acción + ajustes en todas las pantallas y no
+tiene sitio para nada más. Que se vea de quién es el intento importa
+porque el reto es de uno por persona y día, y el móvil suele ser
+compartido.
 
 La bandera va en un único `<img>` con nueve tapas por encima que se
 apagan una a una (`.fgrid__cover.is-open`). Pintar nueve trozos con
@@ -532,6 +549,13 @@ por hecho que el idioma ya está cargado.
   `flagDescription.js`: toda cadena nueva es una clave en los seis archivos
   de idioma. `geo.js` devuelve la *clave* del rumbo (`"ne"`), no su nombre;
   quien lo pinta busca `daily.dir.ne` en el idioma activo.
+- **Toda pantalla que genere texto desde JavaScript tiene que estar en
+  `renderCurrentScreen()`.** `applyStaticI18n()` solo arregla lo que está
+  marcado con `data-i18n` en el HTML; lo que pinta el JS se queda en el
+  idioma anterior si nadie lo repinta. Ya pasó con el fin de partida
+  —título, resumen y lista de banderas falladas se quedaban en el idioma
+  con el que se había jugado— y por eso pintar y "terminar la partida"
+  son ahora dos funciones separadas (`paintEnd()` y `end()`).
 - Los números y las fechas también son idioma: `toLocaleString(getLocale())`
   y `toLocaleDateString(getLocale())`, no un formato fijo. El separador de
   miles de 9.704 no vale para todos.

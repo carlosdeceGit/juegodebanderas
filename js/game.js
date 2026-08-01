@@ -649,6 +649,7 @@ function renderCurrentScreen() {
   else if (id === 's-learn') renderLearnList();
   else if (id === 's-ranking') renderRanking();
   else if (id === 's-daily') dailyChallenge.repaint();
+  else if (id === 's-end') paintEnd();
 }
 $('textSizeSeg').querySelectorAll('[data-size]').forEach(b => {
   onTap(b, () => applyTextSize(b.dataset.size));
@@ -679,6 +680,20 @@ const dailyChallenge = createDailyChallenge({
   show,
   onExit: () => show('s-mode'),
   onRanking: () => { renderRanking(); show('s-ranking'); },
+  avatarFor,
+  /* La bandera del día cuenta como vista —se acaba enseñando entera, con
+     su nombre y su capital— y, si no se ha sacado, entra en el repaso de
+     fallos: es exactamente una bandera que no se supo reconocer.
+
+     Acertarla NO la quita del repaso, al revés que en el modo de repaso:
+     allí se acierta viendo la bandera entera, y aquí se puede llegar al
+     país por descarte y por las pistas de distancia sin haberla
+     reconocido. */
+  onFinish: ({ code, won }) => {
+    seen.set(code, (seen.get(code) || 0) + 1);
+    saveSeenMap();
+    if (!won) recordWrong(code);
+  },
 });
 function startDaily() {
   clearInterval(timer);
@@ -1046,8 +1061,13 @@ onTap($('btnQuit'), () => {
 });
 
 /* ---------- Fin de partida ---------- */
-function end() {
-  clearInterval(timer);
+/* Pintar la pantalla de fin y terminar la partida son dos cosas
+   distintas: lo primero se repite cada vez que cambia el idioma (el
+   título, el resumen y la lista de banderas falladas están todos
+   traducidos), lo segundo pasa una sola vez. Estaban juntas, y por eso
+   cambiar de idioma en el fin de partida dejaba el texto en el idioma
+   anterior. */
+function paintEnd() {
   $('endScore').textContent = score;
   if (mode === 'survival') {
     const finished = idx >= deck.length;
@@ -1077,7 +1097,11 @@ function end() {
   /* Los botones de salida apuntan a pasos concretos del asistente. */
   $('btnChangeLevel').hidden = !MODES[mode]?.needsLevel;
   $('btnEndReview').hidden = wrongCodes().length < REVIEW_MIN_FAILS;
+}
 
+function end() {
+  clearInterval(timer);
+  paintEnd();
   show('s-end');
 
   /* Estas partidas no salen del dispositivo: el ranking de casa es
