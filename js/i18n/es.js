@@ -25,8 +25,6 @@ export default {
     "start.namePlaceholder": "Escribe tu nombre",
 
     /* ---- Asistente de tres pasos ---- */
-    "wizard.step": "Paso {n} de {total}",
-    "wizard.backToStep": "Volver al paso {n}",
     "wizard.continue": "Seguir jugando",
     "wizard.moreGames": "Más juegos",
     "wizard.noPressure": "Sin prisa y sin puntos",
@@ -125,7 +123,7 @@ export default {
     "end.forReview": "Para repasar",
     "end.playAgain": "🔄 Otra vez",
     "end.changeLevel": "🧠 Cambiar de nivel",
-    "end.changeMode": "🏳️ Otro juego",
+    "end.changeMode": "🏠 Volver al inicio",
     "end.reviewThese": "🔁 Repasar fallos",
     "end.changePlayer": "Cambiar de jugador",
     /* ---- El reto de hoy: una bandera tapada en nueve piezas ---- */

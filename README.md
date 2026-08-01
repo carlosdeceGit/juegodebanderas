@@ -97,8 +97,13 @@ Dos reglas que conviene respetar al tocarlo:
   antes entrar por nombre → nivel → jugar.
 - **El paso 2 solo existe si el modo tiene niveles elegibles.** Eso lo
   declara `needsLevel` en el catálogo `MODES` de `game.js`; los modos
-  con dificultad fija saltan del paso 1 al 3 y el indicador de progreso
-  se pinta con dos píldoras en vez de tres, sin ninguna rama especial.
+  con dificultad fija saltan del paso 1 al 3, sin ninguna rama especial.
+- **No hay indicador de progreso.** Se probó con píldoras bajo la
+  cabecera y lo que transmitían era "aquí hay unos puntos", no en qué
+  paso estabas. Lo que sitúa al jugador es el botón de volver
+  (`← Otro juego`, `← Nivel`) y el resumen de lo ya elegido que cada
+  paso enseña bajo su título. Si se retoma la idea, que no sea con
+  puntos mudos.
 
 **Para añadir un modo al asistente** basta con una entrada en `MODES`
 (icono, claves de i18n, `needsLevel`, `usesScope`, `scoreable` y la
@@ -126,11 +131,10 @@ Dos cosas que conviene no deshacer:
 - **Nada de botones que sean solo un emoji en un círculo.** Se probaron y
   no se entendían. Si hace falta una acción nueva en la cabecera, va con
   su etiqueta.
-- **Las píldoras de progreso no van dentro de la cabecera**, sino en su
-  propia fila dentro del contenido. Metidas en medio, con tres píldoras
-  más las dos etiquetas, se desbordaba un móvil de 390px — y con el
-  tamaño de texto en XL, cualquiera. Tampoco se pintan en la portada:
-  antes de elegir nada no informan de nada.
+- **La cabecera no lleva nada en medio.** Ahí estuvieron las píldoras de
+  progreso y hubo que sacarlas dos veces: primero porque se desbordaba
+  la barra en un móvil de 390px, y después porque nadie entendía qué
+  eran esos puntos.
 
 La partida es la excepción a propósito: su cabecera es el HUD (marcador,
 rondas, tiempo) y ahí el `☰` sí va sin etiqueta porque compite por el
@@ -352,9 +356,9 @@ del SVG — ver la auditoría para más detalle.
   tipográfica y los tamaños de toque, así que **escala la aplicación
   entera**. Cualquier tamaño nuevo que se añada al CSS debe multiplicarse
   por `--scale` para no quedarse fuera del ajuste.
-- Zonas de toque de 44px como mínimo. Las píldoras del asistente usan
-  44px fijos, no escalados: el mínimo de toque es absoluto y escalarlo
-  desbordaría la cabecera en móvil.
+- Zonas de toque de 44px como mínimo. El selector de idioma usa 44px
+  fijos, no escalados: el mínimo de toque es absoluto y escalarlo con el
+  texto en XL desbordaría la fila de seis idiomas.
 - Contraste verificado: foco de tinta (13.6:1), acierto `#1F7A6E`
   (5.16:1) y fallo `#C1462A` (5.03:1) sobre blanco. Los tonos claros
   `--teal-500`/`--coral-500` se quedan de decoración porque con texto

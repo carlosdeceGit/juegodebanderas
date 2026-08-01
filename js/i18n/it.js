@@ -16,8 +16,6 @@ export default {
     "start.namePlaceholder": "Scrivi il tuo nome",
 
     /* ---- Procedura in tre passi ---- */
-    "wizard.step": "Passo {n} di {total}",
-    "wizard.backToStep": "Torna al passo {n}",
     "wizard.continue": "Continua a giocare",
     "wizard.moreGames": "Altri giochi",
     "wizard.noPressure": "Senza fretta e senza punti",
@@ -116,7 +114,7 @@ export default {
     "end.forReview": "Da ripassare",
     "end.playAgain": "🔄 Di nuovo",
     "end.changeLevel": "🧠 Cambia livello",
-    "end.changeMode": "🏳️ Altro gioco",
+    "end.changeMode": "🏠 Torna all'inizio",
     "end.reviewThese": "🔁 Ripassa gli errori",
     "end.changePlayer": "Cambia giocatore",
     /* ---- La sfida di oggi: una bandiera coperta da nove tessere ---- */
