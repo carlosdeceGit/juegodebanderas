@@ -78,7 +78,7 @@ tools/build-www.mjs          Copia el sitio a www/, que es lo que empaquetan las
 docs/idiomas.md               Cómo funcionan los idiomas y cómo añadir uno
 docs/decisiones-producto.md   Decisiones de producto explícitas (fecha UTC, países, ranking global)
 docs/apps-moviles.md          Cómo llevar el juego a App Store y Google Play
-docs/ideas-app.md             Propuesta (sin decidir) de qué le falta para parecer un juego-app
+docs/ideas-app.md             Propuesta (sin decidir) para pasar de juego web a producto
 docs/auditoria-juegodebanderas.md  Auditoría original y roadmap por fases (histórico)
 ```
 
