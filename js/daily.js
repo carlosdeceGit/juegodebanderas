@@ -78,6 +78,12 @@ function dayNumber(dateStr) { return Math.floor(Date.parse(`${dateStr}T00:00:00Z
    primero. */
 const GUARD = 20;
 
+/* Se baraja siempre partiendo del catálogo ordenado por código ISO, no
+   del orden en que estén escritos los países en countries.js: ese
+   archivo se regenera de vez en cuando y, si el sorteo dependiera de su
+   orden, reordenarlo cambiaría el reto de todo el mundo de golpe. */
+const BY_CODE = [...COUNTRIES].sort((a, b) => (a.code < b.code ? -1 : 1));
+
 /* El orden de una vuelta, con la costura entre vueltas arreglada.
 
    Sin esto, la garantía de "no se repite hasta que salgan las 195" solo
@@ -88,12 +94,6 @@ const GUARD = 20;
    deja al menos 21 días entre repeticiones también en la costura. Es
    determinista: cualquier dispositivo calcula lo mismo para la misma
    fecha, que es lo único que el reto necesita. */
-/* Se baraja siempre partiendo del catálogo ordenado por código ISO, no
-   del orden en que estén escritos los países en countries.js: ese
-   archivo se regenera de vez en cuando y, si el sorteo dependiera de su
-   orden, reordenarlo cambiaría el reto de todo el mundo de golpe. */
-const BY_CODE = [...COUNTRIES].sort((a, b) => (a.code < b.code ? -1 : 1));
-
 function cycleOrder(cycle) {
   const shuffleFor = c => seededShuffle(BY_CODE, mulberry32(seedFrom(`dcb-daily-${c}`)));
   const order = shuffleFor(cycle);
@@ -165,11 +165,14 @@ function saveProgress(dateStr, playerName, entry) {
 /* ═══════════════════════════════════════════════════════════════════
    La pantalla
 
-   `show` y las dos salidas (volver al inicio, ir al ranking) las pone
-   quien crea el reto — js/game.js —, que es quien sabe navegar entre
-   pantallas. Este módulo solo se ocupa del juego en sí.
+   Todo lo que este módulo no sabe hacer se lo pasa quien lo crea
+   (js/game.js): navegar entre pantallas (`show`), las dos salidas de la
+   pantalla (`onExit`, `onRanking`), el avatar de un jugador
+   (`avatarFor`) y qué hacer con la bandera cuando el reto termina
+   (`onFinish`), que es donde vive la memoria de banderas vistas y
+   falladas. Este módulo solo se ocupa del juego en sí.
    ═══════════════════════════════════════════════════════════════════ */
-export function createDailyChallenge({ show, onExit, onRanking }) {
+export function createDailyChallenge({ show, onExit, onRanking, avatarFor, onFinish }) {
   let dateStr = todayStr();
   let answer = null;
   let order = [];
@@ -206,6 +209,12 @@ export function createDailyChallenge({ show, onExit, onRanking }) {
     grid.setAttribute('aria-label', done
       ? t('daily.gridSolved', { flag: describeFlag(answer) })
       : t('daily.gridHidden', { open, total: TILES }));
+  }
+
+  /* Quién juega y qué día es. El avatar lo pone quien nos crea, que es
+     donde vive la lista de jugadores. */
+  function renderMeta() {
+    $('dailyMeta').textContent = `${avatarFor(player)} ${player} · ${prettyDate(dateStr)}`;
   }
 
   /* ---------- Lista de intentos ---------- */
@@ -325,6 +334,10 @@ export function createDailyChallenge({ show, onExit, onRanking }) {
     renderResult();
     say(winMessage());
     saveDailyScore();
+    /* El reto también enseña banderas: la del día acaba de verse entera,
+       con su nombre y su capital. Que cuente en el progreso y, si no se
+       ha sacado, en el repaso de fallos. */
+    onFinish?.({ code: answer.code, won });
   }
 
   function persist() {
@@ -398,7 +411,7 @@ export function createDailyChallenge({ show, onExit, onRanking }) {
      con el que se jugaron y hay que rehacerlos en el nuevo. */
   function repaint() {
     if (!answer) return;
-    $('dailyDate').textContent = prettyDate(dateStr);
+    renderMeta();
     renderGrid();
     renderGuesses();
     renderSuggestions();
@@ -419,8 +432,7 @@ export function createDailyChallenge({ show, onExit, onRanking }) {
     won = !!saved0.won;
     saved = !!saved0.saved;
 
-    $('dailyDate').textContent = prettyDate(dateStr);
-    $('dailyWho').textContent = player || '';
+    renderMeta();
     $('dailyInput').value = '';
     hideSuggestions();
     renderGrid();

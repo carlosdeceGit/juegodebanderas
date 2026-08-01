@@ -176,16 +176,18 @@
 <section class="screen" id="s-daily">
   <header class="topbar">
     <button class="btn btn--sm" id="btnDailyBack" data-i18n="nav.back">↩ Volver</button>
-    <!-- Quién juega, a la vista: el reto es de un intento por persona y
-         día, y en un móvil compartido hay que saber de quién es el que
-         está en pantalla antes de gastarlo. -->
-    <div class="topbar__mid"><span class="chip" id="dailyWho"></span></div>
+    <div class="topbar__mid"></div>
     <button class="btn btn--sm" data-settings="open" data-i18n="settings.short">⚙️ Ajustes</button>
   </header>
 
   <div class="screen__body screen__body--wide">
     <h1 class="h1" data-i18n="daily.title">🔥 El reto de hoy</h1>
-    <p class="note" id="dailyDate"></p>
+    <!-- Quién juega y de qué día es el reto. Van juntos y aquí, no en la
+         cabecera: el reto es de un intento por persona y día, así que en
+         un móvil compartido hay que ver de quién es el intento antes de
+         gastarlo, pero la cabecera es solo acción + ajustes en todas las
+         pantallas y una cápsula con un nombre largo la desbordaba. -->
+    <p class="note" id="dailyMeta"></p>
 
     <div class="fgrid" id="dailyGrid" role="img"></div>
 
