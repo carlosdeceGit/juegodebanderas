@@ -229,6 +229,32 @@ body{
 .pill[data-state="todo"]::after{ content:""; width:8px; height:8px; border-radius:50%;
                                  background:var(--ink-muted); opacity:.5 }
 
+/* ─────────────────── SELECTOR DE IDIOMA (PORTADA) ───────────────────
+   Seis cápsulas con el código de dos letras, en fila. La versión larga
+   ("Español", "Français") vive en los ajustes, donde hay sitio; aquí no,
+   porque esto va encima del rótulo de portada y no puede robarle altura.
+   El nombre entero sigue estando en el `aria-label` de cada botón. */
+.langbar{
+  display:flex; gap:6px; width:100%; max-width:var(--w-content);
+  margin-bottom:calc(var(--sp-2) * -1);
+}
+.langbar button{
+  /* 44px fijos y no escalados, por el mismo motivo que las píldoras del
+     asistente: el mínimo de zona de toque es absoluto, y escalarlo con el
+     texto en XL dejaría media portada ocupada por el selector. */
+  flex:1 1 0; min-width:0; min-height:44px; padding:var(--sp-2) 2px;
+  display:flex; align-items:center; justify-content:center;
+  font-family:inherit; font-size:calc(13px * var(--scale)); font-weight:var(--fw-black);
+  letter-spacing:.06em; color:var(--ink-muted);
+  background:var(--surface-raised); border:var(--bw-1) solid var(--border);
+  border-radius:var(--r-pill); cursor:pointer;
+  transition:background-color var(--dur-fast), color var(--dur-fast);
+}
+@media (hover:hover){ .langbar button:hover{ background:var(--surface-sunken); color:var(--ink) } }
+.langbar button[aria-checked="true"]{
+  background:var(--ink); color:var(--paper-100); border-color:var(--ink);
+}
+
 /* ─────────────────────── BOTÓN ─────────────────────── */
 .btn{
   --lift:var(--lift-2); --bg:var(--surface-raised); --fg:var(--ink);
@@ -311,7 +337,14 @@ body{
 .card[hidden]{ display:none }
 
 .card__icon{ font-size:calc(28px * var(--scale)); line-height:1 }
-.card__text{ min-width:0; overflow-wrap:break-word }
+/* `hyphens:auto` antes de que actúe `overflow-wrap`: una palabra que no
+   cabe se parte por donde toca y con guion ("Tages-aufgabe") en vez de por
+   la mitad ("Tagesaufga/be"). Con el español no se notaba, pero el alemán
+   está lleno de compuestos largos y en una tarjeta estrecha con el texto en
+   XL se partían todos a lo bruto. Funciona porque `<html lang>` se mantiene
+   al día con el idioma activo: el navegador necesita saber qué idioma es
+   para saber dónde se separan las sílabas. */
+.card__text{ min-width:0; hyphens:auto; overflow-wrap:break-word }
 .card__title{ display:block; font-size:var(--fs-body); font-weight:var(--fw-black); line-height:1.2 }
 .card__sub{ display:block; font-size:var(--fs-xs); color:var(--ink-muted); font-weight:var(--fw-reg); margin-top:2px }
 /* Distintivo compacto: en una rejilla de dos columnas, una etiqueta de
@@ -414,7 +447,11 @@ body{
 }
 .seg button{
   font-family:inherit; font-size:min(var(--fs-sm),4vw); font-weight:var(--fw-black);
-  min-height:var(--tap); padding:var(--sp-2) 4px; min-width:0; overflow-wrap:break-word;
+  /* `anywhere` y no `break-word`: solo `anywhere` reduce el ancho mínimo del
+     contenido, que es lo que deja encoger al hijo del flex. Con `break-word`
+     una palabra larga ("Français", "Ozeanien") con el texto en XL no se
+     partía, se salía del botón y se veía recortada. */
+  min-height:var(--tap); padding:var(--sp-2) 4px; min-width:0; overflow-wrap:anywhere;
   display:flex; align-items:center; justify-content:center; gap:4px;
   color:var(--ink); background:transparent; border:0; cursor:pointer;
   border-right:var(--bw-hair) solid var(--border);
