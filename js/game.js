@@ -429,43 +429,9 @@ function buildDailyDeck() {
    indicador de progreso se pinta con dos píldoras en vez de tres.
    ═══════════════════════════════════════════════════════════════════ */
 
-function wizardSteps() {
-  return MODES[wizard.modeKey]?.needsLevel ? ['s-mode', 's-level', 's-who'] : ['s-mode', 's-who'];
-}
-
-function paintPills(currentId) {
-  const steps = wizardSteps();
-  document.querySelectorAll('[data-pills]').forEach(host => {
-    const screen = host.closest('.screen');
-    if (!screen || !steps.includes(screen.id)) { host.innerHTML = ''; return; }
-    host.innerHTML = '';
-    steps.forEach((stepId, i) => {
-      const pos = steps.indexOf(currentId);
-      const b = document.createElement('button');
-      b.className = 'pill';
-      b.type = 'button';
-      if (i < pos) {
-        b.dataset.state = 'done';
-        b.textContent = stepId === 's-mode'
-          ? MODES[wizard.modeKey].icon
-          : (LEVELS[wizard.levelKey]?.icon || '');
-        b.setAttribute('aria-label', t('wizard.backToStep', { n: i + 1 }));
-        onTap(b, () => show(stepId));
-      } else {
-        b.dataset.state = i === pos ? 'now' : 'todo';
-        b.disabled = true;
-        b.setAttribute('aria-label', t('wizard.step', { n: i + 1, total: steps.length }));
-      }
-      host.appendChild(b);
-    });
-  });
-}
-
 /* ---------- Paso 1: ¿A qué jugamos? ---------- */
 function renderModeStep() {
   updateSeenProgress();
-  paintPills('s-mode');
-  renderLangBar();
 
   const grid = $('modeGrid');
   grid.innerHTML = '';
@@ -511,7 +477,6 @@ function chooseMode(key) {
 
 /* ---------- Paso 2: ¿Cómo de difícil? ---------- */
 function renderLevelStep() {
-  paintPills('s-level');
   const m = MODES[wizard.modeKey];
   $('levelModeEcho').textContent = `${m.icon} ${t(m.labelKey)}`;
 
@@ -554,7 +519,6 @@ function renderContinentSeg(host, onChange) {
 
 /* ---------- Paso 3: ¿Quién juega? ---------- */
 function renderWhoStep() {
-  paintPills('s-who');
   const m = MODES[wizard.modeKey];
   const parts = [`${m.icon} ${t(m.labelKey)}`];
   if (m.needsLevel && LEVELS[wizard.levelKey]) parts.push(t(LEVELS[wizard.levelKey].labelKey));
@@ -589,11 +553,17 @@ function renderWhoStep() {
       <span class="person__meta"></span>`;
     onTap(add, () => {
       $('newPlayerRow').hidden = false;
+      $('langBarWrap').hidden = false;
       $('nameInput').focus();
     });
     grid.appendChild(add);
   }
+  /* El selector de idioma acompaña al formulario de nombre: es el
+     momento en que alguien nuevo llega al juego y puede necesitarlo.
+     Fuera de ahí vive solo en los ajustes. */
   $('newPlayerRow').hidden = list.length > 0;
+  $('langBarWrap').hidden = list.length > 0;
+  renderLangBar();
   $('whoTitle').textContent = list.length ? t('wizard.whoPlays') : t('start.who');
 }
 

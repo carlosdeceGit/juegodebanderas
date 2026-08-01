@@ -16,8 +16,6 @@ export default {
     "start.namePlaceholder": "Escriu el teu nom",
 
     /* ---- Assistent de tres passos ---- */
-    "wizard.step": "Pas {n} de {total}",
-    "wizard.backToStep": "Torna al pas {n}",
     "wizard.continue": "Continua jugant",
     "wizard.moreGames": "Més jocs",
     "wizard.noPressure": "Sense pressa i sense punts",
@@ -118,7 +116,7 @@ export default {
     "end.alreadyPlayedToday": " · Ja has jugat avui: aquest intent no compta per al rànquing",
     "end.playAgain": "🔄 Un altre cop",
     "end.changeLevel": "🧠 Canvia de nivell",
-    "end.changeMode": "🏳️ Un altre joc",
+    "end.changeMode": "🏠 Torna a l'inici",
     "end.reviewThese": "🔁 Repassa els errors",
     "end.changePlayer": "Canvia de jugador",
 

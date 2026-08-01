@@ -16,8 +16,6 @@ export default {
     "start.namePlaceholder": "Écris ton prénom",
 
     /* ---- Assistant en trois étapes ---- */
-    "wizard.step": "Étape {n} sur {total}",
-    "wizard.backToStep": "Revenir à l'étape {n}",
     "wizard.continue": "Continuer à jouer",
     "wizard.moreGames": "Plus de jeux",
     "wizard.noPressure": "Sans presse et sans points",
@@ -118,7 +116,7 @@ export default {
     "end.alreadyPlayedToday": " · Tu as déjà joué aujourd'hui : cet essai ne compte pas pour le classement",
     "end.playAgain": "🔄 Encore",
     "end.changeLevel": "🧠 Changer de niveau",
-    "end.changeMode": "🏳️ Autre jeu",
+    "end.changeMode": "🏠 Retour à l'accueil",
     "end.reviewThese": "🔁 Revoir les erreurs",
     "end.changePlayer": "Changer de joueur",
 
