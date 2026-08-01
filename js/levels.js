@@ -29,6 +29,13 @@ export const LEVELS = {
   },
 };
 
-/* El reto diario usa siempre la misma dificultad para que el ranking sea justo. */
+/* El reto diario ya no es una partida de estas: es la bandera tapada en
+   nueve piezas de js/daily.js, con sus propias reglas. Esta constante
+   sobrevive porque es la etiqueta con la que sus puntuaciones viajan a
+   la tabla `games`, cuya política de inserción solo admite estos cinco
+   valores en la columna `level` (ver supabase/migrations/). Cambiarla
+   por "diario" haría que el servidor rechazase el reto diario entero
+   mientras no se despliegue una migración nueva; y el valor solo se usa
+   para esa validación: el ranking diario lista jugador y puntos, no
+   niveles. */
 export const DAILY_LEVEL_KEY = "experto";
-export const DAILY_ROUNDS = 12;

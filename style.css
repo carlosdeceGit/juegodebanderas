@@ -546,6 +546,83 @@ body{
 .learnInfo b{ font-size:var(--fs-sm) }
 .learnInfo span{ color:var(--ink-muted) }
 
+/* ─────────────────────── RETO DIARIO: BANDERA EN 9 PIEZAS ─────────────────────── */
+/* La bandera va entera en un `<img>` y encima hay nueve tapas que se
+   apagan una a una. La alternativa (nueve trozos con `background-position`)
+   pintaba nueve veces el mismo SVG y, con el redondeo de subpíxeles del
+   navegador, dejaba costuras claras entre piezas justo donde no hay
+   ninguna en la bandera de verdad.
+
+   La caja es 4:3 porque todos los SVG de flag-icons lo son (640×480):
+   así el `contain` de la imagen no deja franjas y las tapas caen
+   exactamente encima de sus novenos. */
+.fgrid{
+  position:relative; width:100%; max-width:520px; aspect-ratio:4/3; margin-inline:auto;
+  display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(3,1fr);
+  overflow:hidden; background:var(--surface-sunken);
+  border:var(--bw-3) solid var(--border); border-radius:var(--r-lg); box-shadow:var(--sh-3);
+}
+.fgrid__flag{ position:absolute; inset:0; width:100%; height:100%; object-fit:contain; display:block }
+.fgrid__cover{
+  position:relative; background:var(--paper-300);
+  /* Las líneas de separación son parte del juego: enseñan cuántas piezas
+     quedan por descubrir. */
+  box-shadow:inset 0 0 0 var(--bw-hair) var(--surface-sunken);
+  transition:opacity var(--dur-base) ease, transform var(--dur-base) ease;
+}
+.fgrid__cover.is-open{ opacity:0; transform:scale(1.06); pointer-events:none }
+
+@media (prefers-reduced-motion:reduce){
+  .fgrid__cover{ transition:none }
+}
+
+/* ─── Campo con sugerencias ─── */
+.combo{ position:relative; flex:1; min-width:0; display:flex }
+.suggest{
+  position:absolute; z-index:20; top:calc(100% + 4px); left:0; right:0;
+  margin:0; padding:var(--sp-1); list-style:none; max-height:46dvh; overflow-y:auto;
+  background:var(--surface-raised); border:var(--bw-2) solid var(--border);
+  border-radius:var(--r-lg); box-shadow:var(--sh-2);
+}
+.suggest[hidden]{ display:none }
+.suggest__item{
+  display:block; width:100%; text-align:left; font-family:inherit;
+  font-size:var(--fs-body); font-weight:var(--fw-bold); color:var(--ink);
+  min-height:var(--tap); padding:var(--sp-2) var(--sp-3);
+  background:transparent; border:0; border-radius:var(--r-md); cursor:pointer;
+}
+@media (hover:hover){ .suggest__item:hover{ background:var(--surface-sunken) } }
+
+/* ─── Lista de intentos ─── */
+.guesses{ display:flex; flex-direction:column; gap:var(--sp-2); width:100% }
+.guess{
+  display:grid; grid-template-columns:1fr auto auto auto; align-items:center; gap:var(--sp-3);
+  min-height:var(--tap); padding:var(--sp-2) var(--sp-3);
+  font-size:var(--fs-sm); font-variant-numeric:tabular-nums;
+  background:var(--surface-raised); color:var(--ink);
+  border:var(--bw-hair) solid var(--border); border-radius:var(--r-md); box-shadow:var(--sh-1);
+}
+.guess__name{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+              font-weight:var(--fw-bold) }
+.guess__val{ font-weight:var(--fw-black); white-space:nowrap }
+.guess--hit{ background:var(--success); color:var(--white); border-color:var(--border) }
+.guess--empty{
+  grid-template-columns:1fr; justify-items:center; box-shadow:none;
+  background:var(--surface-sunken); border-style:dashed; color:var(--ink-muted);
+  font-size:var(--fs-xs); font-weight:var(--fw-black); letter-spacing:.08em; text-transform:uppercase;
+}
+.guess--next{ background:var(--surface-raised); border-style:solid; box-shadow:var(--sh-1) }
+
+/* ─── Resultado del reto ─── */
+.result{ display:flex; flex-direction:column; align-items:center; gap:var(--sp-3); width:100% }
+.result[hidden]{ display:none }
+.result__flag{ margin:0; font-size:var(--fs-h2); font-weight:var(--fw-black); text-align:center;
+               text-wrap:balance }
+/* En el reto no hay cuenta atrás, así que el mensaje no necesita el
+   hueco reservado de la partida: ahí ocupa dos líneas fijas para que las
+   opciones no bailen, y aquí eso dejaría un vacío raro bajo la bandera. */
+.feedback--daily{ font-size:var(--fs-body); min-height:calc(var(--fs-body) * 2.6) }
+
 /* ─────────────────────── HOJA INFERIOR / MODAL ─────────────────────── */
 .sheet{
   display:none; position:fixed; inset:0; z-index:500;

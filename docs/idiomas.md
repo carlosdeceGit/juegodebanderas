@@ -130,9 +130,13 @@ a mano las contadas veces que se añade un país o un idioma.
   (`"experto"`, `"survival"`…). Es una clave, no texto: si se tradujera, el
   ranking de una casa que cambia de idioma se partiría en dos. Lo que se
   traduce es la etiqueta que se pinta, vía `labelKey`.
-- **El mazo del reto diario**, que sale de una semilla con la fecha en UTC.
-  Es el mismo mazo en los seis idiomas, así que el ranking diario y el duelo
-  siguen siendo comparables entre gente que juega en idiomas distintos.
+- **La bandera del reto diario**, que sale de una semilla con la fecha en
+  UTC sobre el catálogo ordenado por código ISO. Es la misma bandera en los
+  seis idiomas, así que el ranking diario y el duelo siguen siendo
+  comparables entre gente que juega en idiomas distintos. Lo que sí cambia
+  con el idioma es todo lo que se lee: los nombres que se escriben y se
+  sugieren, el rumbo de las pistas (`daily.dir.*`), y el formato de la
+  distancia y de la fecha, que salen de `toLocaleString(getLocale())`.
 
 ## Migraciones que ya están hechas
 

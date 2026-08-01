@@ -5,8 +5,10 @@ catalán, inglés, francés, alemán e italiano), pensado originalmente como
 juego familiar. HTML + CSS + JavaScript **vanilla** (módulos ES nativos),
 sin build, sin framework, sin dependencias npm.
 El progreso y el ranking de casa se guardan en el propio dispositivo;
-Supabase se usa solo para el reto diario compartido. El juego funciona
-igual de bien sin conexión: solo se pierden el reto diario y el duelo.
+Supabase se usa solo para el ranking del reto diario. El juego funciona
+igual de bien sin conexión —el reto de hoy incluido, porque la bandera
+del día se calcula en local—: lo único que se pierde es que la
+puntuación del reto llegue al ranking compartido, y el duelo.
 
 Este documento es la referencia técnica del proyecto: qué hay, cómo
 funciona y qué tener en cuenta antes de tocarlo. Para el historial de
@@ -33,17 +35,22 @@ servidor local evita ese problema.
 ## Estructura del repositorio
 
 ```
-index.html                  Las 7 pantallas del juego (marcado, sin lógica)
+index.html                  Las 8 pantallas del juego (marcado, sin lógica)
 style.css                   Sistema de diseño y todo el CSS (sin preprocesador)
 js/
-  game.js                   Estado del juego, bucle de ronda, todos los modos
+  game.js                   Estado del juego, bucle de ronda, todos los modos por turnos
+  daily.js                  El reto de hoy: una bandera tapada en 9 piezas (pantalla propia)
   countries.js              Datos de los 195 países que NO dependen del idioma
-                             (código ISO, código de continente, y etiquetas
-                             pattern/palette para calcular distractores)
+                             (código ISO, código de continente, coordenadas
+                             lat/lon, y etiquetas pattern/palette para calcular
+                             distractores)
   levels.js                 Configuración declarativa de los 4 niveles clásicos
   distractors.js            Algoritmo de similitud para elegir opciones incorrectas
   confusables.js            Lista curada a mano de banderas clásicamente confundibles
   flagDescription.js        Genera la descripción accesible (no reveladora) de cada bandera
+  geo.js                    Distancia, rumbo y proximidad entre países (pistas del reto)
+  dom.js                    Helpers de interfaz compartidos ($, escapeHtml, onTap, normText)
+  storage.js                localStorage tolerante a fallo (lsGet/lsSet/lsGetJSON…)
   i18n.js                   Motor de idiomas (elige, carga y sirve; sin cadenas dentro)
   i18n/<idioma>.js          Un archivo por idioma: interfaz, continentes, vocabulario
   i18n/names.<idioma>.js    Nombres de país y capitales de ese idioma
@@ -64,11 +71,11 @@ ha verificado cada cambio hasta ahora.
 
 ## Cómo está montada la interfaz
 
-`index.html` define 7 `<section class="screen">` (tipo de juego, nivel,
-jugador, partida, fin, aprender, ranking) más dos hojas inferiores: el
-menú de partida y los ajustes. Solo una pantalla tiene la clase `.on` a
-la vez; `game.js` las alterna con la función `show(id)`. No hay routing
-ni historial: todo vive en una sola página.
+`index.html` define 8 `<section class="screen">` (tipo de juego, nivel,
+jugador, partida, fin, reto de hoy, aprender, ranking) más dos hojas
+inferiores: el menú de partida y los ajustes. Solo una pantalla tiene la
+clase `.on` a la vez; `game.js` las alterna con la función `show(id)`.
+No hay routing ni historial: todo vive en una sola página.
 
 Todo el texto de la interfaz está en `js/i18n.js`, no hardcodeado en
 el HTML ni en el JS — ver la sección "Internacionalización" más abajo.
@@ -154,7 +161,7 @@ Dos trampas que ya han mordido una vez y conviene no repetir:
   cualquier `display:flex` o `display:grid` propio.
 
 **Los toques se escuchan solo con `click`, nunca con `touchend`**
-(`onTap()` en `game.js`). Con `touchend`, cualquier dedo que se levantara
+(`onTap()` en `js/dom.js`). Con `touchend`, cualquier dedo que se levantara
 encima de un botón lo activaba aunque el gesto hubiera sido un scroll de
 media pantalla: en el móvil era imposible recorrer la portada sin entrar
 en alguna tarjeta sin querer. El navegador ya distingue el scroll del
@@ -175,13 +182,18 @@ Por cada ronda: se elige una bandera de un mazo (`deck`), se generan
 opciones (la correcta + distractores), corre un temporizador, y al
 elegir se calcula la puntuación y se muestra la capital como dato
 educativo. El bucle es el mismo objeto compartido (`js/game.js`) para
-**todos** los modos; lo que cambia entre modos es cómo se construye el
-mazo, qué se muestra como pregunta/opciones, y qué cuenta como acierto.
-Esto se controla con una única variable de estado, `mode`:
+**todos** los modos por turnos; lo que cambia entre modos es cómo se
+construye el mazo, qué se muestra como pregunta/opciones, y qué cuenta
+como acierto. Esto se controla con una única variable de estado, `mode`:
 
 ```
-'classic' | 'daily' | 'review' | 'survival' | 'invert' | 'classify' | 'pairing'
+'classic' | 'review' | 'survival' | 'invert' | 'classify' | 'pairing'
 ```
+
+**El reto de hoy es la excepción y no pasa por aquí**: no tiene rondas,
+ni cronómetro, ni opciones que elegir, así que vive en su propio módulo
+y su propia pantalla (`js/daily.js`, ver más abajo). Del bucle solo
+comparte la entrada — el asistente elige jugador y le cede el control.
 
 Casi toda la lógica de ronda (`nextRound`, `resolveRound`, `timeout`,
 `end`) hace `if (mode === '...')` en los puntos donde un modo concreto
@@ -203,7 +215,7 @@ cuyo enunciado sea una imagen, hay que pasarla por ahí.**
 | Modo | Cómo se juega | Mazo | ¿Cuenta para el ranking? |
 |---|---|---|---|
 | **Clásico** (4 niveles: Nene, Principiante, Experto, Dios) | Bandera → elegir el nombre del país | `buildDeck()`, prioriza banderas menos vistas, respeta el filtro de continente | Sí, en local (`dcb_scores_v1`) |
-| **Reto diario** (tarjeta destacada del paso 1) | Igual que Experto, pero con semilla determinista por fecha (mismo mazo para todo el mundo el mismo día) | `buildDailyDeck()`, ignora el filtro de continente | Sí, en Supabase, máx. 1 intento/jugador/día (`daily_ranking`) |
+| **El reto de hoy** (tarjeta destacada del paso 1) | Pantalla aparte (`js/daily.js`): una bandera tapada en 9 piezas, se escribe el país y cada fallo destapa una pieza | Una sola bandera, determinista por fecha (la misma para todo el mundo) | Sí, en Supabase, máx. 1 intento/jugador/día (`daily_ranking`) |
 | **Aprender** (`btnLearn`, fuera del asistente) | Lista navegable de banderas con nombre/capital/continente | Todas (o filtradas por continente), sin cronómetro ni puntuación | No |
 | **Repasa tus fallos** (`btnReview`, solo visible con ≥3 fallos históricos) | Igual que Clásico, pero el mazo son las banderas más falladas | Ordenado por nº de fallos; acertar una la quita del historial | No |
 | **Elige la bandera** | Se invierte el sentido: se muestra el nombre y hay que tocar la bandera | Reutiliza `pickDistractors` | No |
@@ -226,6 +238,71 @@ la puntuación ni el HUD. Mirar `nextRound()` y `resolveRound()` en
 `js/game.js` para dónde engancha cada pieza, y añadir su entrada en
 `MODES` para que aparezca en el asistente (ver "El asistente de tres
 pasos" más arriba).
+
+## El reto de hoy (`js/daily.js`)
+
+Una bandera al día, la misma para todo el mundo, tapada con **nueve
+piezas** (3 × 3). Se ve una pieza de salida; se escribe el nombre de un
+país y, si no es, se destapa otra pieza. Hay **6 intentos**. Al terminar
+—se acierte o no— se ve la bandera entera.
+
+Sustituye al reto diario anterior, que eran 12 rondas de opción múltiple
+con cronómetro (nivel Experto con mazo sembrado por fecha). El motivo
+está en `docs/decisiones-producto.md`: el reto diario solo tiene gracia
+si es comparable y da conversación, y doce rondas cronometradas medían
+sobre todo la velocidad de tocar la pantalla.
+
+Piezas que conviene conocer antes de tocarlo:
+
+- **Qué bandera toca hoy** (`flagOfTheDay`): no se sortea un país cada
+  día. Se baraja el catálogo entero con una semilla fija y se recorre en
+  orden según el número de día UTC, así que **dentro de cada vuelta de
+  195 días no se repite ninguna bandera**. Cada vuelta usa una semilla
+  distinta para no repetir el orden de la anterior, y la costura entre
+  vueltas está cosida a mano (`cycleOrder`, constante `GUARD`): sin eso,
+  una bandera del final de una vuelta podía reaparecer cinco días
+  después al principio de la siguiente; ahora la separación mínima
+  medida es de 22 días. El orden en que se destapan las piezas también
+  va sembrado por la fecha.
+- **Las pistas de distancia** (`js/geo.js`): cada intento fallido dice a
+  cuántos km está el país acertado, en qué dirección (flecha + nombre
+  del rumbo para lectores de pantalla) y un % de proximidad. Sin esto,
+  adivinar un país por un noveno de su bandera es casi imposible. Usa
+  los campos `lat`/`lon` de `countries.js`, que son **centroides
+  aproximados** de cada país, no capitales.
+- **Se escribe, no se elige**, con sugerencias filtradas sin tildes ni
+  mayúsculas (`normText`). Un país que no existe o uno ya probado
+  **no gasta intento**: gastarlo por una errata sería injusto cuando
+  solo hay un intento al día.
+- **En el idioma que se esté jugando.** Los nombres se comparan contra
+  los del idioma activo (`countryName`), no contra los españoles, y los
+  rumbos, las distancias y la fecha se escriben con las reglas de ese
+  idioma. La bandera del día, en cambio, **no depende del idioma**: sale
+  del código ISO, así que media familia puede jugarlo en catalán y la
+  otra media en inglés y seguir comparando el mismo reto.
+- **El estado se guarda** en `dcb_daily_v2`, por fecha y jugador:
+  recargar la página no regala intentos. Se guarda el día entero en una
+  sola clave y se descarta cuando cambia la fecha, así que el
+  almacenamiento no crece.
+- **Puntuación**: 300 al acierto a la primera, −40 por cada fallo
+  (mínimo 100), y 0 si se agotan los intentos. Se envía como **una sola
+  "ronda"**, que es lo que hace que encaje en la validación del
+  servidor sin migración: `score <= rounds * 200 * 1.6` con `rounds = 1`
+  deja el techo en 320. Por lo mismo, viaja etiquetado con el `level`
+  `experto` (ver el comentario en `js/levels.js`): la política RLS solo
+  admite cinco valores en esa columna, y el ranking diario lista
+  jugador y puntos, no niveles.
+- **Compartir** genera cuadrados 🟥/🟩 con el número de intentos, **sin
+  decir qué bandera era** — se comparte con gente que aún no ha jugado.
+  Usa `navigator.share` si existe, si no el portapapeles, y si tampoco,
+  enseña el texto para copiarlo a mano.
+
+La bandera va en un único `<img>` con nueve tapas por encima que se
+apagan una a una (`.fgrid__cover.is-open`). Pintar nueve trozos con
+`background-position` era la alternativa obvia, pero dejaba costuras
+claras entre piezas por el redondeo de subpíxeles. La caja es 4:3
+porque todos los SVG de flag-icons lo son: así las tapas caen
+exactamente sobre sus novenos.
 
 ### Puntuación
 
@@ -296,6 +373,7 @@ del SVG — ver la auditoría para más detalle.
 | `dcb_last_v1` | Última configuración jugada, para la tarjeta "Seguir jugando" |
 | `dcb_seen_v1` | Mapa código→veces vista, por bandera (progreso de aprendizaje) |
 | `dcb_wrong_v1` | Mapa código→nº de fallos históricos (alimenta "Repasa tus fallos") |
+| `dcb_daily_v2` | El reto de hoy en curso: `{date, players:{jugador:{guesses,done,won,saved}}}`. Se descarta entero al cambiar la fecha |
 | `dcb_continent` | Filtro de continente elegido, por código (solo afecta a los niveles clásicos) |
 | `dcb_textsize` | Tamaño de texto (`'md'`/`'lg'`/`'xl'`) |
 | `dcb_lang` | Idioma elegido a mano (`'es'`/`'ca'`/`'en'`/`'fr'`/`'de'`/`'it'`) |
@@ -322,7 +400,7 @@ Hay dos rankings y **viven en sitios distintos a propósito**:
 | Ranking | Dónde | Qué contiene |
 |---|---|---|
 | **Ranking de casa** | `localStorage` (`dcb_scores_v1`) | Mejor marca por jugador y nivel, del modo clásico y de Supervivencia |
-| **Reto diario** | Supabase | La partida diaria de todos los jugadores, y el duelo asíncrono |
+| **Reto de hoy** | Supabase | El resultado del reto de hoy de todos los jugadores, y el duelo asíncrono |
 
 El ranking de casa era antes la vista `best_scores` de Supabase, que
 devolvía las **50 mejores marcas de la tabla entera, sin ningún filtro**:
@@ -339,9 +417,9 @@ servidor con las partidas agrupadas por familia (una columna nueva, una
 migración y cerrar la lectura directa de la tabla con una función
 `SECURITY DEFINER`), y ninguna de esas piezas existe hoy.
 
-El reto diario se queda en Supabase porque su gracia es comparar el mismo
-mazo con gente que juega en otro dispositivo, y eso no se puede hacer en
-local. De su tabla **solo se muestran los nombres que están en la lista
+El reto de hoy se queda en Supabase porque su gracia es comparar la misma
+bandera con gente que juega en otro dispositivo, y eso no se puede hacer
+en local. De su tabla **solo se muestran los nombres que están en la lista
 de jugadores de este dispositivo**; el resto se filtra en el cliente.
 Ojo con lo que eso es y lo que no: es una decisión de qué se enseña en
 pantalla, no una barrera — la clave `anon` va en el repositorio, así que
@@ -450,8 +528,13 @@ por hecho que el idioma ya está cargado.
 
 **Reglas al tocar código:**
 
-- Nada de texto suelto en `game.js`, `index.html` ni `flagDescription.js`:
-  toda cadena nueva es una clave en los seis archivos de idioma.
+- Nada de texto suelto en `game.js`, `daily.js`, `geo.js`, `index.html` ni
+  `flagDescription.js`: toda cadena nueva es una clave en los seis archivos
+  de idioma. `geo.js` devuelve la *clave* del rumbo (`"ne"`), no su nombre;
+  quien lo pinta busca `daily.dir.ne` en el idioma activo.
+- Los números y las fechas también son idioma: `toLocaleString(getLocale())`
+  y `toLocaleDateString(getLocale())`, no un formato fijo. El separador de
+  miles de 9.704 no vale para todos.
 - El continente es un código (`"af"`, `"am"`, `"as"`, `"eu"`, `"oc"`), nunca
   su nombre. Comparar por código, pintar con `continentName()`.
 - Los países se identifican por su código ISO en todas partes (mazo,
@@ -468,7 +551,11 @@ Antes de cambiar cualquiera de estos tres puntos, leer el razonamiento
 completo en `docs/decisiones-producto.md`:
 
 - La fecha del reto diario usa **UTC**, no la hora local del
-  dispositivo (a propósito, para que el mazo sea el mismo para todos).
+  dispositivo (a propósito, para que la bandera del día sea la misma
+  para todos).
+- El reto diario es **una bandera tapada en 9 piezas**, no una partida
+  del bucle normal. El formato anterior (12 rondas cronometradas) se
+  cambió a propósito; el razonamiento está documentado.
 - El catálogo de países es **miembros de la ONU + Ciudad del
   Vaticano** — no añadir territorios, banderas históricas ni estados
   de reconocimiento limitado sin que el producto lo pida
@@ -506,6 +593,15 @@ como mínimo:
   el texto en XL (los nombres largos —"Français", "Ozeanien"— son el caso
   que lo rompe).
 
+**Trampa al guionizar los tests:** `onTap()` ignora dos toques seguidos
+sobre el mismo elemento en menos de 500ms (antirrebote). Un guion que
+encadena clics sin pausa se come la mitad y parece un fallo del juego;
+hay que dejar ~600ms entre toques, como haría una persona.
+
+Al probar el reto de hoy conviene además interceptar las llamadas a
+Supabase con `page.route(...)`: si no, cada ejecución del guion mete una
+partida de prueba en la tabla real de ese día.
+
 ## Historial
 
 El proyecto pasó por una auditoría completa
@@ -523,6 +619,11 @@ implementadas y mergeadas:
   asíncrono.
 - **Fase 4** — infraestructura de internacionalización y las
   decisiones de producto documentadas.
+
+Después de esas cinco fases, el **reto diario cambió de formato**: de 12
+rondas cronometradas a una bandera tapada en nueve piezas
+(`js/daily.js`). El razonamiento está en la sección 4 de
+`docs/decisiones-producto.md`.
 
 Para el detalle de cada hallazgo y por qué se decidió cada cosa, la
 auditoría original sigue siendo la referencia más completa.

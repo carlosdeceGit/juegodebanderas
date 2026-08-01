@@ -170,6 +170,55 @@
   </div>
 </section>
 
+<!-- ══════════ EL RETO DE HOY (bandera tapada en 9 piezas) ══════════ -->
+<section class="screen" id="s-daily">
+  <header class="topbar">
+    <button class="btn btn--sm" id="btnDailyBack" data-i18n="nav.back">↩ Volver</button>
+    <!-- Quién juega, a la vista: el reto es de un intento por persona y
+         día, y en un móvil compartido hay que saber de quién es el que
+         está en pantalla antes de gastarlo. -->
+    <div class="topbar__mid"><span class="chip" id="dailyWho"></span></div>
+    <button class="btn btn--sm" data-settings="open" data-i18n="settings.short">⚙️ Ajustes</button>
+  </header>
+
+  <div class="screen__body screen__body--wide">
+    <h1 class="h1" data-i18n="daily.title">🔥 El reto de hoy</h1>
+    <p class="note" id="dailyDate"></p>
+
+    <div class="fgrid" id="dailyGrid" role="img"></div>
+
+    <p class="feedback feedback--daily" id="dailyFeedback" aria-live="polite"></p>
+
+    <div class="field" id="dailyForm">
+      <div class="combo">
+        <input id="dailyInput" class="input" maxlength="40" autocomplete="off"
+               autocapitalize="words" spellcheck="false" enterkeyhint="go"
+               data-i18n-placeholder="daily.placeholder" placeholder="País…"
+               data-i18n-aria-label="daily.inputLabel" aria-label="Escribe un país">
+        <!-- Lista simple de botones a propósito: sin `combobox`/`listbox`
+             a medias, que prometen a un lector de pantalla un patrón de
+             teclado (flechas, aria-activedescendant) que aquí no existe. -->
+        <ul class="suggest" id="dailySuggest" data-i18n-aria-label="daily.suggestLabel" aria-label="Países sugeridos" hidden></ul>
+      </div>
+      <button class="btn btn--primary" id="btnDailyGuess" data-i18n="daily.guess">🌍 Adivinar</button>
+    </div>
+
+    <div class="guesses" id="dailyGuesses"></div>
+
+    <div class="result" id="dailyResult" hidden>
+      <h2 class="h2" id="dailyResultTitle"></h2>
+      <p class="result__flag" id="dailyResultFlag"></p>
+      <p class="note" id="dailyResultScore"></p>
+      <button class="btn btn--primary btn--block" id="btnDailyShare" data-i18n="daily.share">📋 Compartir resultado</button>
+      <p class="note" id="dailyResultNote" aria-live="polite"></p>
+      <div class="grid">
+        <button class="btn btn--sm" id="btnDailyRanking" data-i18n="nav.ranking">🏆 Ranking de casa</button>
+        <button class="btn btn--sm" id="btnDailyHome" data-i18n="end.changeMode">🏳️ Otro juego</button>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ══════════ APRENDER ══════════ -->
 <section class="screen" id="s-learn">
   <header class="topbar">
