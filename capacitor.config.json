@@ -1,0 +1,13 @@
+{
+  "appId": "com.juegodebanderas.app",
+  "appName": "Diversión con Banderas",
+  "webDir": "www",
+  "backgroundColor": "#FFF8E7",
+  "android": {
+    "backgroundColor": "#FFF8E7"
+  },
+  "ios": {
+    "backgroundColor": "#FFF8E7",
+    "contentInset": "never"
+  }
+}
