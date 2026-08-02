@@ -82,8 +82,16 @@ Propongo que el tablero no sea un camino abstracto: **que sea el mapa del
 mundo, borrado.**
 
 El Borrón ha vaciado el atlas. Al empezar, el mundo es gris, sin nombres, y
-todas las banderas están en blanco. Cada fase ganada devuelve el color a un
-trozo. Al terminar una región, se colorea entera de golpe.
+todas las banderas están en blanco. Cada país recuperado vuelve al color
+como una gota de tinta que cae en su sitio.
+
+Como los capítulos recorren el mundo entero y no van continente a
+continente (§5), **el mapa se enciende salpicado desde el primer día**:
+Japón, Brasil y Canadá aparecen en la primera hora, cada uno en su esquina.
+Eso es mejor que ver colorearse una región y el resto en gris — se ve de
+inmediato que el juego va del mundo entero — y encaja con la historia: el
+Conde recupera primero lo que el mundo recuerda mejor, y termina por lo que
+no recuerda nadie.
 
 - **El progreso se ve sin explicarlo.** No hace falta una barra: se ve
   cuánto mundo queda gris.
@@ -113,33 +121,75 @@ El **modo cambia constantemente**. Lo que propongo es que las fases se
 cero — igual que `js/levels.js` ya define los cuatro niveles clásicos con
 parámetros en vez de con código propio para cada uno.
 
-Así se ve la primera región entera:
+### Los capítulos NO son continentes
+
+Una versión anterior de este documento repartía las fases por continentes:
+capítulo de Europa, capítulo de América, capítulo de África. **Era un
+error**, por tres motivos:
+
+1. **Mata la variedad.** Doce fases seguidas de banderas europeas son doce
+   fases de tricolores y cruces. La gracia de este juego es que el mundo
+   es variadísimo, y agrupar por continente esconde justo eso.
+2. **Deja las mejores para el final.** El círculo rojo de Japón, la hoja de
+   Canadá, la bandera de Brasil: las banderas que más enganchan a un niño
+   no están en Europa. Son el anzuelo y no pueden estar en la hora cuatro.
+3. **Y se aprende peor.** Practicar mezclando categorías cuesta más en el
+   momento pero se retiene mucho mejor que practicar en bloques. Doce fases
+   seguidas de un continente se sienten fáciles mientras se juegan y se
+   olvidan enteras.
+
+**Los capítulos se ordenan por dificultad y cada uno recorre el mundo
+entero.** Y cada uno tiene tema, que es lo que hace que se recuerden:
+
+| Cap. | Tema | De dónde sale |
+|---|---|---|
+| 1 | **Las que todo el mundo conoce** | Las 40 más reconocibles del planeta |
+| 2 | **Las que se confunden** | `js/confusables.js`, 25 grupos ya escritos |
+| 3 | **Las que cuentan algo** — lunas, estrellas, soles, animales | Etiquetas `pattern` |
+| 4 | **Las islas** | Del Caribe al Pacífico, pasando por el Índico |
+| 5 | **Las familias de colores** — panafricanas, panárabes, nórdicas | Etiquetas `palette` |
+| 6 | **Las que nadie recuerda** | La cola difícil: las 40 que más se fallan |
+
+Tres de los seis capítulos salen **directamente de etiquetas que
+`js/countries.js` y `js/confusables.js` ya guardan**. Y el 1 y el 6 son la
+misma lista ordenada por dificultad, de la que hoy se puede hacer una
+versión a mano en una tarde y, con jugadores, calcularla sola con el
+porcentaje de acierto real.
+
+### La zona vive en la fase, no en el capítulo
+
+Esto es lo que salva lo bueno de agrupar: **una fase suelta sí puede
+centrarse en una zona** —"las nórdicas", "el Cono Sur", "el Golfo"— porque
+ocho banderas parecidas juntas es la mejor forma de aprender a
+distinguirlas. Lo que no puede es ser el capítulo entero.
+
+Así queda el primer capítulo, que recorre el planeta de principio a fin:
 
 | # | Fase | Modo |
 |---|---|---|
-| 1 | Las banderas del oeste de Europa, con su nombre a la vista | Aprender |
+| 1 | Las diez más famosas del mundo, con su nombre a la vista | Aprender |
 | 2 | Las mismas, ahora de memoria | Bandera |
 | 3 | Sus capitales | Capital |
 | 4 | Señálalas en el mapa | Ubicación |
-| 5 | Mezcla de las tres, sin fallar dos veces seguidas | Mixto |
-| 6 | 👑 **El Impostor** — los tricolores que se confunden | Jefe |
-| 7 | Las cruces del norte: nórdicas y bálticas | Bandera |
-| 8 | Reconoce el país por su forma | Silueta |
-| 9 | Capitales del este de Europa | Capital |
-| 10 | ¿Cuál **no** limita con Alemania? | Vecinos |
-| 11 | Diez banderas de Europa en sesenta segundos | Contrarreloj |
+| 5 | Los tres gigantes de América y sus vecinos | Bandera |
+| 6 | 👑 **El Impostor** — Italia y México, Irlanda y Costa de Marfil | Jefe |
+| 7 | Las nórdicas: cinco cruces casi iguales | Bandera |
+| 8 | Japón, India, Corea, Brasil: reconoce el país por su forma | Silueta |
+| 9 | Capitales que no son la ciudad más grande | Capital |
+| 10 | ¿Cuál **no** limita con Brasil? | Vecinos |
+| 11 | Diez banderas del mundo en sesenta segundos | Contrarreloj |
 | 12 | 👑 **El Puzle del Borrón** — recomponer tres banderas rotas | Jefe |
 
-Doce fases, ocho modos distintos, y ninguna escrita a mano: todas salen de
-combinar piezas. Con seis modos, treinta zonas y cinco objetivos salen
-cientos de combinaciones sin escribir contenido nuevo.
+Doce fases, ocho modos distintos, cinco continentes, y ninguna escrita a
+mano: todas salen de combinar piezas. Con seis modos, treinta zonas y cinco
+objetivos salen cientos de combinaciones sin escribir contenido nuevo.
 
 **A mano solo se diseñan los doce jefes.** Doce sí las hace bien una
 persona; setenta y dos, no.
 
 ### Enseñar antes de examinar
 
-Fíjate en el orden de la región: las primeras fases **enseñan** (la bandera
+Fíjate en el orden del capítulo: las primeras fases **enseñan** (la bandera
 con su nombre a la vista, como el modo Aprender) y las siguientes van
 quitando ayuda hasta pedirlo de memoria. Eso convierte la campaña en el
 tutorial del juego entero y en el motor de aprendizaje, sin que parezca
@@ -206,7 +256,7 @@ en vez de confeti genérico, el juego ya tiene un lenguaje visual propio
   mancha de tinta que se expande por el mapa. No es un relleno: es un gesto.
 - **El sello de goma.** Cada bandera recuperada se sella en el pasaporte con
   el golpe seco y el ligerísimo temblor de un sello de verdad.
-- **El lacre.** Derrotar a un jefe cierra la región con un sello de cera
+- **El lacre.** Derrotar a un jefe cierra el capítulo con un sello de cera
   roja. Sonido, peso, y una animación que se ve una vez cada seis fases y
   por eso no cansa.
 - **Los números que saltan.** `+150` sale grande, encoge y se va. Siempre
@@ -463,11 +513,11 @@ Es exactamente por lo que las fases se componen (§5): cada temporada elige
 un **tema** que cambia la zona, los modos y el jefe, y las doce fases salen
 de ahí. Un año entero de temporadas cabe en una tabla:
 
-> Enero: las islas · Febrero: banderas con estrellas · Marzo: África ·
-> Abril: capitales · Mayo: los tricolores · Junio: fronteras y vecinos ·
-> Julio: siluetas · Agosto: los alfabetos · Septiembre: Asia ·
-> Octubre: las banderas más difíciles · Noviembre: América ·
-> Diciembre: la vuelta al mundo
+> Enero: las islas · Febrero: las que llevan estrellas · Marzo: lunas y
+> soles · Abril: capitales que engañan · Mayo: los tricolores del mundo ·
+> Junio: fronteras y vecinos · Julio: siluetas · Agosto: los alfabetos ·
+> Septiembre: banderas con animales · Octubre: las más difíciles ·
+> Noviembre: las más nuevas del mundo · Diciembre: la vuelta al mundo
 
 Doce temas, doce jefes escritos a mano al año. **Uno al mes sí se hace; doce
 fases al mes escritas una a una, no.**
@@ -496,7 +546,7 @@ ampliarlo para no meterse en disputas de soberanía.
 desbloqueadas entran en el juego de verdad, como pides:
 
 - **Se juegan** en el modo Rarezas (jefe 11), en fases especiales de la
-  última región y en las partidas libres una vez abiertas.
+  último capítulo y en las partidas libres una vez abiertas.
 - **Viven en la vitrina del conde**, una sección aparte del pasaporte.
 - **Nunca aparecen en el reto diario**, que es compartido y tiene que ser
   igual y justo para todo el mundo.
@@ -523,13 +573,15 @@ Es la diferencia entre diseñar la carta entera de un restaurante —que hay
 que hacerla— y cocinar solo los entrantes la primera noche para ver si la
 gente vuelve.
 
-En concreto: construir **la primera región completa** (las once fases de
-Europa y su jefe), con el mapa que se colorea y el conde con su sombrero.
+En concreto: construir **el primer capítulo completo** — las once fases de
+"las que todo el mundo conoce" y su jefe—, con el mapa que se colorea y el
+conde con su sombrero. Y es el mejor capítulo posible para probar, porque
+es el que lleva las banderas más atractivas del planeta.
 Eso ya es jugable de principio a fin y contesta la única pregunta que
-importa: **¿cuánta gente llega al final de la primera región?**
+importa: **¿cuánta gente llega al final del primer capítulo?**
 
 - Si la mitad la termina, la campaña funciona: se construyen las otras
-  cinco regiones con confianza.
+  cinco capítulos con confianza.
 - Si abandonan en la cuarta fase, hay algo que arreglar en el ritmo — y es
   mucho mejor arreglarlo una vez que seis.
 
@@ -573,7 +625,7 @@ tablero no ofrece decisiones, ofrece un botón.
 verla venir es media emoción. **No robar** las vidas ni los muros de pago.
 
 **Las medallas de Pokémon.** Cada jefe con su tema y su medalla, no solo
-más difícil. Es el precedente exacto de un jefe por región.
+más difícil. Es el precedente exacto de un jefe por capítulo.
 
 **Los mapas de roguelike.** Para la segunda versión: que el camino se
 bifurque entre la ruta fácil y la difícil que da mejor reliquia. Añade

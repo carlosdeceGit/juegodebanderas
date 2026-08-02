@@ -46,10 +46,11 @@ partir del cual se traduce.
 > color, ni una sola bandera: solo papel. En el borde de la página, muy
 > despacio, se movía una mancha de tinta.
 
-> **2 · Europa vuelve** *(fase 12)*
-> Europa tiene otra vez sus nombres, y el Conde ha dormido bien por primera
-> vez en semanas. Pero al cerrar el atlas ha visto un rastro de tinta
-> cruzando el mar. La mancha no huye: le está esperando.
+> **2 · Lo que se recuerda primero** *(fase 12)*
+> El Conde empieza por las que sabría dibujar con los ojos cerrados, y en
+> una tarde el mapa se enciende a manchas: Japón, Brasil, Canadá, Egipto.
+> Pero entre bandera y bandera queda mucho gris. Y en el gris hay un rastro
+> de tinta que no huye: le está esperando.
 
 > **3 · La pluma** *(fase 18)*
 > El Conde reconoce esa tinta. Es la suya. Salió de su propia pluma, el día
@@ -57,9 +58,9 @@ partir del cual se traduce.
 > en voz baja. La mancha no contesta.
 
 > **4 · Lo que no ha borrado** *(fase 24)*
-> América entera vuelve al mapa en una tarde. El Conde se sienta a mirarla
-> y se fija en algo raro: el Borrón ha borrado países, ciudades y ríos, pero
-> no ha tocado ni un solo mar. Los mares no tienen bandera.
+> El Conde se sienta a mirar el mapa a media luz y se fija en algo raro: el
+> Borrón ha borrado países, ciudades y ríos, pero no ha tocado ni un solo
+> mar. Los mares no tienen bandera.
 
 > **5 · La primera palabra** *(fase 30)*
 > Esa noche el Borrón habla. Dice una sola palabra: "Nómbrame". El Conde
@@ -70,10 +71,11 @@ partir del cual se traduce.
 > estar dentro. Un nombre, un color y una bandera, como todos los demás.
 > "No puedo", dice el Conde. "El atlas solo guarda lo que existe de verdad."
 
-> **7 · Cincuenta y cuatro** *(fase 42)*
-> África le lleva tres semanas y termina con los dedos manchados de tinta.
-> Cuando levanta la vista, el Borrón está al otro lado de la mesa, mirando
-> cómo trabaja. Ha dejado de borrar.
+> **7 · Las islas** *(fase 42)*
+> Islas diminutas repartidas por tres océanos, con banderas parecidísimas y
+> un montón de agua entre unas y otras. Le lleva tres semanas y termina con
+> los dedos manchados de tinta. Cuando levanta la vista, el Borrón está al
+> otro lado de la mesa, mirando cómo trabaja. Ha dejado de borrar.
 
 > **8 · La pregunta** *(fase 48)*
 > "¿Y quién decide lo que existe de verdad?", pregunta el Borrón. El Conde
@@ -81,9 +83,10 @@ partir del cual se traduce.
 > la vida poniendo nombres y nunca se preguntó quién le dio permiso.
 
 > **9 · La última página gris** *(fase 54)*
-> Islas diminutas, banderas parecidísimas y un océano enorme entre unas y
-> otras. El Conde recupera Oceanía isla por isla. Al terminar queda una
-> sola página gris, y no es la de un país: es la suya.
+> Rojo, amarillo y verde. Rojo, blanco y negro. Cruces nórdicas. El Conde
+> ordena el mundo por familias de colores hasta que el atlas queda casi
+> entero. Casi: queda una sola página gris, y no es la de un país. Es la
+> suya.
 
 > **10 · Sin nombre** *(fase 60)*
 > El Borrón ha borrado el nombre del Conde. Ahora tiene un condado sin
@@ -122,6 +125,15 @@ Esa última fila de la escena 12 es la más útil de todas: **da una razón
 dentro del cuento para que el juego no se acabe nunca**, y convierte al
 villano en el motor del contenido en vez de en un enemigo derrotado del que
 ya no se habla.
+
+Y hay una rima que sale sola del orden de los capítulos (`modo-campana.md`
+§5): el último capítulo es **"las que nadie recuerda"**, así que el Conde
+llega a las escenas 11 y 12 justo después de pasarse doce fases devolviendo
+el nombre a países que casi nadie sabría situar. Cuando el Borrón pide que
+lo nombren, el Conde lleva un mes entero haciendo exactamente eso.
+
+Esa rima **no existiría si los capítulos fueran continentes**: terminar en
+Oceanía no significa nada; terminar en las olvidadas, sí.
 
 ## 5. El final, y una recompensa que no cuesta nada
 
@@ -292,11 +304,13 @@ Conviene tenerlo a la vista, porque es bastante:
 
 Esto es lo más importante de toda la parte 2:
 
-**Fase 0 — 0 €.** Montar la región de Europa con un Conde provisional: el
-icono que ya existe, con un sombrero dibujado en SVG. Sonidos CC0. Sin
-música. Sirve perfectamente para saber si la campaña engancha.
+**Fase 0 — 0 €.** Montar el primer capítulo —"las que todo el mundo
+conoce"— con un Conde provisional: el icono que ya existe, con un sombrero
+dibujado en SVG. Sonidos CC0. Sin música. Sirve perfectamente para saber si
+la campaña engancha, y encima se prueba con las banderas más atractivas del
+planeta.
 
-**Fase 1 — solo si la gente termina Europa.** Encargar el Conde de verdad y
+**Fase 1 — solo si la gente termina el capítulo 1.** Encargar el Conde y
 sus complementos (250-500 €). Es el momento correcto: ya se sabe qué poses
 hacen falta porque se ha visto el juego funcionando.
 
