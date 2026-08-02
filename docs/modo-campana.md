@@ -366,23 +366,84 @@ Grupos de unas treinta personas. Los cinco primeros suben, los cinco
   quede el último. Un mes sin premio ninguno es un mes que invita a no
   volver.
 
-### 9.5 El problema del que nadie habla: hacen falta jugadores
+Mientras solo exista Cuarzo (§9.5) no hay ni ascenso ni descenso, y no pasa
+nada: el premio del mes es el podio de tu grupo, los escudos y el sello de
+la temporada. El ascenso llega cuando llega la escalera.
 
-Diez ligas de treinta personas necesitan gente para llenarse. Con
-doscientos jugadores al mes, diez ligas son diez grupos de veinte, y la de
-Diamante tendría tres personas.
+### 9.5 La escalera se construye hacia arriba
 
-Cómo lo resolvería, sin mentir a nadie:
+Diez ligas necesitan gente para llenarse: con doscientos jugadores, la de
+Diamante tendría tres personas y no sería una liga, sería una foto de
+familia.
 
-- **La gema es tu rango personal**, no un cajón. Se sube por puntos y no se
-  pierde por debajo del suelo.
-- **El grupo mensual se forma juntando ligas cercanas** hasta reunir unas
-  veinte personas. Se enseña honestamente: "grupo de 18".
-- **Mientras no haya gente suficiente, la liga es de casa**: tu familia y
-  tus amigos, con la misma escalera y los mismos premios.
-- **Nunca rivales inventados.** Si el ranking dice que hay alguien, que haya
-  alguien. Un juego infantil que miente sobre con quién compites es
-  exactamente lo que no quiero recomendar.
+**La solución: al principio existe una sola liga y todo el mundo está en
+Cuarzo. Las demás se van abriendo de una en una, por encima, según llega
+gente.** La escalera no está construida esperando a que alguien suba: se
+construye según se sube.
+
+#### Liga y grupo no son lo mismo
+
+Conviene tenerlo claro porque resuelve el problema de golpe:
+
+- **La liga** es el escalón: Cuarzo, Ámbar, Turquesa…
+- **El grupo** es con quién compites de verdad ese mes: unas treinta
+  personas.
+
+Con doscientos jugadores en Cuarzo se hacen **siete grupos de treinta**, no
+una lista de doscientos. Nadie es el número 147: cada uno tiene su podio,
+sus cinco de arriba y su mes emocionante. Una sola liga ya funciona bien
+desde el primer día.
+
+#### Cuándo se abre la siguiente
+
+Hace falta una regla concreta, porque "cuando haya más gente" no se puede
+programar. Yo la pondría así:
+
+> **Se abre la liga siguiente cuando la de arriba llega a 90 jugadores
+> activos en un mes** (tres grupos llenos).
+
+Y con un detalle importante: **la primera promoción a una liga recién
+abierta es más grande de lo normal** — suben los diez primeros de cada
+grupo en vez de los cinco — para que nazca con un grupo lleno en vez de con
+quince personas dando vueltas.
+
+#### Una liga abierta no se cierra nunca
+
+Si un mes flojo deja Zafiro con doce personas, se juntan los grupos, pero
+la liga sigue existiendo. Quitarle a alguien el escalón que se ganó es de
+las pocas cosas que garantizan que no vuelva.
+
+#### Y aquí está la mejor parte: la escalera se abre entre todos
+
+Enseñar las ligas de arriba **bloqueadas, con lo que falta para abrirlas**:
+
+> 🔒 Ámbar · faltan 23 jugadores para abrirla
+
+Eso convierte la debilidad —somos pocos— en un objetivo compartido, y en el
+único motivo honesto para invitar a alguien: no "instálate esto", sino
+"nos faltan 23 para abrir la siguiente liga". Es la mecánica de crecimiento
+más limpia de todo el documento, porque el número que se enseña es
+verdadero.
+
+Dos cuidados al hacerlo:
+
+- **No enseñar el contador desde el minuto cero.** Con seis jugadores, un
+  contador dice "esto está vacío". A partir de un mínimo razonable — unos
+  cincuenta — dice "esto está creciendo". Es la misma cifra contada en el
+  momento correcto.
+- **Contar hacia la meta, no hacia atrás.** Una barra que se llena, no un
+  recuento de cuánta gente hay.
+
+Y quien estuviera en la primera temporada, cuando solo existía Cuarzo, se
+lleva un sello de **Fundador** en el pasaporte. No da ventaja: da historia,
+que para eso sirve un pasaporte.
+
+#### Lo único que no se hace
+
+**Nunca rivales inventados.** Si el ranking dice que hay alguien, que haya
+alguien. Un juego infantil que miente sobre con quién compites es
+exactamente lo que no voy a recomendar — y además, con la escalera
+abriéndose sola, ya no hace ninguna falta.
 
 ### 9.6 Una tensión por semana, no una al mes
 
