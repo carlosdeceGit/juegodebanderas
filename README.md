@@ -78,6 +78,7 @@ tools/build-www.mjs          Copia el sitio a www/, que es lo que empaquetan las
 docs/idiomas.md               Cómo funcionan los idiomas y cómo añadir uno
 docs/decisiones-producto.md   Decisiones de producto explícitas (fecha UTC, países, ranking global)
 docs/apps-moviles.md          Cómo llevar el juego a App Store y Google Play
+docs/publico-objetivo.md      El público es de 15 años en adelante: manda sobre los documentos de propuesta
 docs/ideas-app.md             Propuesta (sin decidir) para pasar de juego web a producto
 docs/mecanicas-juego.md       Propuesta (sin decidir) de mecánicas de juego y retención
 docs/mecanicas-enganche.md    Propuesta (sin decidir) con datos del sector y modos más allá de banderas

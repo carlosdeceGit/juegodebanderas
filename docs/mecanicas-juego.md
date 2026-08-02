@@ -146,11 +146,11 @@ del cromo raro, cuesta casi nada y hace que se juegue "a ver si sale una".
 
 ### 4.3 La línea que no cruzo
 
-Esto es un juego infantil, así que:
+Con público de 15 en adelante ya no es una obligación legal, pero sigue
+siendo lo que yo haría (`publico-objetivo.md` §3.3):
 
-- **Los sobres se ganan jugando y no se venden jamás.** Vender cajas
-  sorpresa a menores está regulado en media Europa y, aunque no lo
-  estuviera, no.
+- **Los sobres se ganan jugando y no se venden.** Un juego de conocimiento
+  que vende aleatoriedad se gana una reputación que no le compensa.
 - **Nada de contadores de urgencia** ("¡solo 3 minutos!"), ni de culpa por
   la racha perdida, ni de recompensas que caducan mientras duermes.
 - **Nada de jugadores falsos**: si el ranking dice que hay alguien, que
@@ -287,13 +287,14 @@ sirvió**, para poder quitarla si no.
 ## 9. Lo que no haría
 
 - **Vidas o energía.** El mecanismo para que dejes de jugar. En un juego
-  familiar sin monetización no tiene ninguna función.
+  sin monetización agresiva no tiene ninguna función.
 - **Sobres de pago.** Ver 4.3.
 - **Rivales inventados** para que el ranking parezca lleno.
 - **Cien logros.** Doce sellos que se persiguen valen más que cien que se
   ignoran.
 - **Racha que se rompe al fallar.** Solo se rompe al no jugar. Castigar el
-  fallo en un juego de niños es la forma más rápida de que lo dejen.
+  fallo es la forma más rápida de que alguien deje de intentarlo, tenga la
+  edad que tenga.
 - **Anuncios.**
 
 ---

@@ -102,7 +102,7 @@ no recuerda nadie.
   mapa que pase de gris a color.
 
 La bandera en blanco es, además, la mejor casilla vacía posible para un
-álbum, y es un chiste visual que un niño entiende sin que se lo cuenten.
+álbum, y es un chiste visual que se entiende sin que nadie lo explique.
 
 ---
 
@@ -131,8 +131,8 @@ error**, por tres motivos:
    fases de tricolores y cruces. La gracia de este juego es que el mundo
    es variadísimo, y agrupar por continente esconde justo eso.
 2. **Deja las mejores para el final.** El círculo rojo de Japón, la hoja de
-   Canadá, la bandera de Brasil: las banderas que más enganchan a un niño
-   no están en Europa. Son el anzuelo y no pueden estar en la hora cuatro.
+   Canadá, la bandera de Brasil: las banderas que más enganchan no están en
+   Europa. Son el anzuelo y no pueden estar en la hora cuatro.
 3. **Y se aprende peor.** Practicar mezclando categorías cuesta más en el
    momento pero se retiene mucho mejor que practicar en bloques. Doce fases
    seguidas de un continente se sienten fáciles mientras se juegan y se
@@ -163,7 +163,10 @@ centrarse en una zona** —"las nórdicas", "el Cono Sur", "el Golfo"— porque
 ocho banderas parecidas juntas es la mejor forma de aprender a
 distinguirlas. Lo que no puede es ser el capítulo entero.
 
-Así queda el primer capítulo, que recorre el planeta de principio a fin:
+Así queda el primer capítulo, que recorre el planeta de principio a fin.
+**Ojo: la versión definitiva es la de `publico-objetivo.md` §5.1**, que
+sube el listón para un público de 15+ y empieza midiendo en vez de
+enseñando. Esta se deja porque muestra bien la variedad de modos:
 
 | # | Fase | Modo |
 |---|---|---|
@@ -224,10 +227,10 @@ Tu idea era una frase en un idioma. Le daría una vuelta: **que sea el
 alfabeto, no la lengua.** Una palabra en georgiano, tailandés, amárico,
 coreano, griego o armenio.
 
-Reconocer una escritura es **visual**, como una bandera: un niño de siete
-años puede jugarlo sin saber ningún idioma. Y no tiene la ambigüedad del
-idioma hablado (¿el español es España o México?). Con el georgiano no hay
-duda posible.
+Reconocer una escritura es **visual**, como una bandera: se puede jugar sin
+saber ni una palabra de esos idiomas. Y no tiene la ambigüedad del idioma
+hablado (¿el español es España o México?). Con el georgiano no hay duda
+posible.
 
 *Coste: una tabla de treinta palabras.*
 
@@ -271,8 +274,8 @@ en vez de confeti genérico, el juego ya tiene un lenguaje visual propio
   segundos vale más que el premio.
 
 Regla general: **la recompensa se anima, el castigo no.** Un fallo se
-resuelve rápido y sin drama; un acierto se celebra. En un juego de niños
-esa asimetría es todo.
+resuelve rápido y sin drama; un acierto se celebra. Esa asimetría es lo que
+separa un juego que apetece repetir de uno que da pereza.
 
 ---
 
@@ -310,11 +313,11 @@ Los que afectan al diseño:
 - **Nada de packs pensados para que sobren monedas.** Vender de 500 en 500
   cuando todo cuesta 450 es exactamente la práctica que señalan.
 - **No se puede obligar a pasar por la moneda** para comprar algo.
-- **Nada de cajas sorpresa de pago.** Los sobres se ganan jugando; si se
-  venden con dinero y el contenido es aleatorio, entras en el terreno más
-  vigilado que hay ahora mismo en Europa, y con menores de por medio.
-- **Puerta parental antes de la tienda**, además del control que ya ponen
-  Apple y Google.
+- **Nada de cajas sorpresa de pago.** Los sobres se ganan jugando. Con
+  público de 15+ esto ya no es una prohibición sino un criterio (ver
+  `publico-objetivo.md` §3.3), pero sigue siendo el que yo tomaría: un juego
+  de conocimiento que vende aleatoriedad se gana una reputación que no le
+  compensa.
 
 ### Y un consejo de negocio, no de diseño
 
@@ -383,8 +386,8 @@ más horas tiene, en lugar de quien mejor juega.
 
 ### 9.3 La escalera: diez gemas
 
-De menos a más, con el color como señal principal — un niño tiene que saber
-en qué liga está por el color, sin leer:
+De menos a más, con el color como señal principal: se tiene que saber en qué
+liga se está de un vistazo, sin leer el nombre:
 
 | | Liga | Color |
 |---|---|---|
@@ -407,11 +410,10 @@ queda ahí para siempre, aunque luego se baje.
 ### 9.4 Subir y bajar, con cabeza
 
 Grupos de unas treinta personas. Los cinco primeros suben, los cinco
-últimos bajan. Con tres correcciones para un juego de niños:
+últimos bajan. Con dos correcciones:
 
-- **Nunca se baja más de una liga en un mes.**
-- **De Jade para abajo no se baja.** Es el suelo: un niño de ocho años no
-  tiene que aprender lo que es el descenso.
+- **Nunca se baja más de una liga en un mes.** Es equilibrio, no ternura:
+  caer tres escalones de golpe por un mes malo desanima a cualquiera.
 - **Terminar el mes siempre da algo** — escudos y un sello —, aunque se
   quede el último. Un mes sin premio ninguno es un mes que invita a no
   volver.
@@ -491,9 +493,9 @@ que para eso sirve un pasaporte.
 #### Lo único que no se hace
 
 **Nunca rivales inventados.** Si el ranking dice que hay alguien, que haya
-alguien. Un juego infantil que miente sobre con quién compites es
-exactamente lo que no voy a recomendar — y además, con la escalera
-abriéndose sola, ya no hace ninguna falta.
+alguien. Un juego que miente sobre con quién compites es exactamente lo que
+no voy a recomendar — y además, con la escalera abriéndose sola, ya no hace
+ninguna falta.
 
 ### 9.6 Una tensión por semana, no una al mes
 

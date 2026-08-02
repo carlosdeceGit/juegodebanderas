@@ -25,7 +25,8 @@ Que el villano sea una mancha de tinta no es solo una imagen bonita:
 - Encaja exactamente con el sistema visual del juego ("Papel & Tinta").
 - Es lo más barato de dibujar que existe: **es una mancha**. Un villano que
   se puede animar con SVG sin encargarle nada a nadie.
-- Y no asusta a un niño de seis años, que es un requisito, no un detalle.
+- Y no es un villano de dibujos animados: una mancha que borra nombres
+  aguanta perfectamente un público adulto.
 
 ## 2. El arco, en una frase
 
@@ -160,8 +161,8 @@ Estas reglas no son de estilo: son de presupuesto. Cada una ahorra dinero.
 4. **Nunca un adjetivo referido al Conde.** Ni "cansado", ni "sorprendido".
    Así se puede ofrecer **Conde o Condesa** cambiando una sola palabra, sin
    duplicar el texto en los cuatro idiomas donde los adjetivos concuerdan
-   en género. Es una elección que en un juego familiar se agradece mucho, y
-   escribiendo con cuidado sale gratis.
+   en género. Escribiendo con cuidado sale gratis, y en un juego con
+   personaje se agradece.
 5. **El Borrón, sin género.** "La mancha" o "el Borrón" según haga falta,
    nunca "él".
 
@@ -200,17 +201,24 @@ queda más coherente que doce dibujos pegados.
 
 | Qué | Cómo | Coste |
 |---|---|---|
-| **El Conde**, tres poses (normal, contento, preocupado) | Encargo a ilustrador | 250-500 € |
-| **8-10 complementos** (sombreros, capas, monóculo, bufanda) | Mismo encargo, mismo estilo | Incluido si se negocia junto |
+| **El Conde** — *ver nota abajo: puede no dibujarse* | Encargo a ilustrador | 0-500 € |
+| **Cosméticos**: tintas, lacres, papeles, plumillas, escudo de armas | En casa: color, textura y formas componibles | 0 € |
 | **El Borrón** | En casa: es una mancha SVG animada | 0 € |
 | **El mapa mundial** | Natural Earth, dominio público | 0 € |
 | **Las diez gemas** | En casa: diez formas SVG con el color de cada liga | 0 € |
 | **Sellos, lacre, marcos** | En casa, con el sistema de diseño | 0 € |
 | **Iconos y splash** | Ya hechos (`tools/build-icons.mjs`) | 0 € |
 
-**Lo único que yo encargaría fuera es el Conde.** Todo lo demás sale del
-sistema de diseño que ya existe: el icono de la app se generó con un script
-y un SVG escrito a mano, así que la capacidad ya está demostrada.
+**Con público de 15+, puede que no haya que encargar nada.** Si los
+cosméticos son el escritorio del Conde —tintas, lacres, papeles, plumillas,
+un escudo de armas que compone cada jugador— y no trajes de un personaje,
+entonces del Conde basta con la mano, la pluma y la letra
+(`publico-objetivo.md` §3.5 y §3.6). Un personaje mal dibujado infantiliza
+el juego entero; no dibujarlo no tiene ese riesgo y sale gratis.
+
+Si aun así se quiere el personaje, todo lo demás sigue saliendo del sistema
+de diseño que ya existe: el icono de la app se generó con un script y un
+SVG escrito a mano, así que la capacidad está demostrada.
 
 ### Tres cosas que hay que pedir por escrito al encargar
 
@@ -273,8 +281,8 @@ La forma más barata que sale bien:
 
 1. Escribir el original en español con las cinco reglas del punto 6.
 2. Primera pasada automática a los otros cinco idiomas.
-3. **Revisión humana**, que es donde está la diferencia. En un juego
-   infantil una traducción rara se nota inmediatamente.
+3. **Revisión humana**, que es donde está la diferencia. Un público adulto
+   detecta una traducción automática a la primera frase.
 
 Y una decisión de presupuesto razonable: **revisar a fondo inglés y catalán
 primero** —el inglés porque es el que verá más gente fuera, el catalán

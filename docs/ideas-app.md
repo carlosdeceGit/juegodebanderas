@@ -4,6 +4,9 @@
 por buenas las decisiones anteriores: lo que sigue es lo que haría falta
 para que esto sea una app de verdad, no una web empaquetada.
 
+> ⚠️ Escrito cuando el público eran familias con niños. El público es ahora
+> de 15 años en adelante: manda `docs/publico-objetivo.md`.
+
 **Regla que se aplica a todo lo de abajo:** cada pieza tiene que tener
 sentido también jugando en el navegador. Un juego con dos formas de
 abrirlo, no dos productos que mantener.
@@ -63,8 +66,10 @@ pierde el móvil, que es lo único que el código no cubre. El `uid` no cambia
 al vincular, así que no se pierde nada.
 
 Ese orden — código primero, login opcional después — es el que deja el
-juego usable por un niño de ocho años sin arrastrar consentimiento parental
-para todo el mundo.
+juego jugable desde el primer toque sin pedirle una cuenta a nadie. Con el
+público en 15+ ya no hay obligación legal de evitar el login social, así
+que **también puede ofrecerse**; sigue siendo mejor que llegue después y no
+en la pantalla de bienvenida.
 
 ### Lo que hay que hacer bien
 
@@ -257,9 +262,10 @@ Qué modos se juegan, en qué pantalla se abandona, cuánta gente vuelve al
 día siguiente. **Guardado en vuestro propio Supabase**, en contadores
 agregados, sin ninguna herramienta externa.
 
-Dos motivos: sin esto se decide a ciegas, y usar Google Analytics o
-similares en un juego infantil es justo lo que las tiendas no permiten.
-Hacerlo en casa es más barato *y* más limpio.
+Sin esto se decide a ciegas. Con público adulto ya se puede usar una
+herramienta externa —la prohibición era de la categoría Niños—, pero
+hacerlo en casa sigue saliendo más barato *y* más limpio, y no obliga a
+declarar un tercero en la ficha de privacidad.
 
 *Coste: 1 día.*
 
@@ -336,17 +342,24 @@ Unas cinco o seis semanas de trabajo hasta tener algo que se sostenga solo.
 
 ---
 
-## 9. La única restricción que no es una opinión
+## 9. Lo que queda de restricción legal
 
-El juego se dirige a niños, y eso es ley, no preferencia: COPPA en Estados
-Unidos y el consentimiento parental del RGPD en Europa.
+**Esta sección decía que el juego se dirigía a niños y que eso era ley y no
+preferencia. Ya no aplica**: el público es de 15 años en adelante
+(`docs/publico-objetivo.md`). Se caen COPPA, el consentimiento parental y
+la categoría Niños con todas sus normas.
 
-La buena noticia es que **el diseño de arriba lo esquiva casi entero**: con
-cuenta anónima y nombres generados no se recoge ni un dato personal, así
-que no hay nada que consentir. El riesgo aparece solo si se añade login con
-email o con redes sociales.
+Lo que queda, que es bastante menos:
 
-Por eso el orden propuesto es código de vinculación primero y login
-opcional después, y por eso el login —si se pone— debería estar detrás de
-una puerta parental y limitado a Apple, Google o email. Redes sociales, en
-un juego infantil, no compensan nunca.
+- **Declarar el juego como no dirigido a menores** en Google Play, y una
+  clasificación por edad coherente: 12+ con ligas y compras, o 16+ si se
+  quiere cerrar el asunto del todo.
+- **Política de privacidad.** Eso es RGPD y no depende de la edad.
+- **Borrado y exportación de cuenta desde dentro**, que exigen Apple y el
+  RGPD por igual.
+- **Los siete principios europeos sobre monedas de juego**, que son derecho
+  del consumidor.
+
+La cuenta anónima sigue siendo la mejor arquitectura, pero ahora **por
+producto y no por obligación**: mantiene el arranque en dos toques y no
+recoge ni un dato que después haya que proteger, declarar o borrar.
