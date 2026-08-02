@@ -1,7 +1,8 @@
 # El Condado: modo campaña
 
-**Propuesta, no decisión.** Desarrollo de la idea del conde que perdió los
-nombres y las banderas del mundo y tiene que recuperarlos fase a fase.
+**Propuesta, no decisión.** Desarrollo de la idea del conde que puso los
+nombres y las banderas al mundo, se lo han quitado todo, y tiene que
+recuperarlo fase a fase.
 
 ---
 
@@ -11,303 +12,364 @@ La mayoría de los juegos casuales pegan una historia encima de una mecánica
 que no la necesita. Aquí pasa lo contrario, y es raro: **la trama y la
 mecánica son la misma cosa.**
 
-Si el conde es quien puso los nombres y las banderas al mundo y se lo han
-quitado todo, entonces acertar una bandera **no es puntuar, es recuperarla**.
-El álbum deja de ser una pantalla de estadísticas y pasa a ser el objetivo
-del juego. Los tres documentos anteriores buscaban una razón para
-coleccionar; esta idea la trae puesta de fábrica.
+Si el conde es quien puso los nombres y las banderas y se lo han quitado,
+acertar una bandera **no es puntuar, es recuperarla**. El álbum deja de ser
+una pantalla de estadísticas y pasa a ser el objetivo del juego.
 
-Y resuelve de paso los tres problemas que peor pinta tenían:
+Y resuelve de paso los tres problemas peores:
 
-| Problema detectado antes | Cómo lo resuelve la campaña |
+| Problema | Cómo lo resuelve la campaña |
 |---|---|
-| Tres pantallas antes de jugar | El tablero dice dónde estás y cuál es la siguiente. Un toque |
+| Tres pantallas antes de jugar | El tablero dice cuál es la siguiente fase. Un toque |
 | La puntuación no significa nada | Ya no puntúas: liberas un trozo de mundo |
-| Ocho modos que nadie descubre | Cada fase presenta uno. El menú desaparece |
+| Ocho modos que nadie descubre | Cada jefe desbloquea uno. El menú se llena solo |
 | El contenido se acaba a las 195 banderas | 72 fases con objetivos distintos sobre el mismo catálogo |
 
 ---
 
-## 2. El giro que yo le daría: **el tablero es el mapa**
+## 2. Tres puertas desde el primer día
 
-En la idea original el tablero es un camino de fases. Propongo algo más
-fuerte: **el tablero es el mapa del mundo, y empieza en blanco.**
+La campaña **no puede ser la única forma de jugar**. La pantalla de inicio
+tiene tres tarjetas desde el minuto uno:
 
-El Borrón —o como se llame el villano— ha borrado el atlas. Al empezar, el
-mundo es gris, sin nombres, y todas las banderas están en blanco. Cada fase
-ganada devuelve el color a un trozo de mapa. Al final de una región,
-Sudamérica entera pasa de gris a color de golpe.
+| Puerta | Para quién | Cuánto dura |
+|---|---|---|
+| 👑 **El Condado** | Quien quiere el juego grande | Meses |
+| 🔥 **El reto de hoy** | Quien solo quiere su ritual diario | 2 minutos |
+| 🏳️ **¿Qué bandera es?** | Quien quiere jugar y ya | 90 segundos |
 
-Lo que se gana con eso:
+Son tres tipos de jugador distintos y ninguno molesta a los otros. Una
+persona puede jugar solo el reto diario durante dos años y estar
+perfectamente servida: eso es un éxito, no un fallo.
 
-- **El progreso se ve de un vistazo y sin explicarlo.** No hace falta una
-  barra: se ve cuánto mundo te queda gris.
-- **Unifica tres cosas que iban por separado** en los documentos
-  anteriores: el mapa que se colorea, el álbum de cromos y el pasaporte
-  pasan a ser el mismo objeto.
-- **Da la escena del jefe final**: el mundo entero, de una vez.
-- **Y abarata el arte.** No hace falta un tablero ilustrado: hace falta un
-  mapa que pase de gris a color. Eso ya es bonito.
-
-La bandera en blanco, además, es la mejor imagen posible para una casilla
-vacía del álbum. Y es un chiste visual que un niño entiende sin que nadie
-se lo cuente.
+**El resto de modos empiezan cerrados.** Y ese es el truco.
 
 ---
 
-## 3. Estructura: 72 fases que no hay que diseñar a mano
+## 3. Los jefes reparten el juego
 
-**Aquí está el mayor riesgo del proyecto.** Candy Crush ajusta sus niveles
-uno a uno con un equipo dedicado. Si cada una de las 72 fases hay que
-inventarla, el proyecto muere en la fase 20 — no por difícil, por aburrido
-de hacer.
+Hoy el juego tiene ocho modos y casi nadie descubre más de dos, porque
+están en una lista. En la campaña, **cada jefe derrotado abre un modo nuevo
+en el menú libre**, para siempre.
 
-La solución es que las fases **se generen a partir de una plantilla**, como
-ya hace `levels.js` con los cuatro niveles clásicos:
+| Jefe | Fase | Abre en juego libre |
+|---|---|---|
+| 1 | 6 | Elige la bandera *(ya existe)* |
+| 2 | 12 | Siluetas |
+| 3 | 18 | ¿Dónde está? (el mapa) |
+| 4 | 24 | Bandera y capital *(ya existe)* |
+| 5 | 30 | La cuadrícula 3×3 |
+| 6 | 36 | Vecinos y rutas |
+| 7 | 42 | Frío o caliente |
+| 8 | 48 | Alfabetos perdidos |
+| 9 | 54 | Supervivencia *(ya existe)* |
+| 10 | 60 | Mayor o menor |
+| 11 | 66 | **Rarezas** (las banderas que no son de países) |
+| 12 | 72 | 👑 **Jefe final** → modo sin fin |
+
+Cuatro de esos modos **ya están escritos** (`js/game.js`). La campaña no los
+inventa: los convierte en recompensas. Un modo que te dan cuando lo ganas
+vale mucho más que el mismo modo escondido en una lista.
+
+Y da la respuesta a "¿por qué seguir en el Condado?": porque cada seis
+fases el juego se hace más grande.
+
+---
+
+## 4. El tablero es el mapa, y empieza en gris
+
+Propongo que el tablero no sea un camino abstracto: **que sea el mapa del
+mundo, borrado.**
+
+El Borrón ha vaciado el atlas. Al empezar, el mundo es gris, sin nombres, y
+todas las banderas están en blanco. Cada fase ganada devuelve el color a un
+trozo. Al terminar una región, se colorea entera de golpe.
+
+- **El progreso se ve sin explicarlo.** No hace falta una barra: se ve
+  cuánto mundo queda gris.
+- **Unifica tres pantallas en una**: el mapa que se colorea, el álbum y el
+  pasaporte pasan a ser el mismo objeto.
+- **Da escenario al jefe final**: el mundo entero de una vez.
+- **Y abarata el arte**: no hay que ilustrar un tablero, hay que hacer un
+  mapa que pase de gris a color.
+
+La bandera en blanco es, además, la mejor casilla vacía posible para un
+álbum, y es un chiste visual que un niño entiende sin que se lo cuenten.
+
+---
+
+## 5. Cada fase tiene su propio modo
+
+Esto es importante y en la versión anterior lo expliqué mal: **no propongo
+que todas las fases sean iguales.** Justo lo contrario. Una fase se define
+así:
 
 ```
-fase = modo + zona del mundo + objetivo + restricción
+fase = MODO + zona del mundo + objetivo + restricción
 ```
 
-- **Modo**: bandera, capital, silueta, ubicación, vecinos, mezcla.
-- **Zona**: África Occidental, los Balcanes, el Caribe…
-- **Objetivo**: acertar 8 de 10, encadenar 5 seguidas, terminar en 60s.
-- **Restricción**: sin pistas, sin fallar dos veces, a contrarreloj.
+El **modo cambia constantemente**. Lo que propongo es que las fases se
+*compongan* de esas cuatro piezas en vez de inventarse una por una desde
+cero — igual que `js/levels.js` ya define los cuatro niveles clásicos con
+parámetros en vez de con código propio para cada uno.
 
-Con seis modos, treinta zonas y cinco objetivos salen cientos de fases
-distintas sin escribir ninguna. **Solo los doce jefes se diseñan a mano**, y
-doce sí es un número que una persona puede hacer bien.
+Así se ve la primera región entera:
 
-### El reparto
+| # | Fase | Modo |
+|---|---|---|
+| 1 | Las banderas del oeste de Europa, con su nombre a la vista | Aprender |
+| 2 | Las mismas, ahora de memoria | Bandera |
+| 3 | Sus capitales | Capital |
+| 4 | Señálalas en el mapa | Ubicación |
+| 5 | Mezcla de las tres, sin fallar dos veces seguidas | Mixto |
+| 6 | 👑 **El Impostor** — los tricolores que se confunden | Jefe |
+| 7 | Las cruces del norte: nórdicas y bálticas | Bandera |
+| 8 | Reconoce el país por su forma | Silueta |
+| 9 | Capitales del este de Europa | Capital |
+| 10 | ¿Cuál **no** limita con Alemania? | Vecinos |
+| 11 | Diez banderas de Europa en sesenta segundos | Contrarreloj |
+| 12 | 👑 **El Puzle del Borrón** — recomponer tres banderas rotas | Jefe |
 
-Seis regiones de doce fases. Once normales y una de jefe, con un jefe
-intermedio en la sexta: **jefe cada 6 fases, 12 jefes, 72 fases.**
+Doce fases, ocho modos distintos, y ninguna escrita a mano: todas salen de
+combinar piezas. Con seis modos, treinta zonas y cinco objetivos salen
+cientos de combinaciones sin escribir contenido nuevo.
 
-| Región | Por qué ahí |
-|---|---|
-| 1. Europa | Casi todo el mundo reconoce algo. Se gana pronto |
-| 2. América | Sigue habiendo terreno conocido |
-| 3. Asia | Empieza lo difícil de verdad |
-| 4. África | La región donde más se aprende: 54 países |
-| 5. Oceanía | Pocos países y muy parecidos: exige precisión |
-| 6. El mundo | Todo mezclado. Aquí vive el jefe final |
-
-Los cinco continentes son exactamente los que ya existen en
-`countries.js` (`af`, `am`, `as`, `eu`, `oc`), así que las zonas salen de
-datos que ya están.
+**A mano solo se diseñan los doce jefes.** Doce sí las hace bien una
+persona; setenta y dos, no.
 
 ### Enseñar antes de examinar
 
-Dentro de cada región, las tres primeras fases deberían **enseñar** —las
-banderas se ven con su nombre, como en el modo "Aprender"— y las siguientes
-ir quitando ayuda hasta pedir el nombre de memoria.
-
-Eso convierte la campaña en el tutorial de todo el juego *y* en el motor de
-aprendizaje, sin que parezca ninguna de las dos cosas. Es también donde
-encaja sin ruido el repaso espaciado: una fase de cada cuatro repesca lo
-que fallaste hace días.
+Fíjate en el orden de la región: las primeras fases **enseñan** (la bandera
+con su nombre a la vista, como el modo Aprender) y las siguientes van
+quitando ayuda hasta pedirlo de memoria. Eso convierte la campaña en el
+tutorial del juego entero y en el motor de aprendizaje, sin que parezca
+ninguna de las dos cosas.
 
 ---
 
-## 4. Los jefes: formatos nuevos, y cuánto cuesta cada uno
+## 6. Los jefes, y lo que cuesta cada uno
 
-Aquí es donde la idea brilla, porque cada jefe **presenta un formato nuevo
-sin necesidad de un menú de modos**. Ordenados por lo que cuestan:
+Cada jefe **presenta un formato nuevo**, que es lo que justifica el
+desbloqueo. Ordenados por lo que cuestan:
 
-### 4.1 El puzle de bandera · **prácticamente gratis**
+### 6.1 El puzle de bandera · **casi gratis**
 
-Ordenar las piezas de una bandera desordenada. `js/daily.js` **ya parte las
-banderas en nueve piezas** para el reto diario: la mitad del trabajo está
-escrita.
+Recomponer una bandera rota en piezas. `js/daily.js` **ya parte las
+banderas en nueve piezas** para el reto diario.
 
-### 4.2 El impostor · **gratis**
+### 6.2 El impostor · **gratis**
 
-Dos banderas casi idénticas y hay que elegir la correcta. `confusables.js`
-tiene **25 grupos ya escritos a mano** con la explicación de en qué se
-diferencian. Es un jefe entero sacado de un archivo que ya existe.
+Dos banderas casi idénticas, elige la buena. `js/confusables.js` tiene
+**25 grupos ya escritos a mano**, con la explicación de en qué se
+diferencian. Un jefe entero sacado de un archivo que ya existe.
 
-### 4.3 Frío o caliente
+### 6.3 Frío o caliente
 
-Vas nombrando países y el juego solo dice a qué distancia estás. `geo.js`
-ya calcula distancia y rumbo para las pistas del reto.
+Nombras países y el juego solo dice a qué distancia estás. `js/geo.js` ya
+calcula distancia y rumbo.
 
-### 4.4 El alfabeto perdido · **mejor que "el idioma"**
+### 6.4 El alfabeto perdido
 
-Tu idea era una frase en un idioma y adivinar el país. Le daría una vuelta:
-**que no sea el idioma, que sea el alfabeto.** Una palabra en georgiano, en
-tailandés, en amárico, en coreano, en griego, en armenio.
+Tu idea era una frase en un idioma. Le daría una vuelta: **que sea el
+alfabeto, no la lengua.** Una palabra en georgiano, tailandés, amárico,
+coreano, griego o armenio.
 
-Por qué es mejor: reconocer una escritura es **visual**, como una bandera,
-así que un niño de siete años puede jugarlo sin saber ni un idioma. Con el
-idioma hablado, además, la respuesta es ambigua (¿el español es España o
-México?); con el alfabeto georgiano no hay duda posible. Y la parte
-educativa es preciosa: hay quince alfabetos que casi nadie sabe que existen.
+Reconocer una escritura es **visual**, como una bandera: un niño de siete
+años puede jugarlo sin saber ningún idioma. Y no tiene la ambigüedad del
+idioma hablado (¿el español es España o México?). Con el georgiano no hay
+duda posible.
 
-*Coste: una tabla de treinta palabras. Barato y muy vistoso.*
+*Coste: una tabla de treinta palabras.*
 
-### 4.5 La cuadrícula
+### 6.5 La cuadrícula 3×3
 
-La rejilla 3×3 del documento anterior. Las categorías salen solas de las
-etiquetas de patrón y paleta que `countries.js` ya guarda.
+Rejilla donde cada casilla cruza dos categorías. Las categorías salen solas
+de las etiquetas de patrón y paleta que `js/countries.js` ya guarda.
 
-### 4.6 La curiosidad · **el único jefe caro, y tiene arreglo**
+### 6.6 La curiosidad · **el único caro, y tiene arreglo**
 
-Tu idea de "una definición y adivinar el país" es la más divertida y la más
-cara: escribir doscientas curiosidades **por seis idiomas** es un trabajo
-enorme.
-
-El arreglo: que la mayoría **se deduzcan de los datos** en lugar de
-escribirse. *"El único país que limita con otros diez"*, *"el país sin
-salida al mar más grande"*, *"el que tiene más vecinos de África"*. Se
-generan solas de la tabla de fronteras y superficies, salen infinitas y no
-hay que traducir nada más que la plantilla de la frase.
-
-Y encima de eso, **doce curiosidades escritas a mano**, una por jefe, que
-son las que dan personalidad. Doce sí se escriben; doscientas no.
+Escribir doscientas curiosidades **por seis idiomas** es un trabajo enorme.
+Arreglo: que la mayoría **se deduzcan de los datos** — *"el único país que
+limita con otros diez"*, *"el país sin salida al mar más grande"* — porque
+así salen infinitas y solo hay que traducir la plantilla. Y encima, doce
+escritas a mano, una por jefe, que son las que dan personalidad.
 
 ---
 
-## 5. La economía: dos monedas, y una es muy lista
+## 7. Que sea visual: el jugo, en Papel & Tinta
 
-Tu instinto de separar los premios de los jefes de los premios normales es
-correcto, y es exactamente cómo se diseña esto bien.
+"Que enganche" no es una mecánica: es que **cada toque devuelva algo**. Pero
+en vez de confeti genérico, el juego ya tiene un lenguaje visual propio
+("Papel & Tinta") y el jugo debería salir de ahí:
 
-### De los jefes: reliquias (sirven para algo)
+- **La tinta que se extiende.** Al acertar, el país se colorea como una
+  mancha de tinta que se expande por el mapa. No es un relleno: es un gesto.
+- **El sello de goma.** Cada bandera recuperada se sella en el pasaporte con
+  el golpe seco y el ligerísimo temblor de un sello de verdad.
+- **El lacre.** Derrotar a un jefe cierra la región con un sello de cera
+  roja. Sonido, peso, y una animación que se ve una vez cada seis fases y
+  por eso no cansa.
+- **Los números que saltan.** `+150` sale grande, encoge y se va. Siempre
+  *después* del acierto, nunca antes.
+- **Las monedas que vuelan al contador** al terminar la fase, de una en una
+  y acelerando. Es de las animaciones más satisfactorias que existen y
+  cuesta veinte líneas.
+- **La barra que se llena delante de ti**, nunca ya llena al entrar.
+- **El "casi".** Cuando falles por poco, que se note: la bandera correcta se
+  enseña al lado de la que elegiste, con la diferencia marcada.
+- **La anticipación del cofre**: que tarde en abrirse. La espera de dos
+  segundos vale más que el premio.
 
-Pista, dejar solo dos respuestas, congelar el tiempo, una segunda
-oportunidad. **Se ganan solo derrotando jefes**, así que un jefe no da
-puntos: da una herramienta que cambia cómo juegas las siguientes fases.
-
-Y ahí hay una decisión fina: que las reliquias **se recarguen jugando** en
-lugar de gastarse para siempre. Un objeto que no se gasta nunca deja de
-tener decisión; uno que se gasta y no vuelve, no se usa nunca "por si
-acaso". Que se recarguen cada día es el punto medio.
-
-### De las fases normales: cosas que no sirven para nada (y por eso valen)
-
-Músicas, sombreros y trajes para el conde, sellos para el pasaporte, marcos
-para las banderas. **Nada que dé ventaja.** Los premios cosméticos son los
-que se pueden repartir a manos llenas sin desequilibrar nada, y son los que
-la gente enseña.
-
-Empezaría con ocho o diez sombreros y complementos antes que con trajes
-enteros: un sombrero es un dibujo pequeño y se reconoce igual.
-
-### Y la mejor idea de tu lista: **las banderas que no son de países**
-
-Proponías desbloquear banderas de organizaciones y territorios. Eso resuelve
-una tensión que está documentada en el proyecto: `decisiones-producto.md`
-fija el catálogo en los 195 de la ONU y prohíbe ampliarlo, precisamente
-para no meterse en disputas de soberanía.
-
-**Como premio, no como catálogo, el problema desaparece.** La bandera
-olímpica, la de la ONU, la de la Unión Europea, la pirata, la de a cuadros
-de las carreras, la del Everest: viven en *la vitrina del conde*, que es
-explícitamente un cajón de curiosidades y no el atlas. Nadie tiene que
-decidir si Kosovo es un país para poder enseñar la bandera del Tíbet en una
-vitrina de rarezas.
-
-Es un sitio donde meter todas las banderas divertidas del mundo sin tocar
-ni una línea de la política editorial.
+Regla general: **la recompensa se anima, el castigo no.** Un fallo se
+resuelve rápido y sin drama; un acierto se celebra. En un juego de niños
+esa asimetría es todo.
 
 ---
 
-## 6. Formatos parecidos, y qué robar de cada uno
+## 8. El dinero
 
-Pediste referencias. Estas son las que valen para este caso:
+Quieres una moneda que se gane jugando y que también se pueda comprar. Se
+puede hacer, y hay una forma correcta de hacerlo.
 
-**El camino de Duolingo.** En 2022 cambiaron un árbol lleno de opciones por
-un camino con **una sola siguiente cosa que hacer**, y les fue mucho mejor.
-La lección: el tablero no debe ofrecer decisiones al abrir la app, debe
-ofrecer un botón. La elección se pone *después*, dentro de la partida.
+### Cómo la diseñaría
 
-**El mapa de Candy Crush.** Robar el ritmo: la fase difícil llega con una
-cadencia reconocible, y se ve venir. Ver que se acerca un jefe es la mitad
-de la emoción. **No robar**: las vidas, los muros de pago y la fricción
-artificial.
+**Una sola moneda: escudos.** Se ganan terminando fases, derrotando jefes,
+manteniendo la racha y con el reto diario.
 
-**Las medallas de Pokémon.** Ocho gimnasios, ocho jefes temáticos, una
-medalla cada uno. Es el precedente exacto de "un jefe por región con su
-sello", y funciona porque cada jefe **tiene tema**, no es solo más difícil.
+**Se gastan en:**
 
-**Los mapas de los roguelike** (tipo *Slay the Spire*). Un día, cuando la
-campaña ya funcione, se puede añadir que el camino se bifurque: la ruta
-fácil o la difícil que da mejor reliquia. Es una capa de decisión que no
-cuesta contenido nuevo, solo estructura. **Para la segunda versión, no para
-la primera.**
+- Sombreros, trajes y músicas para el conde.
+- Marcos y sellos para el pasaporte.
+- Reliquias de más: una pista, dejar solo dos respuestas, congelar el
+  tiempo, repetir un jefe sin esperar.
+- Adelantar una bandera de la vitrina.
 
-**Los tres estrellas de casi todo el género.** Terminar una fase da una
-estrella, hacerlo perfecto da tres. Es lo que hace que alguien vuelva a una
-fase ya ganada. Con cuidado: si abrir la región siguiente exige demasiadas
-estrellas, se convierte en un peaje y la gente lo abandona. Usarlo para
-premios extra, no para bloquear el camino.
+**No se gastan nunca en:** saltarse fases, ventaja en las ligas, ni nada
+que toque el reto diario. Ese es el límite, y conviene escribirlo antes de
+que alguien proponga cruzarlo: **el dinero no entra donde la gente se
+compara.**
 
----
+### Las reglas que hay que cumplir (y son nuevas)
 
-## 7. Lo que hay que resolver antes de empezar
+Desde marzo de 2025 la red europea de protección al consumidor tiene siete
+principios sobre monedas de juego, pensados justo para juegos con menores.
+Los que afectan al diseño:
 
-**7.1 Qué pasa después del jefe final.** Hay que decidirlo *antes* de
-construir la primera fase, no después. Lo natural aquí: al derrotarlo, el
-mundo queda restaurado y el conde recupera el título — y entonces se abre
-el modo sin fin, con el mapa ya en color y las regiones repetibles con
-dificultad mayor. Si esto no está pensado, el juego se acaba de golpe justo
-con quien más lo ha jugado.
+- **Los precios se enseñan en euros además de en escudos.** Si el sombrero
+  cuesta 450 escudos, tiene que verse también cuánto es eso en dinero.
+- **Nada de packs pensados para que sobren monedas.** Vender de 500 en 500
+  cuando todo cuesta 450 es exactamente la práctica que señalan.
+- **No se puede obligar a pasar por la moneda** para comprar algo.
+- **Nada de cajas sorpresa de pago.** Los sobres se ganan jugando; si se
+  venden con dinero y el contenido es aleatorio, entras en el terreno más
+  vigilado que hay ahora mismo en Europa, y con menores de por medio.
+- **Puerta parental antes de la tienda**, además del control que ya ponen
+  Apple y Google.
 
-**7.2 La campaña no puede tocar el reto diario.** Según la regla del
-documento anterior: el ritual va aparte y no reparte premios de campaña. La
-campaña es la parte de "práctica". Si el reto diario empieza a dar reliquias,
-se rompe lo que lo hace funcionar.
+### Y un consejo de negocio, no de diseño
 
-**7.3 El texto de la historia son seis idiomas.** Doce escenas de tres
-frases son 36 frases × 6 = 216 traducciones. Es asumible, pero solo si la
-historia se cuenta en doce escenas y no en cada fase.
+En juegos familiares el dinero casi nunca viene de los packs de monedas:
+viene de **una compra única que hace un adulto**. Un "Pase del Condado" que
+abra todos los capítulos, quite cualquier espera y regale un sombrero
+exclusivo, por un precio de una cifra, rinde normalmente más que una
+tienda de monedas — y da mucho menos trabajo, menos problemas con las
+tiendas y ninguna mala conciencia.
 
-**7.4 El conde hay que dibujarlo.** Es el único gasto de arte de verdad de
-toda la propuesta. En el estilo "Papel & Tinta" que ya tiene el juego, un
-personaje y ocho complementos es un encargo pequeño y acotado.
-
-**7.5 Cuánto tiene que costar cada fase.** Objetivo: las fases normales se
-ganan a la primera **cuatro de cada cinco veces**, y los jefes se ganan al
-segundo o tercer intento. Un jefe que se gana a la primera no es un jefe;
-uno que se atasca cinco veces echa a la gente. Esto hay que medirlo, no
-adivinarlo.
+Yo montaría las dos cosas, pero en este orden: primero los escudos que se
+ganan (sin tienda), y la compra opcional después, cuando ya se sepa qué
+compra la gente. Las tiendas se quedan entre el 15 y el 30% en cualquier
+caso.
 
 ---
 
-## 8. Cómo lo sacaría sin arriesgar tres meses
+## 9. Las banderas que no son de países
 
-**No construir 72 fases. Construir 12.**
+Tu idea de desbloquearlas resuelve una tensión documentada:
+`decisiones-producto.md` fija el catálogo en los 195 de la ONU y prohíbe
+ampliarlo para no meterse en disputas de soberanía.
 
-La primera región —Europa, once fases y un jefe— con dos formatos de jefe:
-el puzle de bandera y el impostor, que son los dos que salen casi gratis de
-código que ya existe. El mapa en gris que se va coloreando. El conde con un
-sombrero.
+**Como contenido desbloqueable el problema desaparece**, y una vez
+desbloqueadas entran en el juego de verdad, como pides:
 
-Eso es una versión jugable de principio a fin, y contesta la única pregunta
-que importa: **¿cuánta gente llega al final de la primera región?** Si la
-mitad de quien empieza termina las doce fases, la campaña funciona y se
-construyen las otras cinco regiones con confianza. Si abandonan en la
-cuarta, se arregla la primera región antes de multiplicar el problema por
-seis.
+- **Se juegan** en el modo Rarezas (jefe 11), en fases especiales de la
+  última región y en las partidas libres una vez abiertas.
+- **Viven en la vitrina del conde**, una sección aparte del pasaporte.
+- **Nunca aparecen en el reto diario**, que es compartido y tiene que ser
+  igual y justo para todo el mundo.
+- **No cuentan en el 195/195** del álbum. Son un extra, no parte del atlas.
 
-Es la diferencia entre apostar dos semanas y apostar dos meses, y la
-respuesta es exactamente igual de buena.
+Qué metería: la olímpica, la de la ONU, la Unión Europea, la Cruz Roja, la
+pirata, la de cuadros de las carreras, la del Everest, la de la Antártida,
+las banderas históricas famosas, la del Tíbet, la de Esperanto.
+
+Qué evitaría de entrada: los territorios en disputa activa. No por
+cobardía, sino porque cada uno trae su propia discusión y el objetivo de la
+vitrina es que sea divertida. Si alguna vez se meten, que sea una decisión
+tomada a propósito y escrita en `decisiones-producto.md`, no un efecto
+lateral de necesitar contenido.
 
 ---
 
-## 9. Resumen honesto
+## 10. Lo de "12 fases o 72", explicado bien
 
-Lo que más me gusta de la idea: **la trama justifica la colección**, que es
-justo lo que a este juego le faltaba, y **los jefes justifican los modos
-nuevos** sin un menú. Son dos problemas grandes resueltos por una sola
-decisión creativa.
+Aquí me expliqué mal. **La campaña son 72 fases.** Eso no está en duda.
 
-Lo que hay que vigilar: que las 72 fases se generen y no se escriban, que
-la curiosidad no se convierta en un trabajo de redacción de doscientas
-entradas por seis idiomas, y que el final esté decidido antes que el
-principio.
+Los 12 no son un diseño alternativo: son **por dónde empezar a construir**.
+Es la diferencia entre diseñar la carta entera de un restaurante —que hay
+que hacerla— y cocinar solo los entrantes la primera noche para ver si la
+gente vuelve.
 
-Y lo que hay que aprovechar, porque ya está escrito y pagado: las nueve
-piezas del reto diario, los veinticinco grupos de banderas confundibles, la
-distancia y el rumbo, las etiquetas de patrón y paleta, y los cinco
-continentes.
+En concreto: construir **la primera región completa** (las once fases de
+Europa y su jefe), con el mapa que se colorea y el conde con su sombrero.
+Eso ya es jugable de principio a fin y contesta la única pregunta que
+importa: **¿cuánta gente llega al final de la primera región?**
+
+- Si la mitad la termina, la campaña funciona: se construyen las otras
+  cinco regiones con confianza.
+- Si abandonan en la cuarta fase, hay algo que arreglar en el ritmo — y es
+  mucho mejor arreglarlo una vez que seis.
+
+Son dos semanas para saberlo, en vez de dos meses. Las 72 se hacen igual;
+lo único que cambia es que se hacen sabiendo.
+
+---
+
+## 11. Lo que hay que decidir antes de empezar
+
+**11.1 Qué pasa tras el jefe final.** Decidirlo *antes* de la primera fase.
+Lo natural: el mundo queda restaurado, el conde recupera el título y se abre
+el modo sin fin con las regiones repetibles en difícil. Si no está pensado,
+el juego se acaba de golpe justo con quien más lo ha jugado.
+
+**11.2 La campaña no toca el reto diario.** El ritual va aparte, no reparte
+reliquias y no se puede acelerar con dinero.
+
+**11.3 Doce escenas de historia, no una por fase.** Tres frases por escena,
+por seis idiomas, son 216 traducciones. Asumible si son doce; imposible si
+son setenta y dos.
+
+**11.4 El conde hay que dibujarlo.** Es el único gasto de arte real:
+un personaje y ocho complementos, en el estilo que ya tiene el juego.
+
+**11.5 Cuánto cuesta cada fase.** Objetivo medible: las fases normales se
+ganan a la primera cuatro de cada cinco veces; los jefes, al segundo o
+tercer intento. Un jefe que se gana a la primera no es un jefe; uno que
+atasca cinco veces echa a la gente.
+
+---
+
+## 12. Referencias que valen para este caso
+
+**El camino de Duolingo.** Cambiaron un árbol lleno de opciones por un
+camino con **una sola siguiente cosa que hacer**. Lección: al abrir, el
+tablero no ofrece decisiones, ofrece un botón.
+
+**El mapa de Candy Crush.** Robar el ritmo: la fase difícil se ve venir, y
+verla venir es media emoción. **No robar** las vidas ni los muros de pago.
+
+**Las medallas de Pokémon.** Cada jefe con su tema y su medalla, no solo
+más difícil. Es el precedente exacto de un jefe por región.
+
+**Los mapas de roguelike.** Para la segunda versión: que el camino se
+bifurque entre la ruta fácil y la difícil que da mejor reliquia. Añade
+decisión sin añadir contenido.
