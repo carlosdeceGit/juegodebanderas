@@ -80,6 +80,7 @@ docs/decisiones-producto.md   Decisiones de producto explícitas (fecha UTC, pa�
 docs/apps-moviles.md          Cómo llevar el juego a App Store y Google Play
 docs/ideas-app.md             Propuesta (sin decidir) para pasar de juego web a producto
 docs/mecanicas-juego.md       Propuesta (sin decidir) de mecánicas de juego y retención
+docs/mecanicas-enganche.md    Propuesta (sin decidir) con datos del sector y modos más allá de banderas
 docs/auditoria-juegodebanderas.md  Auditoría original y roadmap por fases (histórico)
 ```
 
