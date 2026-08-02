@@ -23,7 +23,7 @@ Y resuelve de paso los tres problemas peores:
 | Tres pantallas antes de jugar | El tablero dice cuál es la siguiente fase. Un toque |
 | La puntuación no significa nada | Ya no puntúas: liberas un trozo de mundo |
 | Ocho modos que nadie descubre | Cada jefe desbloquea uno. El menú se llena solo |
-| El contenido se acaba a las 195 banderas | 72 fases con objetivos distintos sobre el mismo catálogo |
+| El contenido se acaba a las 195 banderas | 72 fases de historia, más doce nuevas cada mes (§9) |
 
 ---
 
@@ -282,7 +282,150 @@ caso.
 
 ---
 
-## 9. Las banderas que no son de países
+## 9. Ligas y temporadas mensuales
+
+### 9.1 Dos cosas que conviene no mezclar
+
+Si cada mes hay fases nuevas que puntúan para la liga, hay que separar dos
+cosas que si se juntan se estropean las dos:
+
+| | **La Historia** | **La Temporada** |
+|---|---|---|
+| Qué es | Las 72 fases del conde | 12 fases nuevas cada mes |
+| Ritmo | El tuyo | El del calendario |
+| ¿Caduca? | **Nunca** | Al acabar el mes |
+| ¿Puntúa para la liga? | No | **Sí** |
+
+El motivo es concreto: **quien empiece a jugar en el mes ocho tiene que
+poder vivir la historia desde el principio**, y no estar ocho meses por
+detrás de todo el mundo para siempre. La historia es tuya y espera. La
+temporada es de todos y es la misma para todos este mes.
+
+Las dos viven dentro de El Condado, en dos pestañas. La pantalla de inicio
+sigue teniendo tres puertas y no cuatro.
+
+**Y esto contesta la pregunta que quedaba abierta:** qué pasa después del
+jefe final. Pasa que se acaba la historia y **las temporadas siguen**. El
+juego no se termina nunca porque cada mes trae doce fases y una liga nueva.
+
+### 9.2 Cómo se puntúa, y una regla de justicia
+
+**Solo cuenta lo que se hace en el mes en curso.** El mes empieza a cero
+para todo el mundo: quien lleva un año jugando no arrastra ventaja.
+
+| De dónde salen los puntos | Cuántos |
+|---|---|
+| Jefe de temporada | Muchos — son el gran salto |
+| Fase de temporada superada | Bastantes |
+| Tres estrellas en una fase | Extra |
+| Reto de hoy | **Cantidad fija, generosa, igual para todos** |
+| Partida libre | Pocos, y con tope diario |
+
+Esa cuarta fila es la regla importante: **el ritual te mantiene, la campaña
+te sube.** Quien solo quiera hacer su reto diario de dos minutos no se cae
+de la liga ni se queda fuera del juego — se queda en una liga digna. Quien
+además juega la temporada, asciende. Nadie está obligado a jugar más de lo
+que quiere para no perder lo que tiene, que es la trampa en la que caen casi
+todos los juegos con ligas.
+
+El tope diario en partida libre es lo que evita que la liga la gane quien
+más horas tiene, en lugar de quien mejor juega.
+
+### 9.3 La escalera: diez gemas
+
+De menos a más, con el color como señal principal — un niño tiene que saber
+en qué liga está por el color, sin leer:
+
+| | Liga | Color |
+|---|---|---|
+| 1 | **Cuarzo** | Blanco translúcido |
+| 2 | **Ámbar** | Naranja miel |
+| 3 | **Turquesa** | Azul claro |
+| 4 | **Jade** | Verde suave |
+| 5 | **Amatista** | Morado |
+| 6 | **Topacio** | Dorado |
+| 7 | **Esmeralda** | Verde intenso |
+| 8 | **Zafiro** | Azul profundo |
+| 9 | **Rubí** | Rojo |
+| 10 | **Diamante** | Blanco brillante |
+
+La progresión va de tonos pálidos a saturados y termina en brillante: se
+lee de un vistazo, y la gema encaja con el lenguaje visual del juego como
+el **lacre** que cierra el mes en el pasaporte. La mejor liga alcanzada se
+queda ahí para siempre, aunque luego se baje.
+
+### 9.4 Subir y bajar, con cabeza
+
+Grupos de unas treinta personas. Los cinco primeros suben, los cinco
+últimos bajan. Con tres correcciones para un juego de niños:
+
+- **Nunca se baja más de una liga en un mes.**
+- **De Jade para abajo no se baja.** Es el suelo: un niño de ocho años no
+  tiene que aprender lo que es el descenso.
+- **Terminar el mes siempre da algo** — escudos y un sello —, aunque se
+  quede el último. Un mes sin premio ninguno es un mes que invita a no
+  volver.
+
+### 9.5 El problema del que nadie habla: hacen falta jugadores
+
+Diez ligas de treinta personas necesitan gente para llenarse. Con
+doscientos jugadores al mes, diez ligas son diez grupos de veinte, y la de
+Diamante tendría tres personas.
+
+Cómo lo resolvería, sin mentir a nadie:
+
+- **La gema es tu rango personal**, no un cajón. Se sube por puntos y no se
+  pierde por debajo del suelo.
+- **El grupo mensual se forma juntando ligas cercanas** hasta reunir unas
+  veinte personas. Se enseña honestamente: "grupo de 18".
+- **Mientras no haya gente suficiente, la liga es de casa**: tu familia y
+  tus amigos, con la misma escalera y los mismos premios.
+- **Nunca rivales inventados.** Si el ranking dice que hay alguien, que haya
+  alguien. Un juego infantil que miente sobre con quién compites es
+  exactamente lo que no quiero recomendar.
+
+### 9.6 Una tensión por semana, no una al mes
+
+Una liga semanal da 52 finales emocionantes al año; una mensual, 12. Un mes
+es mucho tiempo para ir séptimo sin nada en juego.
+
+Arreglo barato: dentro del mes, **un reto de la semana** — "esta semana,
+las islas" — que da un multiplicador los siete días. Cuatro pequeños
+objetivos dentro del grande, sin montar cuatro ligas.
+
+### 9.7 Por qué esto obliga a que las fases se generen
+
+**Doce fases nuevas cada mes, para siempre.** Escritas a mano eso es un
+trabajo mensual que acaba comiéndose el proyecto en el mes cuatro.
+
+Es exactamente por lo que las fases se componen (§5): cada temporada elige
+un **tema** que cambia la zona, los modos y el jefe, y las doce fases salen
+de ahí. Un año entero de temporadas cabe en una tabla:
+
+> Enero: las islas · Febrero: banderas con estrellas · Marzo: África ·
+> Abril: capitales · Mayo: los tricolores · Junio: fronteras y vecinos ·
+> Julio: siluetas · Agosto: los alfabetos · Septiembre: Asia ·
+> Octubre: las banderas más difíciles · Noviembre: América ·
+> Diciembre: la vuelta al mundo
+
+Doce temas, doce jefes escritos a mano al año. **Uno al mes sí se hace; doce
+fases al mes escritas una a una, no.**
+
+### 9.8 Lo que la liga no puede tocar
+
+- **El dinero no compra puntos, ni posición, ni multiplicadores.** Los
+  escudos son para sombreros y pistas. La liga es el sitio donde la gente se
+  compara y ahí el dinero no entra.
+- **El reto diario no se acelera ni se repite.** Sigue siendo uno al día.
+- **Y esto obliga a lo del otro documento**: en cuanto haya puntos y
+  posiciones, el reto diario y la validación de puntuaciones tienen que
+  estar en el servidor. Hoy la bandera de mañana se puede leer en el
+  código. Con una liga por medio, eso es la primera cosa que alguien
+  rompería.
+
+---
+
+## 10. Las banderas que no son de países
 
 Tu idea de desbloquearlas resuelve una tensión documentada:
 `decisiones-producto.md` fija el catálogo en los 195 de la ONU y prohíbe
@@ -310,7 +453,7 @@ lateral de necesitar contenido.
 
 ---
 
-## 10. Lo de "12 fases o 72", explicado bien
+## 11. Lo de "12 fases o 72", explicado bien
 
 Aquí me expliqué mal. **La campaña son 72 fases.** Eso no está en duda.
 
@@ -334,31 +477,32 @@ lo único que cambia es que se hacen sabiendo.
 
 ---
 
-## 11. Lo que hay que decidir antes de empezar
+## 12. Lo que hay que decidir antes de empezar
 
-**11.1 Qué pasa tras el jefe final.** Decidirlo *antes* de la primera fase.
-Lo natural: el mundo queda restaurado, el conde recupera el título y se abre
-el modo sin fin con las regiones repetibles en difícil. Si no está pensado,
-el juego se acaba de golpe justo con quien más lo ha jugado.
+**12.1 Qué pasa tras el jefe final. — Resuelto.** Lo contestan las
+temporadas (§9): el mundo queda restaurado y el conde recupera el título,
+pero cada mes trae doce fases nuevas y una liga que empieza de cero. La
+historia se acaba; el juego no. Era la pregunta más peligrosa que había
+abierta y ya no lo está.
 
-**11.2 La campaña no toca el reto diario.** El ritual va aparte, no reparte
+**12.2 La campaña no toca el reto diario.** El ritual va aparte, no reparte
 reliquias y no se puede acelerar con dinero.
 
-**11.3 Doce escenas de historia, no una por fase.** Tres frases por escena,
+**12.3 Doce escenas de historia, no una por fase.** Tres frases por escena,
 por seis idiomas, son 216 traducciones. Asumible si son doce; imposible si
 son setenta y dos.
 
-**11.4 El conde hay que dibujarlo.** Es el único gasto de arte real:
+**12.4 El conde hay que dibujarlo.** Es el único gasto de arte real:
 un personaje y ocho complementos, en el estilo que ya tiene el juego.
 
-**11.5 Cuánto cuesta cada fase.** Objetivo medible: las fases normales se
+**12.5 Cuánto cuesta cada fase.** Objetivo medible: las fases normales se
 ganan a la primera cuatro de cada cinco veces; los jefes, al segundo o
 tercer intento. Un jefe que se gana a la primera no es un jefe; uno que
 atasca cinco veces echa a la gente.
 
 ---
 
-## 12. Referencias que valen para este caso
+## 13. Referencias que valen para este caso
 
 **El camino de Duolingo.** Cambiaron un árbol lleno de opciones por un
 camino con **una sola siguiente cosa que hacer**. Lección: al abrir, el
