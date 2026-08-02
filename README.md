@@ -79,6 +79,7 @@ docs/idiomas.md               Cómo funcionan los idiomas y cómo añadir uno
 docs/decisiones-producto.md   Decisiones de producto explícitas (fecha UTC, países, ranking global)
 docs/apps-moviles.md          Cómo llevar el juego a App Store y Google Play
 docs/ideas-app.md             Propuesta (sin decidir) para pasar de juego web a producto
+docs/mecanicas-juego.md       Propuesta (sin decidir) de mecánicas de juego y retención
 docs/auditoria-juegodebanderas.md  Auditoría original y roadmap por fases (histórico)
 ```
 
