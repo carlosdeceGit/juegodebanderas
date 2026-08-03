@@ -1,5 +1,12 @@
 # Diversión con Banderas
 
+> ### 📗 Empieza por [`docs/EL-JUEGO.md`](docs/EL-JUEGO.md)
+>
+> Es el **documento base**: qué es el juego, para quién, qué tiene hoy y
+> hacia dónde va, con el estado de cada pieza. Este README es la
+> referencia **técnica del código que existe ahora**; el documento base es
+> el del producto entero.
+
 Juego web de "adivina el país por su bandera", en seis idiomas (español,
 catalán, inglés, francés, alemán e italiano), pensado originalmente como
 juego familiar. HTML + CSS + JavaScript **vanilla** (módulos ES nativos),
@@ -78,6 +85,7 @@ tools/build-www.mjs          Copia el sitio a www/, que es lo que empaquetan las
 docs/idiomas.md               Cómo funcionan los idiomas y cómo añadir uno
 docs/decisiones-producto.md   Decisiones de producto explícitas (fecha UTC, países, ranking global)
 docs/apps-moviles.md          Cómo llevar el juego a App Store y Google Play
+docs/EL-JUEGO.md              ⭐ Documento base: el juego entero, con el estado de cada pieza
 docs/publico-objetivo.md      El público es de 15 años en adelante: manda sobre los documentos de propuesta
 docs/ideas-app.md             Propuesta (sin decidir) para pasar de juego web a producto
 docs/mecanicas-juego.md       Propuesta (sin decidir) de mecánicas de juego y retención
