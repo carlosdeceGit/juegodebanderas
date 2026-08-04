@@ -1,3 +1,18 @@
-# Solo lo instala quien regenera los nombres de país (tools/build-names.mjs).
+# Dependencias. Solo hacen falta para empaquetar las apps (Capacitor) y para
+# regenerar los nombres de país (tools/build-names.mjs). La web no las usa.
 node_modules/
-package-lock.json
+
+# Copia del sitio que empaquetan las apps. Se regenera con `npm run app:www`.
+www/
+
+# Proyectos nativos que genera `npx cap add`. Se regeneran de una pasada
+# mientras no se toquen a mano. En cuanto haya cambios propios dentro
+# (firma, permisos, número de versión, extensiones), hay que quitarlos de
+# aquí y versionarlos: no se pueden volver a generar sin perderlos.
+ios/
+android/
+
+# Iconos y splash nativos derivados de assets/icon.png y assets/splash.png.
+.capacitor-assets-cache/
+
+.DS_Store

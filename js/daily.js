@@ -391,10 +391,27 @@ export function createDailyChallenge({ show, onExit, onRanking, avatarFor, onFin
     return `${t('daily.shareTitle', { date: prettyDate(dateStr) })}\n${squares} ${tally} · ${scoreFor()} ⭐`;
   }
 
+  /* La hoja de compartir del sistema, por orden de preferencia:
+
+     1. El plugin de Capacitor, dentro de las apps de App Store y Google
+        Play. Ahí `navigator.share` no está o no abre nada: el WebView no
+        es Safari ni Chrome y la hoja nativa hay que pedirla por el puente.
+     2. `navigator.share` en la web, que es lo que usan el móvil y los
+        navegadores modernos de escritorio.
+
+     Devuelve false si no hay ninguna de las dos, y entonces se copia al
+     portapapeles como se ha hecho siempre. */
+  async function shareNative(text) {
+    const plugin = window.Capacitor?.Plugins?.Share;
+    if (plugin) { await plugin.share({ text }); return true; }
+    if (navigator.share) { await navigator.share({ text }); return true; }
+    return false;
+  }
+
   async function share() {
     const text = shareText();
     try {
-      if (navigator.share) { await navigator.share({ text }); return; }
+      if (await shareNative(text)) return;
       await navigator.clipboard.writeText(text);
       $('dailyResultNote').textContent = t('daily.copied');
     } catch {

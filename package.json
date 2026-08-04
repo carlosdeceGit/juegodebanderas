@@ -1,0 +1,29 @@
+{
+  "name": "juegodebanderas",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Diversión con Banderas: el juego web y su empaquetado para App Store y Google Play",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "check": "node tools/check-i18n.mjs",
+    "app:icons": "node tools/build-icons.mjs && capacitor-assets generate",
+    "app:www": "node tools/build-www.mjs",
+    "app:sync": "npm run app:www && cap sync",
+    "app:add:ios": "npm run app:www && cap add ios",
+    "app:add:android": "npm run app:www && cap add android",
+    "app:ios": "npm run app:sync && cap open ios",
+    "app:android": "npm run app:sync && cap open android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.5.0",
+    "@capacitor/core": "^8.5.0",
+    "@capacitor/ios": "^8.5.0",
+    "@capacitor/share": "^8.0.1"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^8.5.0"
+  }
+}

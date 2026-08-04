@@ -1,5 +1,12 @@
 # Diversión con Banderas
 
+> ### 📗 Empieza por [`docs/EL-JUEGO.md`](docs/EL-JUEGO.md)
+>
+> Es el **documento base**: qué es el juego, para quién, qué tiene hoy y
+> hacia dónde va, con el estado de cada pieza. Este README es la
+> referencia **técnica del código que existe ahora**; el documento base es
+> el del producto entero.
+
 Juego web de "adivina el país por su bandera", en seis idiomas (español,
 catalán, inglés, francés, alemán e italiano), pensado originalmente como
 juego familiar. HTML + CSS + JavaScript **vanilla** (módulos ES nativos),
@@ -32,6 +39,11 @@ No hace falta `npm install` ni build de ningún tipo. Al abrir el
 módulos ES pueden fallar por CORS en algunos navegadores; usar un
 servidor local evita ese problema.
 
+Hay un `package.json`, pero **la web no lo usa**: está solo para empaquetar
+las apps de iPhone y Android (ver "Apps para iPhone y Android" más abajo).
+`vercel.json` se encarga de que Vercel no intente instalar ni compilar nada
+al ver ese `package.json`.
+
 ## Estructura del repositorio
 
 ```
@@ -55,12 +67,31 @@ js/
   i18n/<idioma>.js          Un archivo por idioma: interfaz, continentes, vocabulario
   i18n/names.<idioma>.js    Nombres de país y capitales de ese idioma
   db.js                     Cliente REST directo contra Supabase (sin SDK)
+  pwa.js                    Registra el service worker (nunca en las apps nativas)
+manifest.webmanifest        Nombre, iconos y colores para instalar la web como app
+sw.js                       Service worker: el juego sin conexión (solo web)
 assets/flags/                196 SVG (proyecto flag-icons, MIT) + LICENSE-flag-icons.txt
+assets/icon.svg              El icono de la app, editable, fuente de todo lo demás
+assets/splash.svg            La pantalla de arranque de las apps nativas
+assets/icons/                PNG del manifest y de iOS (generados)
+capacitor.config.json        Identificador, nombre y color de las apps nativas
+package.json                 Dependencias y scripts SOLO del empaquetado móvil
+vercel.json                  Le dice a Vercel que esto se sirve tal cual, sin build
 supabase/migrations/         Esquema y políticas RLS de la base de datos, versionados
 tools/check-i18n.mjs         Comprueba que los seis idiomas están completos
 tools/build-names.mjs        Regenera los nombres de país de los idiomas derivados
+tools/build-icons.mjs        Rasteriza los SVG de icono y splash a PNG
+tools/build-www.mjs          Copia el sitio a www/, que es lo que empaquetan las apps
 docs/idiomas.md               Cómo funcionan los idiomas y cómo añadir uno
 docs/decisiones-producto.md   Decisiones de producto explícitas (fecha UTC, países, ranking global)
+docs/apps-moviles.md          Cómo llevar el juego a App Store y Google Play
+docs/EL-JUEGO.md              ⭐ Documento base: el juego entero, con el estado de cada pieza
+docs/publico-objetivo.md      El público es de 15 años en adelante: manda sobre los documentos de propuesta
+docs/ideas-app.md             Propuesta (sin decidir) para pasar de juego web a producto
+docs/mecanicas-juego.md       Propuesta (sin decidir) de mecánicas de juego y retención
+docs/mecanicas-enganche.md    Propuesta (sin decidir) con datos del sector y modos más allá de banderas
+docs/modo-campana.md          Propuesta (sin decidir) del modo campaña: el conde que recupera el mundo
+docs/historia-conde.md        Propuesta (sin decidir): las doce escenas de la historia y qué cuesta producirlas
 docs/auditoria-juegodebanderas.md  Auditoría original y roadmap por fases (histórico)
 ```
 
@@ -592,6 +623,39 @@ completo en `docs/decisiones-producto.md`:
   recomienda** con la arquitectura actual (falta autenticación,
   moderación de nombres y protección de menores). Si se retoma, leer
   esa evaluación primero.
+
+## Apps para iPhone y Android
+
+El mismo juego, sin reescribir nada, por dos vías que conviven:
+
+- **Instalable desde el navegador (PWA).** Ya funciona en la web
+  desplegada: `manifest.webmanifest` + `sw.js` + `js/pwa.js`. Quien entre
+  desde el móvil puede añadirlo a la pantalla de inicio y jugar sin
+  conexión. Gratis y sin tiendas de por medio.
+- **Apps de App Store y Google Play (Capacitor).** El sitio viaja entero
+  dentro de un proyecto nativo de Xcode y de Android Studio:
+
+  ```bash
+  npm install                # solo la primera vez
+  npm run app:icons          # iconos y splash desde assets/icon.svg
+  npm run app:add:android    # crea android/  (y app:add:ios en un Mac)
+  npm run app:android        # sincroniza el juego y abre Android Studio
+  ```
+
+Todo lo que hay que saber —requisitos, costes, firma, números de versión,
+qué declarar en las tiendas y por qué Apple rechaza las apps que son "solo
+una web"— está en **`docs/apps-moviles.md`**.
+
+Dos cosas que no cambian al empaquetar: las puntuaciones siguen yendo a
+Supabase con la misma clave `anon` pública (lo que protege los datos son
+las políticas RLS, no el secreto de la clave), y el ranking de casa sigue
+en `localStorage`, que dentro de la app es un almacén distinto del del
+navegador. Quien juegue en la web y en la app tendrá dos rankings de casa.
+
+Cambios que rompen el empaquetado, por si aparecen en una revisión: meter
+un archivo nuevo en la raíz y no añadirlo a la lista de `tools/build-www.mjs`
+(no llegaría a la app), o hacer que el juego dependa de una ruta absoluta
+del dominio (dentro de la app no hay dominio).
 
 ## Cómo probar cambios
 

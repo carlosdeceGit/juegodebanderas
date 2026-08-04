@@ -1,0 +1,23 @@
+<!-- Icono de la aplicación. Fuente única de la que salen todos los PNG
+     (assets/icons/) con `node tools/build-icons.mjs`.
+
+     Mismo sistema visual que el juego ("Papel & Tinta"): papel crema,
+     tinta azul muy oscura, trazo grueso y una bandera de tres franjas
+     con los tres colores de acento. El dibujo vive dentro del 80%
+     central del lienzo para que sobreviva al recorte circular de
+     Android (icono "maskable") sin perder el asta. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Diversión con Banderas">
+  <rect width="512" height="512" fill="#FFF8E7"/>
+
+  <!-- Asta -->
+  <rect x="140" y="112" width="26" height="300" rx="13" fill="#1B2A41"/>
+  <circle cx="153" cy="104" r="20" fill="#1B2A41"/>
+
+  <!-- Bandera: tres franjas con el borde de tinta por fuera -->
+  <g>
+    <path d="M166 132 H372 V268 H166 Z" fill="#E76F51"/>
+    <path d="M166 132 H372 V177 H166 Z" fill="#2A9D8F"/>
+    <path d="M166 223 H372 V268 H166 Z" fill="#F4A261"/>
+    <path d="M166 132 H372 V268 H166 Z" fill="none" stroke="#1B2A41" stroke-width="18" stroke-linejoin="round"/>
+  </g>
+</svg>

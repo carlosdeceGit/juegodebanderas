@@ -1,0 +1,18 @@
+<!-- Pantalla de arranque de las apps nativas. Fuente de assets/splash.png,
+     que es lo que lee `npx @capacitor/assets generate`.
+
+     Es cuadrada y enorme (2732×2732) a propósito: el mismo archivo se
+     recorta para todos los tamaños de pantalla, en vertical y en
+     horizontal, así que lo único que puede quedar visible siempre es el
+     centro. Fuera del círculo central no va nada que importe. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2732 2732" width="2732" height="2732">
+  <rect width="2732" height="2732" fill="#FFF8E7"/>
+  <g transform="translate(1366 1366) scale(1.9) translate(-256 -256)">
+    <rect x="140" y="112" width="26" height="300" rx="13" fill="#1B2A41"/>
+    <circle cx="153" cy="104" r="20" fill="#1B2A41"/>
+    <path d="M166 132 H372 V268 H166 Z" fill="#E76F51"/>
+    <path d="M166 132 H372 V177 H166 Z" fill="#2A9D8F"/>
+    <path d="M166 223 H372 V268 H166 Z" fill="#F4A261"/>
+    <path d="M166 132 H372 V268 H166 Z" fill="none" stroke="#1B2A41" stroke-width="18" stroke-linejoin="round"/>
+  </g>
+</svg>
